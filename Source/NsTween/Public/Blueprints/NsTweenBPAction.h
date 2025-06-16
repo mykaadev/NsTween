@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2024 mykaa. All rights reserved.
+// Copyright (C) 2024 mykaa. All rights reserved.
 
 #pragma once
 
@@ -80,7 +80,7 @@ public:
     /** YoYo delay */
     float YoyoDelay;
 
-    /** Can tick durint pause */
+    /** Can tick during pause */
     bool bCanTickDuringPause;
 
     /** Use global time dilation */
@@ -97,7 +97,7 @@ public:
 
     /** Custom Curve */
     UPROPERTY()
-    UCurveFloat* CustomCurve;
+    TObjectPtr<class UCurveFloat> CustomCurve;
 
     /** Tween Instance */
     NsTweenInstance* TweenInstance = nullptr;

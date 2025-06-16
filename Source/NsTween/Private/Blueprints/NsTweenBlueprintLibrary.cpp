@@ -1,4 +1,4 @@
-﻿#include "Blueprints/NsTweenBlueprintLibrary.h"
+#include "Blueprints/NsTweenBlueprintLibrary.h"
 #include "Classes/NsTweenCore.h"
 
 float UNsTweenBlueprintLibrary::Ease(float t, ENsTweenEase EaseType)

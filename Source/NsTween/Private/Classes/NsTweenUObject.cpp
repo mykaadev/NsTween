@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2024 mykaa. All rights reserved.
+// Copyright (C) 2024 mykaa. All rights reserved.
 
 #include "Classes/NsTweenUObject.h"
 #include "Classes/NsTweenInstance.h"

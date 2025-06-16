@@ -1,4 +1,4 @@
-﻿#include "Blueprints/NsTweenBPAction.h"
+#include "Blueprints/NsTweenBPAction.h"
 #include "Classes/NsTweenCore.h"
 
 void UNsTweenBPAction::Activate()
@@ -260,7 +260,7 @@ NsTweenInstance* UNsTweenBPActionQuat::CreateTweenCustomCurve()
     return NsTweenCore::Play (0,  1,  DurationSecs,  EaseType,  [&](const float T)
     {
      const float EasedTime = CustomCurve->GetFloatValue(T);
-     const FQuat EasedValue = FMath::Lerp(Start, End, EasedTime);
+     const FQuat EasedValue = FQuat::Slerp(Start, End, EasedTime);
      ApplyEasing.Broadcast(EasedValue);
     });
 }
@@ -303,7 +303,7 @@ NsTweenInstance* UNsTweenBPActionRotator::CreateTweenCustomCurve()
     return NsTweenCore::Play(0, 1, DurationSecs, EaseType, [&](float t)
     {
         const float EasedTime = CustomCurve->GetFloatValue(t);
-        const FQuat EasedValue = FMath::Lerp(Start, End, EasedTime);
+        const FQuat EasedValue = FQuat::Slerp(Start, End, EasedTime);
         ApplyEasing.Broadcast(EasedValue.Rotator());
     });
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2024 mykaa. All rights reserved.
+// Copyright (C) 2024 mykaa. All rights reserved.
 
 using UnrealBuildTool;
 
@@ -26,6 +26,7 @@ public class NsTween : ModuleRules
             new string[]
             {
                 "Core",
+                "DeveloperSettings",
                 // ... add other public dependencies that you statically link with here ...
             }
         );

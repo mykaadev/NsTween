@@ -1,36 +1,38 @@
-﻿// Copyright (C) 2024 mykaa. All rights reserved.
+// Copyright (C) 2024 mykaa. All rights reserved.
 
 #include "Classes/NsTweenCore.h"
 #include "Classes/NsTweenManager.h"
+#include "Classes/NsTweenSettings.h"
 
 DEFINE_LOG_CATEGORY(LogNsTween)
-
-constexpr int DEFAULT_FLOAT_TWEEN_CAPACITY = 50;
-constexpr int DEFAULT_VECTOR_TWEEN_CAPACITY = 50;
-constexpr int DEFAULT_VECTOR2D_TWEEN_CAPACITY = 50;
-constexpr int DEFAULT_QUAT_TWEEN_CAPACITY = 10;
 
 NsTweenManager<NsTweenInstanceFloat>* NsTweenCore::FloatTweenManager = nullptr;
 NsTweenManager<NsTweenInstanceVector>* NsTweenCore::VectorTweenManager = nullptr;
 NsTweenManager<NsTweenInstanceVector2D>* NsTweenCore::Vector2DTweenManager = nullptr;
 NsTweenManager<NsTweenInstanceQuat>* NsTweenCore::QuatTweenManager = nullptr;
 
-int NsTweenCore::NumReservedFloat = DEFAULT_FLOAT_TWEEN_CAPACITY;
-int NsTweenCore::NumReservedVector = DEFAULT_VECTOR_TWEEN_CAPACITY;
-int NsTweenCore::NumReservedVector2D = DEFAULT_VECTOR2D_TWEEN_CAPACITY;
-int NsTweenCore::NumReservedQuat = DEFAULT_QUAT_TWEEN_CAPACITY;
+int NsTweenCore::NumReservedFloat = 0;
+int NsTweenCore::NumReservedVector = 0;
+int NsTweenCore::NumReservedVector2D = 0;
+int NsTweenCore::NumReservedQuat = 0;
 
 void NsTweenCore::Initialize()
 {
-    FloatTweenManager = new NsTweenManager<NsTweenInstanceFloat>(DEFAULT_FLOAT_TWEEN_CAPACITY);
-    VectorTweenManager = new NsTweenManager<NsTweenInstanceVector>(DEFAULT_VECTOR_TWEEN_CAPACITY);
-    Vector2DTweenManager = new NsTweenManager<NsTweenInstanceVector2D>(DEFAULT_VECTOR2D_TWEEN_CAPACITY);
-    QuatTweenManager = new NsTweenManager<NsTweenInstanceQuat>(DEFAULT_QUAT_TWEEN_CAPACITY);
+    const UNsTweenSettings* Settings = UNsTweenSettings::GetSettings();
+    const int FloatCapacity = Settings ? Settings->FloatTweenCapacity : 0;
+    const int VectorCapacity = Settings ? Settings->VectorTweenCapacity : 0;
+    const int Vector2DCapacity = Settings ? Settings->Vector2DTweenCapacity : 0;
+    const int QuatCapacity = Settings ? Settings->QuatTweenCapacity : 0;
 
-    NumReservedFloat = DEFAULT_FLOAT_TWEEN_CAPACITY;
-    NumReservedVector = DEFAULT_VECTOR_TWEEN_CAPACITY;
-    NumReservedVector2D = DEFAULT_VECTOR2D_TWEEN_CAPACITY;
-    NumReservedQuat = DEFAULT_QUAT_TWEEN_CAPACITY;
+    FloatTweenManager = new NsTweenManager<NsTweenInstanceFloat>(FloatCapacity);
+    VectorTweenManager = new NsTweenManager<NsTweenInstanceVector>(VectorCapacity);
+    Vector2DTweenManager = new NsTweenManager<NsTweenInstanceVector2D>(Vector2DCapacity);
+    QuatTweenManager = new NsTweenManager<NsTweenInstanceQuat>(QuatCapacity);
+
+    NumReservedFloat = FloatCapacity;
+    NumReservedVector = VectorCapacity;
+    NumReservedVector2D = Vector2DCapacity;
+    NumReservedQuat = QuatCapacity;
 }
 
 void NsTweenCore::Deinitialize()
@@ -39,6 +41,16 @@ void NsTweenCore::Deinitialize()
     delete VectorTweenManager;
     delete Vector2DTweenManager;
     delete QuatTweenManager;
+
+    FloatTweenManager = nullptr;
+    VectorTweenManager = nullptr;
+    Vector2DTweenManager = nullptr;
+    QuatTweenManager = nullptr;
+
+    NumReservedFloat = 0;
+    NumReservedVector = 0;
+    NumReservedVector2D = 0;
+    NumReservedQuat = 0;
 }
 
 void NsTweenCore::EnsureCapacity(const int NumFloatTweens, const int NumVectorTweens, const int NumVector2DTweens, const int NumQuatTweens)
