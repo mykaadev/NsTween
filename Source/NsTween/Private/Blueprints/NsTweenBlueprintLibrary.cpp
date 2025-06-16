@@ -1,4 +1,6 @@
-﻿#include "Blueprints/NsTweenBlueprintLibrary.h"
+﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+
+#include "Blueprints/NsTweenBlueprintLibrary.h"
 #include "Classes/NsTweenCore.h"
 
 float UNsTweenBlueprintLibrary::Ease(float t, ENsTweenEase EaseType)

@@ -1,4 +1,6 @@
-﻿#include "Blueprints/NsTweenBPAction.h"
+﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+
+#include "Blueprints/NsTweenBPAction.h"
 #include "Classes/NsTweenCore.h"
 
 void UNsTweenBPAction::Activate()
