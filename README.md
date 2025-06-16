@@ -62,6 +62,7 @@ Unreal Engine 5.2+
 - `UNsTweenBPActionVector::TweenVector` – Blueprint node to tween vectors.
 - `NsTweenInstance` – represents a single tween instance with control methods.
 
+<!-- GH_ONLY_START -->
 ## ❤️ Credits
 <a href="https://github.com/mykaadev/NsTween/graphs/contributors"><img src="https://contrib.rocks/image?repo=mykaadev/NsTween"/></a>
 
@@ -70,3 +71,4 @@ Reach out via the **[profile page](https://github.com/mykaadev)**.
 
 ## 📃 License
 [![License](https://img.shields.io/badge/license-MIT-green)](https://www.tldrlegal.com/license/mit-license)
+<!-- GH_ONLY_END -->
