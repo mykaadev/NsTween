@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #include "Classes/NsTweenSubsystem.h"
 #include "Classes/NsTweenCore.h"
@@ -23,6 +23,7 @@ void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UNsTweenSubsystem::Deinitialize()
 {
     Super::Deinitialize();
+    NsTweenCore::Deinitialize();
 #if WITH_EDITOR
     NsTweenCore::CheckTweenCapacity();
     NsTweenCore::ClearActiveTweens();

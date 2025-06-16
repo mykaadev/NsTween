@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #include "Blueprints/NsTweenBlueprintLibrary.h"
 #include "Classes/NsTweenCore.h"

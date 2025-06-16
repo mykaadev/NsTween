@@ -1,6 +1,7 @@
-﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #include "NsTween.h"
+#include "Classes/NsTweenCore.h"
 
 #define LOCTEXT_NAMESPACE "FNsTweenModule"
 
@@ -13,6 +14,7 @@ void FNsTweenModule::ShutdownModule()
 {
     // This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
     // we call this function before unloading the module.
+    NsTweenCore::Deinitialize();
 }
 
 #undef LOCTEXT_NAMESPACE

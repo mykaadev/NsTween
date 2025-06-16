@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #pragma once
 
@@ -9,18 +9,6 @@ template <class T>
 class NSTWEEN_API NsTweenManager
 {
     typedef typename TDoubleLinkedList<T*>::TDoubleLinkedListNode TNode;
-
-// Variables
-private:
-
-    /** Active Tweens */
-    TDoubleLinkedList<T*>* ActiveTweens;
-
-    /** Recycled Tweens */
-    TDoubleLinkedList<T*>* RecycledTweens;
-
-    /** Tweens to activate on the next update */
-    TDoubleLinkedList<T*>* TweensToActivate;
 
 // Functions
 public:
@@ -162,4 +150,16 @@ private:
     {
         RecycledTweens->AddTail(ToRecycle);
     }
+
+// Variables
+private:
+
+    /** Active Tweens */
+    TDoubleLinkedList<T*>* ActiveTweens;
+
+    /** Recycled Tweens */
+    TDoubleLinkedList<T*>* RecycledTweens;
+
+    /** Tweens to activate on the next update */
+    TDoubleLinkedList<T*>* TweensToActivate;
 };

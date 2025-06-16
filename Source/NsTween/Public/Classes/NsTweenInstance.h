@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #pragma once
 
@@ -39,25 +39,25 @@ public:
     float DelayCounter;
 
     /** Should auto destroy */
-    uint8 bShouldAutoDestroy;
+    bool bShouldAutoDestroy;
 
     /** Is the tween active */
-    uint8 bIsActive;
+    bool bIsActive;
 
     /** Is the tween paused */
-    uint8 bIsPaused;
+    bool bIsPaused;
 
     /** Should YoYo */
-    uint8 bShouldYoYo;
+    bool bShouldYoYo;
 
     /** is the tween playing YoYo */
-    uint8 bIsPlayingYoYo;
+    bool bIsPlayingYoYo;
 
     /** Can tick during pause */
-    uint8 bCanTickDuringPause;
+    bool bCanTickDuringPause;
 
     /** Should use global time dilation */
-    uint8 bUseGlobalTimeDilation;
+    bool bUseGlobalTimeDilation;
 
     /** Number of loops */
     int NumLoops;
@@ -105,13 +105,13 @@ public:
         , EaseType()
         , Counter(0)
         , DelayCounter(0)
-        , bShouldAutoDestroy(1)
-        , bIsActive(1)
-        , bIsPaused(1)
-        , bShouldYoYo(1)
-        , bIsPlayingYoYo(1)
-        , bCanTickDuringPause(1)
-        , bUseGlobalTimeDilation(1)
+        , bShouldAutoDestroy(true)
+        , bIsActive(true)
+        , bIsPaused(false)
+        , bShouldYoYo(false)
+        , bIsPlayingYoYo(false)
+        , bCanTickDuringPause(false)
+        , bUseGlobalTimeDilation(true)
         , NumLoops(0)
         , NumLoopsCompleted(0)
         , DelaySecs(0)
