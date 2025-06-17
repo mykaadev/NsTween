@@ -49,6 +49,30 @@ Unreal Engine 5.2+
 2. Copy the `NsTween` folder into your project's `Plugins` directory.
 3. Generate project files and enable the plugin when prompted.
 
+## 🚀 Getting Started
+Below is a minimal C++ example showing how to move an actor along the X axis using `NsTweenCore`:
+
+```cpp
+#include "NsTweenCore.h"
+
+void AMyActor::BeginPlay()
+{
+    Super::BeginPlay();
+
+    NsTweenCore::Play(
+        /*Start*/   0.f,
+        /*End*/     100.f,
+        /*Seconds*/ 2.f,
+        /*Ease*/    ENsTweenEase::InOutQuad,
+        /*Update*/  [this](float Value)
+        {
+            SetActorLocation(FVector(Value, 0.f, 0.f));
+        });
+}
+```
+
+The library also exposes Blueprint nodes for the same functionality if you prefer a visual approach.
+
 ## 🔧 API
 ### Key Classes
 - `NsTweenCore` – static helpers to play tweens in C++.
