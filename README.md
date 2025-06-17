@@ -53,13 +53,13 @@ Unreal Engine 5.2+
 ### Key Classes
 - `NsTweenCore` – static helpers to play tweens in C++.
 - `UNsTweenSubsystem` – automatically ticks and manages active tweens.
-- `UNsTweenBPAction` – base class for asynchronous Blueprint tween nodes.
+- `UNsTweenAsyncAction` – base class for asynchronous Blueprint tween nodes.
 - `UNsTweenBlueprintLibrary` – utility functions including `Ease` helpers.
 
 ### Main Functions
 - `NsTweenCore::Play` – start a tween in C++ for various types.
-- `UNsTweenBPActionFloat::TweenFloat` – Blueprint node to tween a float value.
-- `UNsTweenBPActionVector::TweenVector` – Blueprint node to tween vectors.
+- `UNsTweenAsyncActionFloat::TweenFloat` – Blueprint node to tween a float value.
+- `UNsTweenAsyncActionVector::TweenVector` – Blueprint node to tween vectors.
 - `NsTweenInstance` – represents a single tween instance with control methods.
 
 <!-- GH_ONLY_START -->

@@ -4,7 +4,8 @@
 
 #include "Classes/NsTweenEasing.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
-#include "NsTweenBPAction.generated.h"
+#include "Blueprints/NsTweenAsyncActionHelpers.h"
+#include "NsTweenAsyncAction.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTweenEventOutputPin);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTweenUpdateFloatOutputPin, float, Value);
@@ -14,7 +15,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTweenUpdateVectorOutputPin, FVector
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTweenUpdateVector2DOutputPin, FVector2D, Value);
 
 UCLASS(Abstract, BlueprintType, meta = (ExposedAsyncProxy = AsyncTask))
-class NSTWEEN_API UNsTweenBPAction : public UBlueprintAsyncActionBase
+class NSTWEEN_API UNsTweenAsyncAction : public UBlueprintAsyncActionBase
 {
     GENERATED_BODY()
 
@@ -116,7 +117,7 @@ public:
 };
 
 UCLASS()
-class NSTWEEN_API UNsTweenBPActionFloat : public UNsTweenBPAction
+class NSTWEEN_API UNsTweenAsyncActionFloat : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
 
@@ -149,7 +150,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenBPActionFloat* TweenFloat(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionFloat* TweenFloat(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -165,16 +166,16 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenBPActionFloat* TweenFloatCustomCurve(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionFloat* TweenFloatCustomCurve(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
-    //~ Begin UNsTweenBPAction Interface
+    //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
     virtual NsTweenInstance* CreateTweenCustomCurve() override;
-    //~ End UNsTweenBPAction Interface
+    //~ End UNsTweenAsyncAction Interface
 };
 
 UCLASS()
-class NSTWEEN_API UNsTweenBPActionQuat : public UNsTweenBPAction
+class NSTWEEN_API UNsTweenAsyncActionQuat : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
 
@@ -211,7 +212,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenBPActionQuat* TweenQuat(FQuat Start, FQuat End, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuat(FQuat Start, FQuat End, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tweens a quaternion, but you can enter in yaw/pitch/roll as the input
@@ -229,7 +230,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenBPActionQuat* TweenQuatFromRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuatFromRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -245,7 +246,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenBPActionQuat* TweenQuatCustomCurve(FQuat Start, FQuat End, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuatCustomCurve(FQuat Start, FQuat End, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -261,16 +262,16 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenBPActionQuat* TweenQuatFromRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuatFromRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
-    //~ Begin UNsTweenBPAction Interface
+    //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
     virtual NsTweenInstance* CreateTweenCustomCurve() override;
-    //~ End UNsTweenBPAction Interface
+    //~ End UNsTweenAsyncAction Interface
 };
 
 UCLASS()
-class NSTWEEN_API UNsTweenBPActionRotator : public UNsTweenBPAction
+class NSTWEEN_API UNsTweenAsyncActionRotator : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
 
@@ -303,7 +304,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenBPActionRotator* TweenRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionRotator* TweenRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
     /**
      * @brief Tween a float parameter between the given values
      * @param Start The starting value
@@ -318,16 +319,16 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenBPActionRotator* TweenRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionRotator* TweenRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
-    //~ Begin UNsTweenBPAction Interface
+    //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
     virtual NsTweenInstance* CreateTweenCustomCurve() override;
-    //~ End UNsTweenBPAction Interface
+    //~ End UNsTweenAsyncAction Interface
 };
 
 UCLASS()
-class NSTWEEN_API UNsTweenBPActionVector : public UNsTweenBPAction
+class NSTWEEN_API UNsTweenAsyncActionVector : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
 
@@ -363,7 +364,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenBPActionVector* TweenVector(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector* TweenVector(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -379,17 +380,17 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenBPActionVector* TweenVectorCustomCurve(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector* TweenVectorCustomCurve(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
-    //~ Begin UNsTweenBPAction Interface
+    //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
     virtual NsTweenInstance* CreateTweenCustomCurve() override;
-    //~ End UNsTweenBPAction Interface
+    //~ End UNsTweenAsyncAction Interface
 };
 
 /**  */
 UCLASS()
-class NSTWEEN_API UNsTweenBPActionVector2D : public UNsTweenBPAction
+class NSTWEEN_API UNsTweenAsyncActionVector2D : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
 
@@ -425,7 +426,7 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenBPActionVector2D* TweenVector2D(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector2D* TweenVector2D(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -441,10 +442,10 @@ public:
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4", DisplayName = "Tween Vector 2D Custom Curve"), Category = "Tween|Custom Curve")
-    static UNsTweenBPActionVector2D* TweenVector2DCustomCurve(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector2D* TweenVector2DCustomCurve(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
-    //~ Begin UNsTweenBPAction Interface
+    //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
     virtual NsTweenInstance* CreateTweenCustomCurve() override;
-    //~ End UNsTweenBPAction Interface
+    //~ End UNsTweenAsyncAction Interface
 };
