@@ -8,158 +8,110 @@
 template <class T>
 class NSTWEEN_API NsTweenManager
 {
-    typedef typename TDoubleLinkedList<T*>::TDoubleLinkedListNode TNode;
-
-// Functions
 public:
-
-    /** Constructor */
-    NsTweenManager(int Capacity)
+    NsTweenManager(int Capacity = 0)
     {
-        ActiveTweens = new TDoubleLinkedList<T*>();
-        RecycledTweens = new TDoubleLinkedList<T*>();
-        TweensToActivate = new TDoubleLinkedList<T*>();
+        ActiveTweens.Reserve(Capacity);
+        RecycledTweens.Reserve(Capacity);
+        TweensToActivate.Reserve(Capacity);
         for (int i = 0; i < Capacity; ++i)
         {
-            RecycledTweens->AddTail(new T());
+            RecycledTweens.Add(new T());
         }
     }
 
-    /** Desstructor */
     ~NsTweenManager()
     {
-        TNode* CurNode = RecycledTweens->GetHead();
-        while (CurNode != nullptr)
+        for (T* Tween : ActiveTweens)
         {
-            delete CurNode->GetValue();
-            CurNode = CurNode->GetNextNode();
+            delete Tween;
         }
-        delete RecycledTweens;
-
-        CurNode = ActiveTweens->GetHead();
-        while (CurNode != nullptr)
+        for (T* Tween : RecycledTweens)
         {
-            delete CurNode->GetValue();
-            CurNode = CurNode->GetNextNode();
+            delete Tween;
         }
-        delete ActiveTweens;
-
-        CurNode = TweensToActivate->GetHead();
-        while (CurNode != nullptr)
+        for (T* Tween : TweensToActivate)
         {
-            delete CurNode->GetValue();
-            CurNode = CurNode->GetNextNode();
+            delete Tween;
         }
-        delete TweensToActivate;
     }
 
-    /** Ensure capacity */
     void EnsureCapacity(int Num)
     {
-        int NumExistingTweens = ActiveTweens->Num() + TweensToActivate->Num() + RecycledTweens->Num();
-        for (int i = NumExistingTweens; i < Num; ++i)
+        const int NumExisting = ActiveTweens.Num() + TweensToActivate.Num() + RecycledTweens.Num();
+        for (int i = NumExisting; i < Num; ++i)
         {
-            RecycledTweens->AddTail(new T());
+            RecycledTweens.Add(new T());
         }
     }
 
-    /** Get current capacity */
-    int GetCurrentCapacity()
+    int GetCurrentCapacity() const
     {
-        return ActiveTweens->Num() + TweensToActivate->Num() + RecycledTweens->Num();
+        return ActiveTweens.Num() + TweensToActivate.Num() + RecycledTweens.Num();
     }
 
-    /** Update */
     void Update(float UnscaledDeltaSeconds, float DilatedDeltaSeconds, bool bIsGamePaused)
     {
-        // add pending tweens
-        TNode* CurNode = TweensToActivate->GetHead();
-        while (CurNode != nullptr)
+        for (T* Tween : TweensToActivate)
         {
-            TNode* NodeToActivate = CurNode;
-            CurNode = CurNode->GetNextNode();
-            NodeToActivate->GetValue()->Start();
-            TweensToActivate->RemoveNode(NodeToActivate, false);
-            ActiveTweens->AddTail(NodeToActivate);
+            Tween->Start();
+            ActiveTweens.Add(Tween);
         }
+        TweensToActivate.Reset();
 
-        // update tweens
-        CurNode = ActiveTweens->GetHead();
-        while (CurNode != nullptr)
+        for (int32 i = ActiveTweens.Num() - 1; i >= 0; --i)
         {
-            NsTweenInstance* CurTween = static_cast<NsTweenInstance*>(CurNode->GetValue());
+            NsTweenInstance* CurTween = static_cast<NsTweenInstance*>(ActiveTweens[i]);
             CurTween->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
-            TNode* NextNode = CurNode->GetNextNode();
             if (!CurTween->bIsActive)
             {
-                ActiveTweens->RemoveNode(CurNode, false);
-                RecycleTween(CurNode);
+                RecycleTween(ActiveTweens[i]);
+                ActiveTweens.RemoveAt(i);
             }
-            CurNode = NextNode;
         }
     }
 
-    /** Clear active tweens */
     void ClearActiveTweens()
     {
-        TNode* CurNode = TweensToActivate->GetHead();
-        while (CurNode != nullptr)
+        for (T* Tween : TweensToActivate)
         {
-            TNode* NodeToRecycle = CurNode;
-            CurNode = CurNode->GetNextNode();
-
-            NodeToRecycle->GetValue()->Destroy();
-            TweensToActivate->RemoveNode(NodeToRecycle, false);
-            RecycledTweens->AddTail(NodeToRecycle);
+            Tween->Destroy();
+            RecycledTweens.Add(Tween);
         }
+        TweensToActivate.Reset();
 
-        CurNode = ActiveTweens->GetHead();
-        while (CurNode != nullptr)
+        for (T* Tween : ActiveTweens)
         {
-            TNode* NodeToRecycle = CurNode;
-            CurNode = CurNode->GetNextNode();
-            ActiveTweens->RemoveNode(NodeToRecycle, false);
-            RecycledTweens->AddTail(NodeToRecycle);
+            Tween->Destroy();
+            RecycledTweens.Add(Tween);
         }
+        ActiveTweens.Reset();
     }
 
-    /** Create Tween */
     T* CreateTween()
     {
-        TNode* NewTween = GetNewTween();
-        TweensToActivate->AddTail(NewTween);
-        return NewTween->GetValue();
+        T* NewTween = GetNewTween();
+        TweensToActivate.Add(NewTween);
+        return NewTween;
     }
 
 private:
-
-    /** Get new tween */
-    TNode* GetNewTween()
+    T* GetNewTween()
     {
-        TNode* Node = RecycledTweens->GetHead();
-        if (Node != nullptr)
+        if (RecycledTweens.Num() > 0)
         {
-            RecycledTweens->RemoveNode(Node, false);
-            return Node;
+            return RecycledTweens.Pop(false);
         }
-        return new TNode(new T());
+        return new T();
     }
 
-    /** Recycle tween */
-    void RecycleTween(TNode* ToRecycle)
+    void RecycleTween(T* ToRecycle)
     {
-        RecycledTweens->AddTail(ToRecycle);
+        RecycledTweens.Add(ToRecycle);
     }
 
-// Variables
 private:
-
-    /** Active Tweens */
-    TDoubleLinkedList<T*>* ActiveTweens;
-
-    /** Recycled Tweens */
-    TDoubleLinkedList<T*>* RecycledTweens;
-
-    /** Tweens to activate on the next update */
-    TDoubleLinkedList<T*>* TweensToActivate;
+    TArray<T*> ActiveTweens;
+    TArray<T*> RecycledTweens;
+    TArray<T*> TweensToActivate;
 };
