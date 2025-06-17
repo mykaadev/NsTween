@@ -4,29 +4,31 @@
 #include "Classes/NsTweenInstance.h"
 
 UNsTweenUObject::UNsTweenUObject()
-{
-	Tween = nullptr;
-}
+    : Tween(nullptr)
+{}
 void UNsTweenUObject::BeginDestroy()
 {
-	if (Tween != nullptr)
-	{
-		Tween->Destroy();
-		Tween = nullptr;
-	}
-	UObject::BeginDestroy();
+    if (Tween)
+    {
+        // Clean up the managed tween before destruction
+        Tween->Destroy();
+        Tween = nullptr;
+    }
+    Super::BeginDestroy();
 }
-
 void UNsTweenUObject::SetTweenInstance(NsTweenInstance* InTween)
 {
-	this->Tween = InTween;
-	// destroy when we are destroyed
-	this->Tween->SetAutoDestroy(false);
+    Tween = InTween;
+    // Prevent the tween from destroying itself prematurely
+    Tween->SetAutoDestroy(false);
 }
 
 void UNsTweenUObject::Destroy()
 {
-	this->Tween->Destroy();
-	this->Tween = nullptr;
-	ConditionalBeginDestroy();
+    if (Tween)
+    {
+        Tween->Destroy();
+        Tween = nullptr;
+    }
+    ConditionalBeginDestroy();
 }

@@ -32,7 +32,7 @@ public:
     virtual class NsTweenInstance* CreateTweenCustomCurve();
 
     /** Set shared tween properties */
-    virtual void SetSharedTweenProperties(float InDurationSecs, float InDelay, int InLoops, float InLoopDelay, bool InbYoyo, float InYoyoDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation);
+    virtual void SetSharedTweenProperties(float InDurationSecs, float InDelay, int InLoops, float InLoopDelay, bool InbPingPong, float InPingPongDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation);
 
     /** Begin Destroy */
     virtual void BeginDestroy() override;
@@ -75,11 +75,11 @@ public:
     /** Loop delay */
     float LoopDelay;
 
-    /** YoYo */
-    bool bYoyo;
+    /** PingPong */
+    bool bPingPong;
 
-    /** YoYo delay */
-    float YoyoDelay;
+    /** PingPong delay */
+    float PingPongDelay;
 
     /** Can tick during pause */
     bool bCanTickDuringPause;
@@ -107,9 +107,9 @@ public:
     UPROPERTY(BlueprintAssignable, AdvancedDisplay)
     FTweenEventOutputPin OnLoop;
 
-    /** On YoYo */
+    /** On PingPong */
     UPROPERTY(BlueprintAssignable, AdvancedDisplay)
-    FTweenEventOutputPin OnYoyo;
+    FTweenEventOutputPin OnPingPong;
 
     /** On Complete */
     UPROPERTY(BlueprintAssignable, AdvancedDisplay)
@@ -145,12 +145,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenAsyncActionFloat* TweenFloat(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionFloat* TweenFloat(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -161,12 +161,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenAsyncActionFloat* TweenFloatCustomCurve(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionFloat* TweenFloatCustomCurve(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
@@ -207,12 +207,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenAsyncActionQuat* TweenQuat(FQuat Start, FQuat End, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuat(FQuat Start, FQuat End, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tweens a quaternion, but you can enter in yaw/pitch/roll as the input
@@ -225,12 +225,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenAsyncActionQuat* TweenQuatFromRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuatFromRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -241,12 +241,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenAsyncActionQuat* TweenQuatCustomCurve(FQuat Start, FQuat End, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuatCustomCurve(FQuat Start, FQuat End, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -257,12 +257,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenAsyncActionQuat* TweenQuatFromRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionQuat* TweenQuatFromRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
@@ -299,12 +299,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenAsyncActionRotator* TweenRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionRotator* TweenRotator(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
     /**
      * @brief Tween a float parameter between the given values
      * @param Start The starting value
@@ -314,12 +314,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenAsyncActionRotator* TweenRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionRotator* TweenRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
@@ -359,12 +359,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenAsyncActionVector* TweenVector(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector* TweenVector(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -375,12 +375,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween|Custom Curve")
-    static UNsTweenAsyncActionVector* TweenVectorCustomCurve(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector* TweenVectorCustomCurve(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
@@ -421,12 +421,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4"), Category = "Tween")
-    static UNsTweenAsyncActionVector2D* TweenVector2D(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector2D* TweenVector2D(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, ENsTweenEase EaseType = ENsTweenEase::InOutQuad, float EaseParam1 = 0, float EaseParam2 = 0, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     /**
      * @brief Tween a float parameter between the given values
@@ -437,12 +437,12 @@ public:
      * @param Delay Seconds before the tween starts interpolating, after being created
      * @param Loops The number of loops to play. -1 for infinite
      * @param LoopDelay Seconds to pause before starting each loop
-     * @param bYoyo Whether to "yoyo" the tween - once it reaches the end, it starts counting backwards
-     * @param YoyoDelay Seconds to pause before starting to yoyo
+     * @param bPingPong Whether to "pingpong" the tween - once it reaches the end, it starts counting backwards
+     * @param PingPongDelay Seconds to pause before starting to pingpong
      * @param bCanTickDuringPause Whether to play this tween while the game is paused. Useful for UI purposes, such as a pause menu
      */
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", AdvancedDisplay = "4", DisplayName = "Tween Vector 2D Custom Curve"), Category = "Tween|Custom Curve")
-    static UNsTweenAsyncActionVector2D* TweenVector2DCustomCurve(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bYoyo = false, float YoyoDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
+    static UNsTweenAsyncActionVector2D* TweenVector2DCustomCurve(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
     virtual NsTweenInstance* CreateTween() override;
