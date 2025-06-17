@@ -60,11 +60,11 @@ void AMyActor::BeginPlay()
     Super::BeginPlay();
 
     NsTweenCore::Play(
-        /*Start*/   0.f,
-        /*End*/     100.f,
-        /*Seconds*/ 2.f,
-        /*Ease*/    ENsTweenEase::InOutQuad,
-        /*Update*/  [this](float Value)
+        /**Start*/   0.f,
+        /**End*/     100.f,
+        /**Time*/    2.f,
+        /**Ease*/    ENsTweenEase::InOutQuad,
+        /**Update*/  [this](float Value)
         {
             SetActorLocation(FVector(Value, 0.f, 0.f));
         });
@@ -72,6 +72,47 @@ void AMyActor::BeginPlay()
 ```
 
 The library also exposes Blueprint nodes for the same functionality if you prefer a visual approach.
+
+Below is a slightly more advanced snippet showing how to make an item float up and down while rotating. When the rotation tween finishes we call a custom `Pop()` function:
+
+```cpp
+#include "NsTweenCore.h"
+
+void AFloatingItem::BeginPlay()
+{
+    Super::BeginPlay();
+
+    // Float continuously
+    NsTweenCore::Play(
+         /**Start*/   GetActorLocation().Z,
+         /**End*/     GetActorLocation().Z + 40.f,
+         /**Time*/    1.f,
+         /**Ease*/    ENsTweenEase::InOutSine,
+         /**Update*/  [this](float Z)
+        {
+            const FVector Loc = GetActorLocation();
+            Loc.Z = Z;
+            SetActorLocation(Loc);
+        })
+        ->SetPingPong(true)
+        ->SetLoops(-1);
+
+    // Rotate once then pop
+    NsTweenCore::Play(
+        /**Start*/   GetActorQuat(),
+        /**End*/     GetActorQuat() * FQuat(FRotator(0.f, 360.f, 0.f)),
+        /**Time*/    2.f,
+        /**Ease*/    ENsTweenEase::Linear,
+        /**Update*/  [this](FQuat Q)
+        {
+            SetActorRotation(Q);
+        })
+        /**On Ease Complete*/ ->SetOnComplete([this]()
+        {
+            Pop();
+        });
+}
+```
 
 ## 🔧 API
 ### Key Classes
