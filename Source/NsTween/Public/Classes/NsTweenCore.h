@@ -1,4 +1,4 @@
-// Copyright (C) 2025 mykaadev. All rights reserved.
+﻿// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #pragma once
 
@@ -52,6 +52,52 @@ public:
     /** Play Tween - Quat */
     static NsTweenInstanceQuat* Play(const FQuat& Start, const FQuat& End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate);
 
+    /** For Each Manager */
+    template <typename Func>
+    FORCEINLINE static void ForEachManager(Func&& Fn)
+    {
+        Fn(FloatTweenManager);
+        Fn(VectorTweenManager);
+        Fn(Vector2DTweenManager);
+        Fn(QuatTweenManager);
+    }
+
+    /** Ensure Manager capacity */
+    template <typename ManagerType>
+    FORCEINLINE static void EnsureManagerCapacity(ManagerType* Manager, int32 Num)
+    {
+        Manager->EnsureCapacity(Num);
+    }
+
+    template <typename ManagerType>
+    FORCEINLINE static void CheckManagerCapacity(const ManagerType* Manager, const int32 NumReserved, const TCHAR* TypeName)
+    {
+        const int32 Current = Manager->GetCurrentCapacity();
+        if (Current > NumReserved)
+        {
+            UE_LOG(LogNsTween,
+                   Warning,
+                   TEXT("Consider increasing initial capacity for %s tweens with NsTweenCore::EnsureCapacity(). %d were initially reserved, but now there are %d in memory."),
+                   TypeName,
+                   NumReserved,
+                   Current);
+        }
+    }
+
+    /** Play internal */
+    template <typename TweenType, typename ValueType>
+    FORCEINLINE static TweenType* PlayInternal(NsTweenManager<TweenType>* Manager,
+                                        const ValueType& Start,
+                                        const ValueType& End,
+                                        float DurationSecs,
+                                        ENsTweenEase EaseType,
+                                        TFunction<void(ValueType)> OnUpdate)
+    {
+        TweenType* const NewTween = Manager->CreateTween();
+        NewTween->Initialize(Start, End, MoveTemp(OnUpdate), DurationSecs, EaseType);
+        return NewTween;
+    }
+
 // Variables
 private:
 
@@ -68,14 +114,14 @@ private:
     static NsTweenManager<NsTweenInstanceQuat>* QuatTweenManager;
 
     /** Reserved floats */
-    static int NumReservedFloat;
+    static int32 CurrentReservedFloat;
 
     /** Reserved Vector */
-    static int NumReservedVector;
+    static int32 CurrentReservedVector;
 
     /** Reserved Vector2D */
-    static int NumReservedVector2D;
+    static int32 CurrentReservedVector2D;
 
     /** Reserved Quat */
-    static int NumReservedQuat;
+    static int32 CurrentReservedQuat;
 };

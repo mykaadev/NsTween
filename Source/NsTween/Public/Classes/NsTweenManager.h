@@ -1,4 +1,4 @@
-// Copyright (C) 2025 mykaadev. All rights reserved.
+﻿// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #pragma once
 
@@ -9,12 +9,12 @@ template <class T>
 class NSTWEEN_API NsTweenManager
 {
 public:
-    NsTweenManager(int Capacity = 0)
+    NsTweenManager(int32 Capacity = 0)
     {
         ActiveTweens.Reserve(Capacity);
         RecycledTweens.Reserve(Capacity);
         TweensToActivate.Reserve(Capacity);
-        for (int i = 0; i < Capacity; ++i)
+        for (int32 i = 0; i < Capacity; ++i)
         {
             RecycledTweens.Add(new T());
         }
@@ -22,37 +22,37 @@ public:
 
     ~NsTweenManager()
     {
-        for (T* Tween : ActiveTweens)
+        for (const T* const Tween : ActiveTweens)
         {
             delete Tween;
         }
-        for (T* Tween : RecycledTweens)
+        for (const T* const Tween : RecycledTweens)
         {
             delete Tween;
         }
-        for (T* Tween : TweensToActivate)
+        for (const T* const Tween : TweensToActivate)
         {
             delete Tween;
         }
     }
 
-    void EnsureCapacity(int Num)
+    void EnsureCapacity(const int32 Num)
     {
-        const int NumExisting = ActiveTweens.Num() + TweensToActivate.Num() + RecycledTweens.Num();
-        for (int i = NumExisting; i < Num; ++i)
+        const int32 NumExisting = ActiveTweens.Num() + TweensToActivate.Num() + RecycledTweens.Num();
+        for (int32 i = NumExisting; i < Num; ++i)
         {
             RecycledTweens.Add(new T());
         }
     }
 
-    int GetCurrentCapacity() const
+    int32 GetCurrentCapacity() const
     {
         return ActiveTweens.Num() + TweensToActivate.Num() + RecycledTweens.Num();
     }
 
-    void Update(float UnscaledDeltaSeconds, float DilatedDeltaSeconds, bool bIsGamePaused)
+    void Update(const float UnscaledDeltaSeconds, const float DilatedDeltaSeconds, const bool bIsGamePaused)
     {
-        for (T* Tween : TweensToActivate)
+        for (T* const Tween : TweensToActivate)
         {
             Tween->Start();
             ActiveTweens.Add(Tween);
@@ -61,26 +61,28 @@ public:
 
         for (int32 i = ActiveTweens.Num() - 1; i >= 0; --i)
         {
-            NsTweenInstance* CurTween = static_cast<NsTweenInstance*>(ActiveTweens[i]);
-            CurTween->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
-            if (!CurTween->bIsActive)
+            if (NsTweenInstance* CurTween = static_cast<NsTweenInstance*>(ActiveTweens[i]))
             {
-                RecycleTween(ActiveTweens[i]);
-                ActiveTweens.RemoveAt(i);
+                CurTween->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
+                if (!CurTween->bIsActive)
+                {
+                    RecycleTween(ActiveTweens[i]);
+                    ActiveTweens.RemoveAt(i);
+                }
             }
         }
     }
 
     void ClearActiveTweens()
     {
-        for (T* Tween : TweensToActivate)
+        for (T* const Tween : TweensToActivate)
         {
             Tween->Destroy();
             RecycledTweens.Add(Tween);
         }
         TweensToActivate.Reset();
 
-        for (T* Tween : ActiveTweens)
+        for (T* const Tween : ActiveTweens)
         {
             Tween->Destroy();
             RecycledTweens.Add(Tween);
@@ -111,7 +113,13 @@ private:
     }
 
 private:
+
+    /** Active tweens */
     TArray<T*> ActiveTweens;
+
+    /** Recycled tweens */
     TArray<T*> RecycledTweens;
+
+    /** Tweens pending activation */
     TArray<T*> TweensToActivate;
 };

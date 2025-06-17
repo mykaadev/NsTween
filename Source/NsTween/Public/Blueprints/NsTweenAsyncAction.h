@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include "Blueprints/NsTweenAsyncActionHelpers.h"
 #include "Classes/NsTweenEasing.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
-#include "Blueprints/NsTweenAsyncActionHelpers.h"
 #include "NsTweenAsyncAction.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTweenEventOutputPin);

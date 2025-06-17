@@ -20,7 +20,7 @@ enum class ENsTweenDelayState : uint8
 /**
  * Tween Instance
  */
-struct NSTWEEN_API NsTweenInstance
+class NSTWEEN_API NsTweenInstance
 {
 
 // Variables
@@ -211,7 +211,7 @@ private:
 /**
  * Tween Instance - Float
  */
-struct NSTWEEN_API NsTweenInstanceFloat : public NsTweenInstance
+class NSTWEEN_API NsTweenInstanceFloat : public NsTweenInstance
 {
 // Functions
 public:
@@ -239,7 +239,7 @@ public:
 /**
  * Tween Instance - Quat
  */
-struct NSTWEEN_API NsTweenInstanceQuat : public NsTweenInstance
+class NSTWEEN_API NsTweenInstanceQuat : public NsTweenInstance
 {
 // Functions
 public:
@@ -267,7 +267,7 @@ public:
 /**
  * Tween Instance - Vector
  */
-struct NSTWEEN_API NsTweenInstanceVector : public NsTweenInstance
+class NSTWEEN_API NsTweenInstanceVector : public NsTweenInstance
 {
 // Functions
 public:
@@ -295,7 +295,7 @@ public:
 /**
  * Tween Instance - Vector2D
  */
-struct NSTWEEN_API NsTweenInstanceVector2D : public NsTweenInstance
+class NSTWEEN_API NsTweenInstanceVector2D : public NsTweenInstance
 {
 // Functions
 public:
@@ -323,7 +323,7 @@ public:
 /**
  * Tween Instance - Rotator
  */
-struct NSTWEEN_API NsTweenInstanceRotator : public NsTweenInstance
+class NSTWEEN_API NsTweenInstanceRotator : public NsTweenInstance
 {
 // Functions
 public:

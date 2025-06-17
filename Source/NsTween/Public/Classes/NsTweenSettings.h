@@ -14,8 +14,32 @@ class NSTWEEN_API UNsTweenSettings : public UDeveloperSettings
 {
     GENERATED_BODY()
 
+// Functions
 public:
+
+    /** Constructor */
     UNsTweenSettings();
+
+    /** Get Settings */
+    UFUNCTION(BlueprintCallable, Category = "Tween Settings")
+    static UNsTweenSettings* GetSettings()
+    {
+        static UNsTweenSettings* Instance;
+        if(Instance != nullptr)
+        {
+            return Instance;
+        }
+
+        for (const TObjectIterator<UNsTweenSettings> SettingsIt(RF_NoFlags); SettingsIt;)
+        {
+            Instance = *SettingsIt;
+            break;
+        }
+        return Instance;
+    }
+
+// Variables
+public:
 
     /** Initial number of float tweens reserved */
     UPROPERTY(EditAnywhere, Config, Category="Tween Capacity", meta=(ClampMin="0"))
@@ -33,23 +57,6 @@ public:
     UPROPERTY(EditAnywhere, Config, Category="Tween Capacity", meta=(ClampMin="0"))
     int32 QuatTweenCapacity;
 
-    /** Get Tween Settings */
-    UFUNCTION(BlueprintCallable, Category = "Game Settings")
-    static UNsTweenSettings* GetSettings()
-    {
-        static UNsTweenSettings* Instance;
-        if(Instance != nullptr)
-        {
-            return Instance;
-        }
-
-        for (const TObjectIterator<UNsTweenSettings> SettingsIt(RF_NoFlags); SettingsIt; ++SettingsIt)
-        {
-            Instance = *SettingsIt;
-            break;
-        }
-        return Instance;
-    }
 };
 
 
