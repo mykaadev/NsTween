@@ -1,9 +1,10 @@
 // Copyright (C) 2025 mykaadev. All rights reserved.
 
-#include "Blueprints/NsTweenBPAction.h"
+#include "Blueprints/NsTweenAsyncAction.h"
+#include "Blueprints/NsTweenAsyncActionHelpers.h"
 #include "Classes/NsTweenCore.h"
 
-void UNsTweenBPAction::Activate()
+void UNsTweenAsyncAction::Activate()
 {
     if (TweenInstance != nullptr)
     {
@@ -69,18 +70,18 @@ void UNsTweenBPAction::Activate()
     }
 }
 
-NsTweenInstance* UNsTweenBPAction::CreateTween()
+NsTweenInstance* UNsTweenAsyncAction::CreateTween()
 {
     // override in specific data type tasks
     return nullptr;
 }
 
-NsTweenInstance* UNsTweenBPAction::CreateTweenCustomCurve()
+NsTweenInstance* UNsTweenAsyncAction::CreateTweenCustomCurve()
 {
     return nullptr;
 }
 
-void UNsTweenBPAction::SetSharedTweenProperties(float InDurationSecs, float InDelay, int InLoops, float InLoopDelay, bool InbYoyo, float InYoyoDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation)
+void UNsTweenAsyncAction::SetSharedTweenProperties(float InDurationSecs, float InDelay, int InLoops, float InLoopDelay, bool InbYoyo, float InYoyoDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation)
 {
     TweenInstance = nullptr;
     bUseCustomCurve = false;
@@ -95,7 +96,7 @@ void UNsTweenBPAction::SetSharedTweenProperties(float InDurationSecs, float InDe
     bUseGlobalTimeDilation = bInUseGlobalTimeDilation;
 }
 
-void UNsTweenBPAction::BeginDestroy()
+void UNsTweenAsyncAction::BeginDestroy()
 {
     Super::BeginDestroy();
     if (TweenInstance != nullptr)
@@ -105,7 +106,7 @@ void UNsTweenBPAction::BeginDestroy()
     }
 }
 
-void UNsTweenBPAction::Pause()
+void UNsTweenAsyncAction::Pause()
 {
     if (TweenInstance)
     {
@@ -113,7 +114,7 @@ void UNsTweenBPAction::Pause()
     }
 }
 
-void UNsTweenBPAction::Unpause()
+void UNsTweenAsyncAction::Unpause()
 {
     if (TweenInstance)
     {
@@ -121,7 +122,7 @@ void UNsTweenBPAction::Unpause()
     }
 }
 
-void UNsTweenBPAction::Restart()
+void UNsTweenAsyncAction::Restart()
 {
     if (TweenInstance)
     {
@@ -129,7 +130,7 @@ void UNsTweenBPAction::Restart()
     }
 }
 
-void UNsTweenBPAction::Stop()
+void UNsTweenAsyncAction::Stop()
 {
     if (TweenInstance)
     {
@@ -144,7 +145,7 @@ void UNsTweenBPAction::Stop()
     }
 }
 
-void UNsTweenBPAction::SetTimeMultiplier(float Multiplier)
+void UNsTweenAsyncAction::SetTimeMultiplier(float Multiplier)
 {
     if (TweenInstance)
     {
@@ -152,9 +153,9 @@ void UNsTweenBPAction::SetTimeMultiplier(float Multiplier)
     }
 }
 
-UNsTweenBPActionFloat* UNsTweenBPActionFloat::TweenFloat(float Start, float End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloat(float Start, float End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionFloat* BlueprintNode = NewObject<UNsTweenBPActionFloat>();
+    UNsTweenAsyncActionFloat* BlueprintNode = NewObject<UNsTweenAsyncActionFloat>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->EaseType = EaseType;
     BlueprintNode->Start = Start;
@@ -164,9 +165,9 @@ UNsTweenBPActionFloat* UNsTweenBPActionFloat::TweenFloat(float Start, float End,
     return BlueprintNode;
 }
 
-UNsTweenBPActionFloat* UNsTweenBPActionFloat::TweenFloatCustomCurve(float Start, float End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloatCustomCurve(float Start, float End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionFloat* BlueprintNode = NewObject<UNsTweenBPActionFloat>();
+    UNsTweenAsyncActionFloat* BlueprintNode = NewObject<UNsTweenAsyncActionFloat>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->CustomCurve = Curve;
     BlueprintNode->bUseCustomCurve = true;
@@ -177,24 +178,21 @@ UNsTweenBPActionFloat* UNsTweenBPActionFloat::TweenFloatCustomCurve(float Start,
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenBPActionFloat::CreateTween()
+NsTweenInstance* UNsTweenAsyncActionFloat::CreateTween()
 {
-    return NsTweenCore::Play(Start, End, DurationSecs, EaseType, [&](const float T) { ApplyEasing.Broadcast(T); });
+    return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
+        [&](float T) { ApplyEasing.Broadcast(T); });
 }
 
-NsTweenInstance* UNsTweenBPActionFloat::CreateTweenCustomCurve()
+NsTweenInstance* UNsTweenAsyncActionFloat::CreateTweenCustomCurve()
 {
-    return NsTweenCore::Play (0,  1,  DurationSecs,  EaseType,  [&](const float T)
-    {
-        const float EasedTime = CustomCurve->GetFloatValue(T);
-        const float EasedValue = FMath::Lerp(Start, End, EasedTime);
-        ApplyEasing.Broadcast(EasedValue);
-    });
+    return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
+        [&](float V) { ApplyEasing.Broadcast(V); });
 }
 
-UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuat(FQuat Start, FQuat End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuat(FQuat Start, FQuat End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionQuat* BlueprintNode = NewObject<UNsTweenBPActionQuat>();
+    UNsTweenAsyncActionQuat* BlueprintNode = NewObject<UNsTweenAsyncActionQuat>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->EaseType = EaseType;
     BlueprintNode->Start = Start;
@@ -204,9 +202,9 @@ UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuat(FQuat Start, FQuat End, fl
     return BlueprintNode;
 }
 
-UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuatFromRotator(FRotator Start, FRotator End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatFromRotator(FRotator Start, FRotator End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionQuat* BlueprintNode = NewObject<UNsTweenBPActionQuat>();
+    UNsTweenAsyncActionQuat* BlueprintNode = NewObject<UNsTweenAsyncActionQuat>();
     BlueprintNode->SetSharedTweenProperties
             (
              DurationSecs,
@@ -226,9 +224,9 @@ UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuatFromRotator(FRotator Start,
     return BlueprintNode;
 }
 
-UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuatCustomCurve(FQuat Start, FQuat End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatCustomCurve(FQuat Start, FQuat End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionQuat* BlueprintNode = NewObject<UNsTweenBPActionQuat>();
+    UNsTweenAsyncActionQuat* BlueprintNode = NewObject<UNsTweenAsyncActionQuat>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->CustomCurve = Curve;
     BlueprintNode->bUseCustomCurve = true;
@@ -239,9 +237,9 @@ UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuatCustomCurve(FQuat Start, FQ
     return BlueprintNode;
 }
 
-UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuatFromRotatorCustomCurve(FRotator Start, FRotator End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatFromRotatorCustomCurve(FRotator Start, FRotator End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionQuat* BlueprintNode = NewObject<UNsTweenBPActionQuat>();
+    UNsTweenAsyncActionQuat* BlueprintNode = NewObject<UNsTweenAsyncActionQuat>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->CustomCurve = Curve;
     BlueprintNode->bUseCustomCurve = true;
@@ -252,24 +250,21 @@ UNsTweenBPActionQuat* UNsTweenBPActionQuat::TweenQuatFromRotatorCustomCurve(FRot
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenBPActionQuat::CreateTween()
+NsTweenInstance* UNsTweenAsyncActionQuat::CreateTween()
 {
-    return NsTweenCore::Play(Start, End, DurationSecs, EaseType, [&](const FQuat& T) { ApplyEasing.Broadcast(T); });
+    return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
+        [&](const FQuat& Q) { ApplyEasing.Broadcast(Q); });
 }
 
-NsTweenInstance* UNsTweenBPActionQuat::CreateTweenCustomCurve()
+NsTweenInstance* UNsTweenAsyncActionQuat::CreateTweenCustomCurve()
 {
-    return NsTweenCore::Play (0,  1,  DurationSecs,  EaseType,  [&](const float T)
-    {
-     const float EasedTime = CustomCurve->GetFloatValue(T);
-     const FQuat EasedValue = FQuat::Slerp(Start, End, EasedTime);
-     ApplyEasing.Broadcast(EasedValue);
-    });
+    return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
+        [&](const FQuat& Q) { ApplyEasing.Broadcast(Q); });
 }
 
-UNsTweenBPActionRotator* UNsTweenBPActionRotator::TweenRotator(FRotator Start, FRotator End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotator(FRotator Start, FRotator End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionRotator* BlueprintNode = NewObject<UNsTweenBPActionRotator>();
+    UNsTweenAsyncActionRotator* BlueprintNode = NewObject<UNsTweenAsyncActionRotator>();
     BlueprintNode->SetSharedTweenProperties (  DurationSecs,  Delay,  Loops,  LoopDelay,  bYoyo,  YoyoDelay,  bCanTickDuringPause,  bUseGlobalTimeDilation );
     BlueprintNode->EaseType = EaseType;
     BlueprintNode->Start = Start.Quaternion();
@@ -279,9 +274,9 @@ UNsTweenBPActionRotator* UNsTweenBPActionRotator::TweenRotator(FRotator Start, F
     return BlueprintNode;
 }
 
-UNsTweenBPActionRotator* UNsTweenBPActionRotator::TweenRotatorCustomCurve(FRotator Start, FRotator End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotatorCustomCurve(FRotator Start, FRotator End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionRotator* BlueprintNode = NewObject<UNsTweenBPActionRotator>();
+    UNsTweenAsyncActionRotator* BlueprintNode = NewObject<UNsTweenAsyncActionRotator>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->CustomCurve = Curve;
     BlueprintNode->bUseCustomCurve = true;
@@ -292,27 +287,27 @@ UNsTweenBPActionRotator* UNsTweenBPActionRotator::TweenRotatorCustomCurve(FRotat
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenBPActionRotator::CreateTween()
+NsTweenInstance* UNsTweenAsyncActionRotator::CreateTween()
 {
-    return NsTweenCore::Play( Start, End, DurationSecs, EaseType, [&](const FQuat& T)
-    {
-        ApplyEasing.Broadcast(T.Rotator());
-    });
+    return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
+        [&](const FQuat& Q)
+        {
+            ApplyEasing.Broadcast(Q.Rotator());
+        });
 }
 
-NsTweenInstance* UNsTweenBPActionRotator::CreateTweenCustomCurve()
+NsTweenInstance* UNsTweenAsyncActionRotator::CreateTweenCustomCurve()
 {
-    return NsTweenCore::Play(0, 1, DurationSecs, EaseType, [&](float t)
-    {
-        const float EasedTime = CustomCurve->GetFloatValue(t);
-        const FQuat EasedValue = FQuat::Slerp(Start, End, EasedTime);
-        ApplyEasing.Broadcast(EasedValue.Rotator());
-    });
+    return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
+        [&](const FQuat& Q)
+        {
+            ApplyEasing.Broadcast(Q.Rotator());
+        });
 }
 
-UNsTweenBPActionVector* UNsTweenBPActionVector::TweenVector(FVector Start, FVector End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVector(FVector Start, FVector End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionVector* BlueprintNode = NewObject<UNsTweenBPActionVector>();
+    UNsTweenAsyncActionVector* BlueprintNode = NewObject<UNsTweenAsyncActionVector>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->EaseType = EaseType;
     BlueprintNode->Start = Start;
@@ -322,9 +317,9 @@ UNsTweenBPActionVector* UNsTweenBPActionVector::TweenVector(FVector Start, FVect
     return BlueprintNode;
 }
 
-UNsTweenBPActionVector* UNsTweenBPActionVector::TweenVectorCustomCurve(FVector Start, FVector End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVectorCustomCurve(FVector Start, FVector End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionVector* BlueprintNode = NewObject<UNsTweenBPActionVector>();
+    UNsTweenAsyncActionVector* BlueprintNode = NewObject<UNsTweenAsyncActionVector>();
     BlueprintNode->SetSharedTweenProperties(  DurationSecs,  Delay,  Loops,  LoopDelay,  bYoyo,  YoyoDelay,  bCanTickDuringPause,  bUseGlobalTimeDilation );
     BlueprintNode->CustomCurve = Curve;
     BlueprintNode->bUseCustomCurve = true;
@@ -335,24 +330,21 @@ UNsTweenBPActionVector* UNsTweenBPActionVector::TweenVectorCustomCurve(FVector S
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenBPActionVector::CreateTween()
+NsTweenInstance* UNsTweenAsyncActionVector::CreateTween()
 {
-    return NsTweenCore::Play(Start, End, DurationSecs, EaseType, [&](const FVector& T) { ApplyEasing.Broadcast(T); });
+    return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
+        [&](const FVector& V) { ApplyEasing.Broadcast(V); });
 }
 
-NsTweenInstance* UNsTweenBPActionVector::CreateTweenCustomCurve()
+NsTweenInstance* UNsTweenAsyncActionVector::CreateTweenCustomCurve()
 {
-    return NsTweenCore::Play(0, 1, DurationSecs, EaseType, [&](const float T)
-    {
-        const float EasedTime = CustomCurve->GetFloatValue(T);
-        const FVector EasedValue = FMath::Lerp(Start, End, EasedTime);
-        ApplyEasing.Broadcast(EasedValue);
-    });
+    return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
+        [&](const FVector& V) { ApplyEasing.Broadcast(V); });
 }
 
-UNsTweenBPActionVector2D* UNsTweenBPActionVector2D::TweenVector2D(FVector2D Start, FVector2D End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2D(FVector2D Start, FVector2D End, float DurationSecs, ENsTweenEase EaseType, float EaseParam1, float EaseParam2, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionVector2D* BlueprintNode = NewObject<UNsTweenBPActionVector2D>();
+    UNsTweenAsyncActionVector2D* BlueprintNode = NewObject<UNsTweenAsyncActionVector2D>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->EaseType = EaseType;
     BlueprintNode->Start = Start;
@@ -362,9 +354,9 @@ UNsTweenBPActionVector2D* UNsTweenBPActionVector2D::TweenVector2D(FVector2D Star
     return BlueprintNode;
 }
 
-UNsTweenBPActionVector2D* UNsTweenBPActionVector2D::TweenVector2DCustomCurve(FVector2D Start, FVector2D End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
+UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2DCustomCurve(FVector2D Start, FVector2D End, float DurationSecs, UCurveFloat* Curve, float Delay, int Loops, float LoopDelay, bool bYoyo, float YoyoDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
-    UNsTweenBPActionVector2D* BlueprintNode = NewObject<UNsTweenBPActionVector2D>();
+    UNsTweenAsyncActionVector2D* BlueprintNode = NewObject<UNsTweenAsyncActionVector2D>();
     BlueprintNode->SetSharedTweenProperties( DurationSecs, Delay, Loops, LoopDelay, bYoyo, YoyoDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
     BlueprintNode->CustomCurve = Curve;
     BlueprintNode->bUseCustomCurve = true;
@@ -375,17 +367,17 @@ UNsTweenBPActionVector2D* UNsTweenBPActionVector2D::TweenVector2DCustomCurve(FVe
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenBPActionVector2D::CreateTween()
+NsTweenInstance* UNsTweenAsyncActionVector2D::CreateTween()
 {
-    return NsTweenCore::Play(Start, End, DurationSecs, EaseType, [&](const FVector2D T) { ApplyEasing.Broadcast(T); });
+    return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
+        [&](const FVector2D V) { ApplyEasing.Broadcast(V); });
 }
 
-NsTweenInstance* UNsTweenBPActionVector2D::CreateTweenCustomCurve()
+NsTweenInstance* UNsTweenAsyncActionVector2D::CreateTweenCustomCurve()
 {
-    return NsTweenCore::Play(0, 1, DurationSecs, EaseType,[&](const float T)
-    {
-         const float EasedTime = CustomCurve->GetFloatValue(T);
-         const FVector2D EasedValue = FMath::Lerp(Start, End, EasedTime);
-         ApplyEasing.Broadcast(EasedValue);
-    });
+    return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
+        [&](const FVector2D V)
+        {
+            ApplyEasing.Broadcast(V);
+        });
 }
