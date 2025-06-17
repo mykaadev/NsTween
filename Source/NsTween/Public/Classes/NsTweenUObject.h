@@ -5,7 +5,8 @@
 #include "NsTweenUObject.generated.h"
 
 /**
- * Use this to wrap an NsTweenInstance inside a UObject, so that it's destroyed when its outer object is destroyed
+ * Simple UObject wrapper around a NsTweenInstance.
+ * Ensures the tween is cleaned up when this UObject is destroyed.
  */
 UCLASS()
 class UNsTweenUObject : public UObject
@@ -22,15 +23,15 @@ public:
     virtual void BeginDestroy() override;
     //~ End UObject Interface
 
-    /** Stop the tween immediately and mark this object for destruction */
+    /** Assign the tween instance to manage. */
     void SetTweenInstance(class NsTweenInstance* const InTween);
 
-    /** Stop the tween immediately and mark this object for destruction */
+    /** Stop the tween immediately and mark this UObject for destruction */
     void Destroy();
 
 // Variables
 public:
 
-    /** Instance */
+    /** Managed tween instance */
     class NsTweenInstance* Tween;
 };

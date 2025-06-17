@@ -14,13 +14,13 @@ enum class ENsTweenDelayState : uint8
     None,
     Start,
     Loop,
-    YoYo
+    PingPong
 };
 
 /**
  * Tween Instance
  */
-class NSTWEEN_API NsTweenInstance
+struct NSTWEEN_API NsTweenInstance
 {
 
 // Variables
@@ -47,11 +47,11 @@ public:
     /** Is the tween paused */
     bool bIsPaused;
 
-    /** Should YoYo */
-    bool bShouldYoYo;
+    /** Should PingPong */
+    bool bShouldPingPong;
 
-    /** is the tween playing YoYo */
-    bool bIsPlayingYoYo;
+    /** is the tween playing PingPong */
+    bool bIsPlayingPingPong;
 
     /** Can tick during pause */
     bool bCanTickDuringPause;
@@ -71,8 +71,8 @@ public:
     /** Loop delay seconds */
     float LoopDelaySecs;
 
-    /** YoYo delay seconds */
-    float YoyoDelaySecs;
+    /** PingPong delay seconds */
+    float PingPongDelaySecs;
 
     /** Time multiplier */
     float TimeMultiplier;
@@ -86,10 +86,10 @@ public:
     /** Tween delay state */
     ENsTweenDelayState DelayState;
 
-private:
+public:
 
-    /** Function to run on YoYo */
-    TFunction<void()> OnYoyo;
+    /** Function to run on PingPong */
+    TFunction<void()> OnPingPong;
 
     /** Function to run on Loop */
     TFunction<void()> OnLoop;
@@ -97,7 +97,6 @@ private:
     /** Function to run on Complete */
     TFunction<void()> OnComplete;
 
-public:
 
     /** Constructor */
     NsTweenInstance()
@@ -108,15 +107,15 @@ public:
         , bShouldAutoDestroy(true)
         , bIsActive(true)
         , bIsPaused(false)
-        , bShouldYoYo(false)
-        , bIsPlayingYoYo(false)
+        , bShouldPingPong(false)
+        , bIsPlayingPingPong(false)
         , bCanTickDuringPause(false)
         , bUseGlobalTimeDilation(true)
         , NumLoops(0)
         , NumLoopsCompleted(0)
         , DelaySecs(0)
         , LoopDelaySecs(0)
-        , YoyoDelaySecs(0)
+        , PingPongDelaySecs(0)
         , TimeMultiplier(0)
         , EaseParam1(0)
         , EaseParam2(0)
@@ -129,17 +128,17 @@ public:
     /** Set Delay */
     NsTweenInstance* SetDelay(float InDelaySecs);
 
-    /** How many times to replay the loop (yoyo included). use -1 for infinity */
+    /** How many times to replay the loop (pingpong included). use -1 for infinity */
     NsTweenInstance* SetLoops(int InNumLoops);
 
     /** Seconds to wait before starting another loop */
     NsTweenInstance* SetLoopDelay(float InLoopDelaySecs);
 
     /** Interpolate backwards after reaching the end */
-    NsTweenInstance* SetYoyo(bool bInShouldYoyo);
+    NsTweenInstance* SetPingPong(bool bInShouldPingPong);
 
-    /** Seconds to wait before yoyo-ing backwards */
-    NsTweenInstance* SetYoyoDelay(float InYoyoDelaySecs);
+    /** Seconds to wait before pingpong-ing backwards */
+    NsTweenInstance* SetPingPongDelay(float InPingPongDelaySecs);
 
     /** Multiply the time delta by this number to speed up or slow down the tween. Only positive numbers allowed */
     NsTweenInstance* SetTimeMultiplier(float InTimeMultiplier);
@@ -159,8 +158,8 @@ public:
     /** Automatically recycles this instance after tween is complete (Stop() is called)*/
     NsTweenInstance* SetAutoDestroy(bool bInShouldAutoDestroy);
 
-    /** Callback on YoYo */
-    NsTweenInstance* SetOnYoyo(TFunction<void()> Handler);
+    /** Callback on PingPong */
+    NsTweenInstance* SetOnPingPong(TFunction<void()> Handler);
 
     /** Callback on Loop */
     NsTweenInstance* SetOnLoop(TFunction<void()> Handler);
@@ -205,14 +204,14 @@ private:
     /** Start New Loop */
     void StartNewLoop();
 
-    /** Start YoYo */
-    void StartYoyo();
+    /** Start PingPong */
+    void StartPingPong();
 };
 
 /**
  * Tween Instance - Float
  */
-class NSTWEEN_API NsTweenInstanceFloat : public NsTweenInstance
+struct NSTWEEN_API NsTweenInstanceFloat : public NsTweenInstance
 {
 // Functions
 public:
@@ -240,7 +239,7 @@ public:
 /**
  * Tween Instance - Quat
  */
-class NSTWEEN_API NsTweenInstanceQuat : public NsTweenInstance
+struct NSTWEEN_API NsTweenInstanceQuat : public NsTweenInstance
 {
 // Functions
 public:
@@ -268,7 +267,7 @@ public:
 /**
  * Tween Instance - Vector
  */
-class NSTWEEN_API NsTweenInstanceVector : public NsTweenInstance
+struct NSTWEEN_API NsTweenInstanceVector : public NsTweenInstance
 {
 // Functions
 public:
@@ -296,7 +295,7 @@ public:
 /**
  * Tween Instance - Vector2D
  */
-class NSTWEEN_API NsTweenInstanceVector2D : public NsTweenInstance
+struct NSTWEEN_API NsTweenInstanceVector2D : public NsTweenInstance
 {
 // Functions
 public:
@@ -324,7 +323,7 @@ public:
 /**
  * Tween Instance - Rotator
  */
-class NSTWEEN_API NsTweenInstanceRotator : public NsTweenInstance
+struct NSTWEEN_API NsTweenInstanceRotator : public NsTweenInstance
 {
 // Functions
 public:

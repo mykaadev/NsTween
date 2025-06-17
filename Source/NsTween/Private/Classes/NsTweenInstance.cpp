@@ -34,14 +34,14 @@ NsTweenInstance* NsTweenInstance::SetLoopDelay(float InLoopDelaySecs)
     return SetValue(this, LoopDelaySecs, InLoopDelaySecs);
 }
 
-NsTweenInstance* NsTweenInstance::SetYoyo(bool bInShouldYoyo)
+NsTweenInstance* NsTweenInstance::SetPingPong(bool bInShouldPingPong)
 {
-    return SetValue(this, bShouldYoYo, bInShouldYoyo);
+    return SetValue(this, bShouldPingPong, bInShouldPingPong);
 }
 
-NsTweenInstance* NsTweenInstance::SetYoyoDelay(float InYoyoDelaySecs)
+NsTweenInstance* NsTweenInstance::SetPingPongDelay(float InPingPongDelaySecs)
 {
-    return SetValue(this, YoyoDelaySecs, InYoyoDelaySecs);
+    return SetValue(this, PingPongDelaySecs, InPingPongDelaySecs);
 }
 
 NsTweenInstance* NsTweenInstance::SetTimeMultiplier(float InTimeMultiplier)
@@ -74,9 +74,9 @@ NsTweenInstance* NsTweenInstance::SetAutoDestroy(bool bInShouldAutoDestroy)
     return SetValue(this, bShouldAutoDestroy, bInShouldAutoDestroy);
 }
 
-NsTweenInstance* NsTweenInstance::SetOnYoyo(TFunction<void()> Handler)
+NsTweenInstance* NsTweenInstance::SetOnPingPong(TFunction<void()> Handler)
 {
-    return SetValue(this, OnYoyo, MoveTemp(Handler));
+    return SetValue(this, OnPingPong, MoveTemp(Handler));
 }
 
 NsTweenInstance* NsTweenInstance::SetOnLoop(TFunction<void()> Handler)
@@ -108,8 +108,8 @@ void NsTweenInstance::InitializeSharedMembers(float InDurationSecs, ENsTweenEase
     bShouldAutoDestroy = true;
     bIsActive = true;
     bIsPaused = false;
-    bShouldYoYo = false;
-    bIsPlayingYoYo = false;
+    bShouldPingPong = false;
+    bIsPlayingPingPong = false;
     bCanTickDuringPause = false;
     bUseGlobalTimeDilation = true;
 
@@ -117,7 +117,7 @@ void NsTweenInstance::InitializeSharedMembers(float InDurationSecs, ENsTweenEase
     NumLoopsCompleted = 0;
     DelaySecs = 0;
     LoopDelaySecs = 0;
-    YoyoDelaySecs = 0;
+    PingPongDelaySecs = 0;
     EaseParam1 = 0;
     EaseParam2 = 0;
     TimeMultiplier = 1.0f;
@@ -125,11 +125,11 @@ void NsTweenInstance::InitializeSharedMembers(float InDurationSecs, ENsTweenEase
     DelayState = ENsTweenDelayState::None;
 
 #if ENGINE_MAJOR_VERSION < 5
-    OnYoyo = nullptr;
+    OnPingPong = nullptr;
     OnLoop = nullptr;
     OnComplete = nullptr;
 #else
-    OnYoyo.Reset();
+    OnPingPong.Reset();
     OnLoop.Reset();
     OnComplete.Reset();
 #endif
@@ -153,7 +153,7 @@ void NsTweenInstance::Restart()
     if (bIsActive)
     {
         Counter = 0;
-        bIsPlayingYoYo = false;
+        bIsPlayingPingPong = false;
         NumLoopsCompleted = 0;
         Unpause();
         Start();
@@ -167,11 +167,11 @@ void NsTweenInstance::Destroy()
 
 #if ENGINE_MAJOR_VERSION < 5
     OnLoop  = nullptr;
-    OnYoyo  = nullptr;
+    OnPingPong  = nullptr;
     OnComplete = nullptr;
 #else
     OnLoop.Reset();
-    OnYoyo.Reset();
+    OnPingPong.Reset();
     OnComplete.Reset();
 #endif
 }
@@ -217,10 +217,10 @@ void NsTweenInstance::Update(float UnscaledDeltaSeconds, float DilatedDeltaSecon
                     }
                 break;
 
-                case ENsTweenDelayState::YoYo:
-                    if (OnYoyo)
+                case ENsTweenDelayState::PingPong:
+                    if (OnPingPong)
                     {
-                        OnYoyo();
+                        OnPingPong();
                     }
                 break;
             }
@@ -228,7 +228,7 @@ void NsTweenInstance::Update(float UnscaledDeltaSeconds, float DilatedDeltaSecon
     }
     else
     {
-        if (bIsPlayingYoYo)
+        if (bIsPlayingPingPong)
         {
             Counter -= DeltaTime;
         }
@@ -241,7 +241,7 @@ void NsTweenInstance::Update(float UnscaledDeltaSeconds, float DilatedDeltaSecon
 
         ApplyEasing(NsTweenEasing::EaseWithParams(Counter / DurationSecs, EaseType, EaseParam1, EaseParam2));
 
-        if (bIsPlayingYoYo)
+        if (bIsPlayingPingPong)
         {
             if (Counter <= 0)
             {
@@ -252,9 +252,9 @@ void NsTweenInstance::Update(float UnscaledDeltaSeconds, float DilatedDeltaSecon
         {
             if (Counter >= DurationSecs)
             {
-                if (bShouldYoYo)
+                if (bShouldPingPong)
                 {
-                    StartYoyo();
+                    StartPingPong();
                 }
                 else
                 {
@@ -293,7 +293,7 @@ void NsTweenInstance::StartNewLoop()
 {
     DelayCounter = LoopDelaySecs;
     Counter = 0;
-    bIsPlayingYoYo = false;
+    bIsPlayingPingPong = false;
     if (DelayCounter > 0)
     {
         DelayState = ENsTweenDelayState::Loop;
@@ -307,19 +307,19 @@ void NsTweenInstance::StartNewLoop()
     }
 }
 
-void NsTweenInstance::StartYoyo()
+void NsTweenInstance::StartPingPong()
 {
-    bIsPlayingYoYo = true;
-    DelayCounter = YoyoDelaySecs;
+    bIsPlayingPingPong = true;
+    DelayCounter = PingPongDelaySecs;
     if (DelayCounter > 0)
     {
-        DelayState = ENsTweenDelayState::YoYo;
+        DelayState = ENsTweenDelayState::PingPong;
     }
     else
     {
-        if (OnYoyo)
+        if (OnPingPong)
         {
-            OnYoyo();
+            OnPingPong();
         }
     }
 }
