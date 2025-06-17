@@ -2,7 +2,7 @@
 <h1 align="center">
   <br>
   <a href="https://github.com/mykaadev/NsTween">
-    <img src="https://raw.githubusercontent.com/mykaadev/NsTween/refs/heads/main/Resources/Icon128.png" alt="NsTween" width="200">
+    <img src="https://github.com/mykaadev/NsTween/blob/cc9e0b441a9305994196757e401b1465734f7954/Resources/Banner.png" alt="NsTween" width="400">
   </a>
 </h1>
 
