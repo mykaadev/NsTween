@@ -12,87 +12,37 @@ const float BOUNCE_K5 = 2.25f * BOUNCE_R;  // 81.81%
 const float BOUNCE_K6 = 2.625f * BOUNCE_R; // 95.45%
 const float BOUNCE_K0 = 7.5625f;
 
+namespace
+{
+    /**
+     * Helpers to build Out and InOut curves from In functions.
+     */
+    FORCEINLINE float OutFromIn(float T, float (*InFunc)(float))
+    {
+        return 1.0f - InFunc(1.0f - T);
+    }
+
+    FORCEINLINE float InOutFromIn(float T, float (*InFunc)(float))
+    {
+        if (T < 0.5f)
+        {
+            return 0.5f * InFunc(T * 2.0f);
+        }
+        else
+        {
+            return 1.0f - 0.5f * InFunc(2.0f - T * 2.0f);
+        }
+    }
+}
+
 float NsTweenEasing::Ease(const float InT, const ENsTweenEase EaseType)
 {
-    switch (EaseType)
-    {
-        default:
-        case ENsTweenEase::Linear:
-            return EaseLinear(InT);
-        case ENsTweenEase::Smoothstep:
-            return EaseSmoothStep(InT);
-        case ENsTweenEase::Stepped:
-            return EaseStepped(InT);
-        case ENsTweenEase::InSine:
-            return EaseInSine(InT);
-        case ENsTweenEase::OutSine:
-            return EaseOutSine(InT);
-        case ENsTweenEase::InOutSine:
-            return EaseInOutSine(InT);
-        case ENsTweenEase::InQuad:
-            return EaseInQuad(InT);
-        case ENsTweenEase::OutQuad:
-            return EaseOutQuad(InT);
-        case ENsTweenEase::InOutQuad:
-            return EaseInOutQuad(InT);
-        case ENsTweenEase::InCubic:
-            return EaseInCubic(InT);
-        case ENsTweenEase::OutCubic:
-            return EaseOutCubic(InT);
-        case ENsTweenEase::InOutCubic:
-            return EaseInOutCubic(InT);
-        case ENsTweenEase::InQuart:
-            return EaseInQuart(InT);
-        case ENsTweenEase::OutQuart:
-            return EaseOutQuart(InT);
-        case ENsTweenEase::InOutQuart:
-            return EaseInOutQuart(InT);
-        case ENsTweenEase::InQuint:
-            return EaseInQuint(InT);
-        case ENsTweenEase::OutQuint:
-            return EaseOutQuint(InT);
-        case ENsTweenEase::InOutQuint:
-            return EaseInOutQuint(InT);
-        case ENsTweenEase::InExpo:
-            return EaseInExpo(InT);
-        case ENsTweenEase::OutExpo:
-            return EaseOutExpo(InT);
-        case ENsTweenEase::InOutExpo:
-            return EaseInOutExpo(InT);
-        case ENsTweenEase::InCirc:
-            return EaseInCirc(InT);
-        case ENsTweenEase::OutCirc:
-            return EaseOutCirc(InT);
-        case ENsTweenEase::InOutCirc:
-            return EaseInOutCirc(InT);
-        case ENsTweenEase::InElastic:
-            return EaseInElastic(InT);
-        case ENsTweenEase::OutElastic:
-            return EaseOutElastic(InT);
-        case ENsTweenEase::InOutElastic:
-            return EaseInOutElastic(InT);
-        case ENsTweenEase::InBounce:
-            return EaseInBounce(InT);
-        case ENsTweenEase::OutBounce:
-            return EaseOutBounce(InT);
-        case ENsTweenEase::InOutBounce:
-            return EaseInOutBounce(InT);
-        case ENsTweenEase::InBack:
-            return EaseInBack(InT);
-        case ENsTweenEase::OutBack:
-            return EaseOutBack(InT);
-        case ENsTweenEase::InOutBack:
-            return EaseInOutBack(InT);
-    }
+    // Delegate to parameterised version with defaults
+    return EaseWithParams(InT, EaseType);
 }
 
 float NsTweenEasing::EaseWithParams(const float InT, const ENsTweenEase InEaseType, const float InParamOne, const float InParamTwo)
 {
-    if (InParamOne == 0 && InParamTwo == 0)
-    {
-        return Ease(InT, InEaseType);
-    }
-
     switch (InEaseType)
     {
         default:
@@ -199,12 +149,12 @@ float NsTweenEasing::EaseInSine(const float InT)
 
 float NsTweenEasing::EaseOutSine(const float InT)
 {
-    return FMath::Sin(InT * PI * .5f);
+    return OutFromIn(InT, EaseInSine);
 }
 
 float NsTweenEasing::EaseInOutSine(const float InT)
 {
-    return 0.5f * (1 - FMath::Cos(InT * PI));
+    return InOutFromIn(InT, EaseInSine);
 }
 
 float NsTweenEasing::EaseInQuad(const float InT)
@@ -214,21 +164,12 @@ float NsTweenEasing::EaseInQuad(const float InT)
 
 float NsTweenEasing::EaseOutQuad(const float InT)
 {
-    return InT * (2 - InT);
+    return OutFromIn(InT, EaseInQuad);
 }
 
 float NsTweenEasing::EaseInOutQuad(const float InT)
 {
-    const float T2 = InT * 2;
-    if (T2 < 1)
-    {
-        return InT * T2;
-    }
-    else
-    {
-        const float M = InT - 1;
-        return 1 - M * M * 2;
-    }
+    return InOutFromIn(InT, EaseInQuad);
 }
 
 float NsTweenEasing::EaseInCubic(const float InT)
@@ -238,22 +179,12 @@ float NsTweenEasing::EaseInCubic(const float InT)
 
 float NsTweenEasing::EaseOutCubic(const float InT)
 {
-    const float M = InT - 1;
-    return 1 + M * M * M;
+    return OutFromIn(InT, EaseInCubic);
 }
 
 float NsTweenEasing::EaseInOutCubic(const float InT)
 {
-    const float T2 = InT * 2;
-    if (T2 < 1)
-    {
-        return InT * T2 * T2;
-    }
-    else
-    {
-        const float M = InT - 1;
-        return 1 + M * M * M * 4;
-    }
+    return InOutFromIn(InT, EaseInCubic);
 }
 
 float NsTweenEasing::EaseInQuart(const float InT)
@@ -263,22 +194,12 @@ float NsTweenEasing::EaseInQuart(const float InT)
 
 float NsTweenEasing::EaseOutQuart(const float InT)
 {
-    const float M = InT - 1;
-    return 1 - M * M * M * M;
+    return OutFromIn(InT, EaseInQuart);
 }
 
 float NsTweenEasing::EaseInOutQuart(const float InT)
 {
-    const float T2 = InT * 2;
-    if (T2 < 1)
-    {
-        return InT * T2 * T2 * T2;
-    }
-    else
-    {
-        const float M = InT - 1;
-        return 1 - M * M * M * M * 8;
-    }
+    return InOutFromIn(InT, EaseInQuart);
 }
 
 float NsTweenEasing::EaseInQuint(const float InT)
@@ -288,22 +209,12 @@ float NsTweenEasing::EaseInQuint(const float InT)
 
 float NsTweenEasing::EaseOutQuint(const float InT)
 {
-    const float M = InT - 1;
-    return 1 + M * M * M * M * M;
+    return OutFromIn(InT, EaseInQuint);
 }
 
 float NsTweenEasing::EaseInOutQuint(const float InT)
 {
-    const float T2 = InT * 2;
-    if (T2 < 1)
-    {
-        return InT * T2 * T2 * T2 * T2;
-    }
-    else
-    {
-        const float M = InT - 1;
-        return 1 + M * M * M * M * M * 16;
-    }
+    return InOutFromIn(InT, EaseInQuint);
 }
 
 float NsTweenEasing::EaseInExpo(const float InT)
@@ -321,35 +232,12 @@ float NsTweenEasing::EaseInExpo(const float InT)
 
 float NsTweenEasing::EaseOutExpo(const float InT)
 {
-    if (InT <= 0)
-    {
-        return 0;
-    }
-    if (InT >= 1)
-    {
-        return 1;
-    }
-    return 1 - FMath::Pow(2, -10 * InT);
+    return OutFromIn(InT, EaseInExpo);
 }
 
 float NsTweenEasing::EaseInOutExpo(const float InT)
 {
-    if (InT <= 0)
-    {
-        return 0;
-    }
-    if (InT >= 1)
-    {
-        return 1;
-    }
-    if (InT < 0.5f)
-    {
-        return FMath::Pow(2, 10 * (2 * InT - 1) - 1);
-    }
-    else
-    {
-        return 1 - FMath::Pow(2, -10 * (2 * InT - 1) - 1);
-    }
+    return InOutFromIn(InT, EaseInExpo);
 }
 
 float NsTweenEasing::EaseInCirc(const float InT)
@@ -359,22 +247,12 @@ float NsTweenEasing::EaseInCirc(const float InT)
 
 float NsTweenEasing::EaseOutCirc(const float InT)
 {
-    const float M = InT - 1;
-    return FMath::Sqrt(1 - M * M);
+    return OutFromIn(InT, EaseInCirc);
 }
 
 float NsTweenEasing::EaseInOutCirc(const float InT)
 {
-    const float T2 = InT * 2;
-    if (T2 < 1)
-    {
-        return (1 - FMath::Sqrt(1 - T2 * T2)) * .5f;
-    }
-    else
-    {
-        const float M = InT - 1;
-        return (FMath::Sqrt(1 - 4 * M * M) + 1) * .5f;
-    }
+    return InOutFromIn(InT, EaseInCirc);
 }
 
 float NsTweenEasing::EaseInElastic(const float InT, const float InAmplitude, const float InPeriod)
