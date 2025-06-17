@@ -3,88 +3,90 @@
 #include "Classes/NsTweenInstance.h"
 #include "Classes/NsTweenUObject.h"
 
+namespace
+{
+    template <typename T>
+    FORCEINLINE NsTweenInstance* SetValue(NsTweenInstance* Instance, T& Field, T Value)
+    {
+        Field = Value;
+        return Instance;
+    }
+
+    FORCEINLINE NsTweenInstance* SetValue(NsTweenInstance* Instance, TFunction<void()>& Field, TFunction<void()>&& Value)
+    {
+        Field = MoveTemp(Value);
+        return Instance;
+    }
+}
+
 NsTweenInstance* NsTweenInstance::SetDelay(float InDelaySecs)
 {
-    DelaySecs = InDelaySecs;
-    return this;
+    return SetValue(this, DelaySecs, InDelaySecs);
 }
 
 NsTweenInstance* NsTweenInstance::SetLoops(int InNumLoops)
 {
-    NumLoops = InNumLoops;
-    return this;
+    return SetValue(this, NumLoops, InNumLoops);
 }
 
 NsTweenInstance* NsTweenInstance::SetLoopDelay(float InLoopDelaySecs)
 {
-    LoopDelaySecs = InLoopDelaySecs;
-    return this;
+    return SetValue(this, LoopDelaySecs, InLoopDelaySecs);
 }
 
 NsTweenInstance* NsTweenInstance::SetYoyo(bool bInShouldYoyo)
 {
-    bShouldYoYo = bInShouldYoyo;
-    return this;
+    return SetValue(this, bShouldYoYo, bInShouldYoyo);
 }
 
 NsTweenInstance* NsTweenInstance::SetYoyoDelay(float InYoyoDelaySecs)
 {
-    YoyoDelaySecs = InYoyoDelaySecs;
-    return this;
+    return SetValue(this, YoyoDelaySecs, InYoyoDelaySecs);
 }
 
 NsTweenInstance* NsTweenInstance::SetTimeMultiplier(float InTimeMultiplier)
 {
-    TimeMultiplier = FMath::Abs(InTimeMultiplier);
-    return this;
+    return SetValue(this, TimeMultiplier, FMath::Abs(InTimeMultiplier));
 }
 
 NsTweenInstance* NsTweenInstance::SetEaseParam1(float InEaseParam1)
 {
-    EaseParam1 = InEaseParam1;
-    return this;
+    return SetValue(this, EaseParam1, InEaseParam1);
 }
 
 NsTweenInstance* NsTweenInstance::SetEaseParam2(float InEaseParam2)
 {
-    EaseParam2 = InEaseParam2;
-    return this;
+    return SetValue(this, EaseParam2, InEaseParam2);
 }
 
 NsTweenInstance* NsTweenInstance::SetCanTickDuringPause(bool bInCanTickDuringPause)
 {
-    bCanTickDuringPause = bInCanTickDuringPause;
-    return this;
+    return SetValue(this, bCanTickDuringPause, bInCanTickDuringPause);
 }
 
 NsTweenInstance* NsTweenInstance::SetUseGlobalTimeDilation(bool bInUseGlobalTimeDilation)
 {
-    bUseGlobalTimeDilation = bInUseGlobalTimeDilation;
-    return this;
+    return SetValue(this, bUseGlobalTimeDilation, bInUseGlobalTimeDilation);
 }
 
 NsTweenInstance* NsTweenInstance::SetAutoDestroy(bool bInShouldAutoDestroy)
 {
-    bShouldAutoDestroy = bInShouldAutoDestroy;
-    return this;
+    return SetValue(this, bShouldAutoDestroy, bInShouldAutoDestroy);
 }
 
 NsTweenInstance* NsTweenInstance::SetOnYoyo(TFunction<void()> Handler)
 {
-    OnYoyo = MoveTemp(Handler);
-    return this;
+    return SetValue(this, OnYoyo, MoveTemp(Handler));
 }
 
 NsTweenInstance* NsTweenInstance::SetOnLoop(TFunction<void()> Handler)
 {
-    OnLoop = MoveTemp(Handler);
-    return this;
+    return SetValue(this, OnLoop, MoveTemp(Handler));
 }
 
 NsTweenInstance* NsTweenInstance::SetOnComplete(TFunction<void()> Handler)
 {
-    OnComplete = MoveTemp(Handler);
-    return this;
+    return SetValue(this, OnComplete, MoveTemp(Handler));
 }
 
 void NsTweenInstance::InitializeSharedMembers(float InDurationSecs, ENsTweenEase InEaseType)

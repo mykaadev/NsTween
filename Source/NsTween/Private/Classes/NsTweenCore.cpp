@@ -4,6 +4,44 @@
 #include "Classes/NsTweenManager.h"
 #include "Classes/NsTweenSettings.h"
 
+namespace
+{
+    template <typename ManagerType>
+    FORCEINLINE void EnsureManagerCapacity(ManagerType* Manager, int Num, int& NumReserved)
+    {
+        Manager->EnsureCapacity(Num);
+        NumReserved = Manager->GetCurrentCapacity();
+    }
+
+    template <typename ManagerType>
+    FORCEINLINE void CheckManagerCapacity(const ManagerType* Manager, int NumReserved, const TCHAR* TypeName)
+    {
+        const int Current = Manager->GetCurrentCapacity();
+        if (Current > NumReserved)
+        {
+            UE_LOG(LogNsTween,
+                   Warning,
+                   TEXT("Consider increasing initial capacity for %s tweens with NsTweenCore::EnsureCapacity(). %d were initially reserved, but now there are %d in memory."),
+                   TypeName,
+                   NumReserved,
+                   Current);
+        }
+    }
+
+    template <typename TweenType, typename ValueType>
+    FORCEINLINE TweenType* PlayInternal(NsTweenManager<TweenType>* Manager,
+                                        const ValueType& Start,
+                                        const ValueType& End,
+                                        float DurationSecs,
+                                        ENsTweenEase EaseType,
+                                        TFunction<void(ValueType)> OnUpdate)
+    {
+        TweenType* const NewTween = Manager->CreateTween();
+        NewTween->Initialize(Start, End, MoveTemp(OnUpdate), DurationSecs, EaseType);
+        return NewTween;
+    }
+}
+
 DEFINE_LOG_CATEGORY(LogNsTween)
 
 NsTweenManager<NsTweenInstanceFloat>* NsTweenCore::FloatTweenManager = nullptr;
@@ -15,6 +53,18 @@ int NsTweenCore::NumReservedFloat = 0;
 int NsTweenCore::NumReservedVector = 0;
 int NsTweenCore::NumReservedVector2D = 0;
 int NsTweenCore::NumReservedQuat = 0;
+
+namespace
+{
+    template <typename Func>
+    FORCEINLINE void ForEachManager(Func&& Fn)
+    {
+        Fn(NsTweenCore::FloatTweenManager);
+        Fn(NsTweenCore::VectorTweenManager);
+        Fn(NsTweenCore::Vector2DTweenManager);
+        Fn(NsTweenCore::QuatTweenManager);
+    }
+}
 
 void NsTweenCore::Initialize()
 {
@@ -55,15 +105,10 @@ void NsTweenCore::Deinitialize()
 
 void NsTweenCore::EnsureCapacity(const int NumFloatTweens, const int NumVectorTweens, const int NumVector2DTweens, const int NumQuatTweens)
 {
-    FloatTweenManager->EnsureCapacity(NumFloatTweens);
-    VectorTweenManager->EnsureCapacity(NumVectorTweens);
-    Vector2DTweenManager->EnsureCapacity(NumVector2DTweens);
-    QuatTweenManager->EnsureCapacity(NumQuatTweens);
-
-    NumReservedFloat = FloatTweenManager->GetCurrentCapacity();
-    NumReservedVector = VectorTweenManager->GetCurrentCapacity();
-    NumReservedVector2D = Vector2DTweenManager->GetCurrentCapacity();
-    NumReservedQuat = QuatTweenManager->GetCurrentCapacity();
+    EnsureManagerCapacity(FloatTweenManager, NumFloatTweens, NumReservedFloat);
+    EnsureManagerCapacity(VectorTweenManager, NumVectorTweens, NumReservedVector);
+    EnsureManagerCapacity(Vector2DTweenManager, NumVector2DTweens, NumReservedVector2D);
+    EnsureManagerCapacity(QuatTweenManager, NumQuatTweens, NumReservedQuat);
 }
 
 void NsTweenCore::EnsureCapacity(const int NumTweens)
@@ -73,62 +118,23 @@ void NsTweenCore::EnsureCapacity(const int NumTweens)
 
 void NsTweenCore::Update(const float UnscaledDeltaSeconds, const float DilatedDeltaSeconds, const bool bIsGamePaused)
 {
-    FloatTweenManager->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
-    VectorTweenManager->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
-    Vector2DTweenManager->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
-    QuatTweenManager->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
+    ForEachManager([&](auto* Manager)
+                   {
+                       Manager->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
+                   });
 }
 
 void NsTweenCore::ClearActiveTweens()
 {
-    FloatTweenManager->ClearActiveTweens();
-    VectorTweenManager->ClearActiveTweens();
-    Vector2DTweenManager->ClearActiveTweens();
-    QuatTweenManager->ClearActiveTweens();
+    ForEachManager([](auto* Manager) { Manager->ClearActiveTweens(); });
 }
 
 int NsTweenCore::CheckTweenCapacity()
 {
-    if (FloatTweenManager->GetCurrentCapacity() > NumReservedFloat)
-    {
-        UE_LOG
-        (LogNsTween,
-         Warning,
-         TEXT("Consider increasing initial capacity for Float tweens with NsTweenCore::EnsureCapacity(). %d were initially reserved, but now there are %d in memory."),
-         NumReservedFloat,
-         FloatTweenManager->GetCurrentCapacity()
-        );
-    }
-    if (VectorTweenManager->GetCurrentCapacity() > NumReservedVector)
-    {
-        UE_LOG
-        (LogNsTween,
-         Warning,
-         TEXT("Consider increasing initial capacity for Vector (3d vector) tweens with NsTweenCore::EnsureCapacity(). %d were initially reserved, but now there are %d in memory."),
-         NumReservedVector,
-         VectorTweenManager->GetCurrentCapacity()
-        );
-    }
-    if (Vector2DTweenManager->GetCurrentCapacity() > NumReservedVector2D)
-    {
-        UE_LOG
-        (LogNsTween,
-         Warning,
-         TEXT("Consider increasing initial capacity for Vector2D tweens with NsTweenCore::EnsureCapacity(). %d were initially reserved, but now there are %d in memory."),
-         NumReservedVector2D,
-         Vector2DTweenManager->GetCurrentCapacity()
-        );
-    }
-    if (QuatTweenManager->GetCurrentCapacity() > NumReservedQuat)
-    {
-        UE_LOG
-        (LogNsTween,
-         Warning,
-         TEXT("Consider increasing initial capacity for Quaternion tweens with NsTweenCore::EnsureCapacity(). %d were initially reserved, but now there are %d in memory."),
-         NumReservedQuat,
-         QuatTweenManager->GetCurrentCapacity()
-        );
-    }
+    CheckManagerCapacity(FloatTweenManager, NumReservedFloat, TEXT("Float"));
+    CheckManagerCapacity(VectorTweenManager, NumReservedVector, TEXT("Vector (3d vector)"));
+    CheckManagerCapacity(Vector2DTweenManager, NumReservedVector2D, TEXT("Vector2D"));
+    CheckManagerCapacity(QuatTweenManager, NumReservedQuat, TEXT("Quaternion"));
 
     return FloatTweenManager->GetCurrentCapacity() + VectorTweenManager->GetCurrentCapacity() + Vector2DTweenManager->GetCurrentCapacity() + QuatTweenManager->GetCurrentCapacity();
 }
@@ -140,28 +146,20 @@ float NsTweenCore::Ease(const float T, const ENsTweenEase EaseType)
 
 NsTweenInstanceFloat* NsTweenCore::Play(const float Start, const float End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(float)> OnUpdate)
 {
-    NsTweenInstanceFloat* const NewTween = FloatTweenManager->CreateTween();
-    NewTween->Initialize(Start, End, MoveTemp(OnUpdate), DurationSecs, EaseType);
-    return NewTween;
+    return PlayInternal(FloatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
 NsTweenInstanceVector* NsTweenCore::Play(const FVector& Start, const FVector& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate)
 {
-    NsTweenInstanceVector* const NewTween = VectorTweenManager->CreateTween();
-    NewTween->Initialize(Start, End, MoveTemp(OnUpdate), DurationSecs, EaseType);
-    return NewTween;
+    return PlayInternal(VectorTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
 NsTweenInstanceVector2D* NsTweenCore::Play(const FVector2D Start, const FVector2D End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate)
 {
-    NsTweenInstanceVector2D* const NewTween = Vector2DTweenManager->CreateTween();
-    NewTween->Initialize(Start, End, MoveTemp(OnUpdate), DurationSecs, EaseType);
-    return NewTween;
+    return PlayInternal(Vector2DTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
 NsTweenInstanceQuat* NsTweenCore::Play(const FQuat& Start, const FQuat& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate)
 {
-    NsTweenInstanceQuat* const NewTween = QuatTweenManager->CreateTween();
-    NewTween->Initialize(Start, End, MoveTemp(OnUpdate), DurationSecs, EaseType);
-    return NewTween;
+    return PlayInternal(QuatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
