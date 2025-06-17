@@ -99,13 +99,13 @@ void AFloatingItem::BeginPlay()
 
     // Rotate once then pop
     NsTweenCore::Play(
-        /**Start*/   GetActorQuat(),
-        /**End*/     GetActorQuat() * FQuat(FRotator(0.f, 360.f, 0.f)),
+        /**Start*/   GetActorRotation().Quaternion(),
+        /**End*/     GetActorRotation().Quaternion() * FQuat(FRotator(0.f, 360.f, 0.f)),
         /**Time*/    2.f,
         /**Ease*/    ENsTweenEase::Linear,
         /**Update*/  [this](FQuat Q)
         {
-            SetActorRotation(Q);
+            SetActorRotation(Q.Rotator());
         })
         /**On Ease Complete*/ ->SetOnComplete([this]()
         {
