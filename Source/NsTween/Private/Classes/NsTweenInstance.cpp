@@ -40,13 +40,13 @@ void NsTweenInstance::InitializeSharedMembers(float InDurationSecs, ENsTweenEase
     DelayState = ENsTweenDelayState::None;
 
 #if ENGINE_MAJOR_VERSION < 5
-    OnPingPong = nullptr;
-    OnLoop = nullptr;
-    OnComplete = nullptr;
+    OnPingPongCallback = nullptr;
+    OnLoopCallback = nullptr;
+    OnCompleteCallback = nullptr;
 #else
-    OnPingPong.Reset();
-    OnLoop.Reset();
-    OnComplete.Reset();
+    OnPingPongCallback.Reset();
+    OnLoopCallback.Reset();
+    OnCompleteCallback.Reset();
 #endif
 }
 
@@ -81,13 +81,13 @@ void NsTweenInstance::Destroy()
     bIsActive = false;
 
 #if ENGINE_MAJOR_VERSION < 5
-    OnLoop  = nullptr;
-    OnPingPong  = nullptr;
-    OnComplete = nullptr;
+    OnLoopCallback  = nullptr;
+    OnPingPongCallback  = nullptr;
+    OnCompleteCallback = nullptr;
 #else
-    OnLoop.Reset();
-    OnPingPong.Reset();
-    OnComplete.Reset();
+    OnLoopCallback.Reset();
+    OnPingPongCallback.Reset();
+    OnCompleteCallback.Reset();
 #endif
 }
 
@@ -126,16 +126,16 @@ void NsTweenInstance::Update(float UnscaledDeltaSeconds, float DilatedDeltaSecon
             switch (DelayState)
             {
                 case ENsTweenDelayState::Loop:
-                    if (OnLoop)
+                    if (OnLoopCallback)
                     {
-                        OnLoop();
+                        OnLoopCallback();
                     }
                 break;
 
                 case ENsTweenDelayState::PingPong:
-                    if (OnPingPong)
+                    if (OnPingPongCallback)
                     {
-                        OnPingPong();
+                        OnPingPongCallback();
                     }
                 break;
             }
@@ -189,9 +189,9 @@ void NsTweenInstance::CompleteLoop()
     }
     else
     {
-        if (OnComplete)
+        if (OnCompleteCallback)
         {
-            OnComplete();
+            OnCompleteCallback();
         }
         if (bShouldAutoDestroy)
         {
@@ -215,9 +215,9 @@ void NsTweenInstance::StartNewLoop()
     }
     else
     {
-        if (OnLoop)
+        if (OnLoopCallback)
         {
-            OnLoop();
+            OnLoopCallback();
         }
     }
 }
@@ -232,9 +232,9 @@ void NsTweenInstance::StartPingPong()
     }
     else
     {
-        if (OnPingPong)
+        if (OnPingPongCallback)
         {
-            OnPingPong();
+            OnPingPongCallback();
         }
     }
 }
@@ -310,4 +310,22 @@ void NsTweenInstanceRotator::ApplyEasing(float EasedPercent)
 
     const FRotator Interpolated = StartValue + (Delta * EasedPercent);
     OnUpdate(Interpolated.GetNormalized());
+}
+
+NsTweenInstance& NsTweenInstance::OnPingPong(TFunction<void()> Handler)
+{
+    OnPingPongCallback = MoveTemp(Handler);
+    return *this;
+}
+
+NsTweenInstance& NsTweenInstance::OnLoop(TFunction<void()> Handler)
+{
+    OnLoopCallback = MoveTemp(Handler);
+    return *this;
+}
+
+NsTweenInstance& NsTweenInstance::OnComplete(TFunction<void()> Handler)
+{
+    OnCompleteCallback = MoveTemp(Handler);
+    return *this;
 }

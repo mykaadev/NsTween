@@ -89,13 +89,22 @@ public:
 public:
 
     /** Function to run on PingPong */
-    TFunction<void()> OnPingPong;
+    TFunction<void()> OnPingPongCallback;
 
     /** Function to run on Loop */
-    TFunction<void()> OnLoop;
+    TFunction<void()> OnLoopCallback;
 
     /** Function to run on Complete */
-    TFunction<void()> OnComplete;
+    TFunction<void()> OnCompleteCallback;
+
+    /** Assign callback for PingPong */
+    NsTweenInstance& OnPingPong(TFunction<void()> Handler);
+
+    /** Assign callback for Loop */
+    NsTweenInstance& OnLoop(TFunction<void()> Handler);
+
+    /** Assign callback for Complete */
+    NsTweenInstance& OnComplete(TFunction<void()> Handler);
 
 
     /** Constructor */

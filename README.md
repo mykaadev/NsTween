@@ -107,10 +107,10 @@ void AFloatingItem::BeginPlay()
         {
             SetActorRotation(Q.Rotator());
         });
-    RotTween.OnComplete = [this]()
+    RotTween.OnComplete([this]()
     {
         Pop();
-    };
+    });
 }
 ```
 

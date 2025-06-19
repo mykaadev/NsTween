@@ -54,19 +54,19 @@ void UNsTweenAsyncAction::Activate()
 
     if (OnLoop.IsBound())
     {
-        TweenInstance->OnLoop = [&]() { OnLoop.Broadcast(); };
+        TweenInstance->OnLoop([&]() { OnLoop.Broadcast(); });
     }
     if (OnPingPong.IsBound())
     {
-        TweenInstance->OnPingPong = [&]() { OnPingPong.Broadcast(); };
+        TweenInstance->OnPingPong([&]() { OnPingPong.Broadcast(); });
     }
     if (OnComplete.IsBound())
     {
-        TweenInstance->OnComplete = [&]()
+        TweenInstance->OnComplete([&]()
         {
             OnComplete.Broadcast();
             Stop();
-        };
+        });
     }
 }
 
