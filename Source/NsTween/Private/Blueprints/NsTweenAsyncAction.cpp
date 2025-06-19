@@ -39,34 +39,34 @@ void UNsTweenAsyncAction::Activate()
         FFrame::KismetExecutionMessage(TEXT("Tween Instance was not created in child class"), ELogVerbosity::Error);
         return;
     }
-    TweenInstance->SetDelay(Delay)
-                 ->SetLoops(Loops)
-                 ->SetLoopDelay(LoopDelay)
-                 ->SetPingPong(bPingPong)
-                 ->SetPingPongDelay(PingPongDelay)
-                 ->SetCanTickDuringPause(bCanTickDuringPause)
-                 ->SetUseGlobalTimeDilation(bUseGlobalTimeDilation)
-                 // we will tell it when to be destroyed on complete, so that we control when
-                 // the tween goes invalid and it can't get recycled by doing something unexpected in BPs
-                 ->SetAutoDestroy(false)
-                 ->SetEaseParam1(EaseParam1)
-                 ->SetEaseParam2(EaseParam2);
+    TweenInstance->DelaySecs = Delay;
+    TweenInstance->NumLoops = Loops;
+    TweenInstance->LoopDelaySecs = LoopDelay;
+    TweenInstance->bShouldPingPong = bPingPong;
+    TweenInstance->PingPongDelaySecs = PingPongDelay;
+    TweenInstance->bCanTickDuringPause = bCanTickDuringPause;
+    TweenInstance->bUseGlobalTimeDilation = bUseGlobalTimeDilation;
+    // we will tell it when to be destroyed on complete, so that we control when
+    // the tween goes invalid and it can't get recycled by doing something unexpected in BPs
+    TweenInstance->bShouldAutoDestroy = false;
+    TweenInstance->EaseParam1 = EaseParam1;
+    TweenInstance->EaseParam2 = EaseParam2;
 
     if (OnLoop.IsBound())
     {
-        TweenInstance->SetOnLoop([&]() { OnLoop.Broadcast(); });
+        TweenInstance->OnLoop = [&]() { OnLoop.Broadcast(); };
     }
     if (OnPingPong.IsBound())
     {
-        TweenInstance->SetOnPingPong([&]() { OnPingPong.Broadcast(); });
+        TweenInstance->OnPingPong = [&]() { OnPingPong.Broadcast(); };
     }
     if (OnComplete.IsBound())
     {
-        TweenInstance->SetOnComplete([&]()
+        TweenInstance->OnComplete = [&]()
         {
             OnComplete.Broadcast();
             Stop();
-        });
+        };
     }
 }
 
@@ -149,7 +149,7 @@ void UNsTweenAsyncAction::SetTimeMultiplier(float Multiplier)
 {
     if (TweenInstance)
     {
-        TweenInstance->SetTimeMultiplier(Multiplier);
+        TweenInstance->TimeMultiplier = FMath::Abs(Multiplier);
     }
 }
 

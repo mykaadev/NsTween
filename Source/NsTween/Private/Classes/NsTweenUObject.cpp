@@ -20,7 +20,7 @@ void UNsTweenUObject::SetTweenInstance(NsTweenInstance* InTween)
 {
     Tween = InTween;
     // Prevent the tween from destroying itself prematurely
-    Tween->SetAutoDestroy(false);
+    Tween->bShouldAutoDestroy = false;
 }
 
 void UNsTweenUObject::Destroy()

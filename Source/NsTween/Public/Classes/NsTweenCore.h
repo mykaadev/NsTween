@@ -41,16 +41,16 @@ public:
     static float Ease(float T, ENsTweenEase EaseType);
 
     /** Play Tween - Float */
-    static NsTweenInstanceFloat* Play(float Start, float End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(float)> OnUpdate);
+    static NsTweenInstanceFloat& Play(float Start, float End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(float)> OnUpdate);
 
     /** Play Tween - Vector */
-    static NsTweenInstanceVector* Play(const FVector& Start, const FVector& End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate);
+    static NsTweenInstanceVector& Play(const FVector& Start, const FVector& End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate);
 
     /** Play Tween - Vector2D */
-    static NsTweenInstanceVector2D* Play(FVector2D Start, FVector2D End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate);
+    static NsTweenInstanceVector2D& Play(FVector2D Start, FVector2D End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate);
 
     /** Play Tween - Quat */
-    static NsTweenInstanceQuat* Play(const FQuat& Start, const FQuat& End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate);
+    static NsTweenInstanceQuat& Play(const FQuat& Start, const FQuat& End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate);
 
     /** For Each Manager */
     template <typename Func>

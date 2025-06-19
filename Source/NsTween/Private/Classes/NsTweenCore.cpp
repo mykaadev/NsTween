@@ -82,22 +82,22 @@ float NsTweenCore::Ease(const float T, const ENsTweenEase EaseType)
     return NsTweenEasing::Ease(T, EaseType);
 }
 
-NsTweenInstanceFloat* NsTweenCore::Play(const float Start, const float End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(float)> OnUpdate)
+NsTweenInstanceFloat& NsTweenCore::Play(const float Start, const float End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(float)> OnUpdate)
 {
-    return PlayInternal(FloatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
+    return *PlayInternal(FloatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
-NsTweenInstanceVector* NsTweenCore::Play(const FVector& Start, const FVector& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate)
+NsTweenInstanceVector& NsTweenCore::Play(const FVector& Start, const FVector& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate)
 {
-    return PlayInternal(VectorTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
+    return *PlayInternal(VectorTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
-NsTweenInstanceVector2D* NsTweenCore::Play(const FVector2D Start, const FVector2D End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate)
+NsTweenInstanceVector2D& NsTweenCore::Play(const FVector2D Start, const FVector2D End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate)
 {
-    return PlayInternal(Vector2DTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
+    return *PlayInternal(Vector2DTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
-NsTweenInstanceQuat* NsTweenCore::Play(const FQuat& Start, const FQuat& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate)
+NsTweenInstanceQuat& NsTweenCore::Play(const FQuat& Start, const FQuat& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate)
 {
-    return PlayInternal(QuatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
+    return *PlayInternal(QuatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
