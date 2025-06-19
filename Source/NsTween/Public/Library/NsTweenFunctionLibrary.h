@@ -3,13 +3,13 @@
 #pragma once
 
 #include "Classes/NsTweenEasing.h"
-#include "NsTweenBlueprintLibrary.generated.h"
+#include "NsTweenFunctionLibrary.generated.h"
 
 /**
  * Tween Blueprint Function Library
  */
 UCLASS()
-class NSTWEEN_API UNsTweenBlueprintLibrary : public UBlueprintFunctionLibrary
+class NSTWEEN_API UNsTweenFunctionLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 

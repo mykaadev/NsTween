@@ -3,22 +3,23 @@
 #include "Classes/NsTweenCore.h"
 #include "Classes/NsTweenManager.h"
 #include "Classes/NsTweenSettings.h"
+#include "NsTweenEasing.h"
 
 DEFINE_LOG_CATEGORY(LogNsTween)
 
-NsTweenManager<NsTweenInstanceFloat>* NsTweenCore::FloatTweenManager = nullptr;
-NsTweenManager<NsTweenInstanceVector>* NsTweenCore::VectorTweenManager = nullptr;
-NsTweenManager<NsTweenInstanceVector2D>* NsTweenCore::Vector2DTweenManager = nullptr;
-NsTweenManager<NsTweenInstanceQuat>* NsTweenCore::QuatTweenManager = nullptr;
+NsTweenManager<FNsTweenInstanceFloat>* NsTweenCore::FloatTweenManager = nullptr;
+NsTweenManager<FNsTweenInstanceVector>* NsTweenCore::VectorTweenManager = nullptr;
+NsTweenManager<FNsTweenInstanceVector2D>* NsTweenCore::Vector2DTweenManager = nullptr;
+NsTweenManager<FNsTweenInstanceQuat>* NsTweenCore::QuatTweenManager = nullptr;
 
 void NsTweenCore::Initialize()
 {
     if (const UNsTweenSettings* const TweenSettings = UNsTweenSettings::GetSettings())
     {
-        FloatTweenManager = new NsTweenManager<NsTweenInstanceFloat>(TweenSettings->FloatTweenCapacity);
-        VectorTweenManager = new NsTweenManager<NsTweenInstanceVector>(TweenSettings->VectorTweenCapacity);
-        Vector2DTweenManager = new NsTweenManager<NsTweenInstanceVector2D>(TweenSettings->Vector2DTweenCapacity);
-        QuatTweenManager = new NsTweenManager<NsTweenInstanceQuat>(TweenSettings->QuatTweenCapacity);
+        FloatTweenManager = new NsTweenManager<FNsTweenInstanceFloat>(TweenSettings->FloatTweenCapacity);
+        VectorTweenManager = new NsTweenManager<FNsTweenInstanceVector>(TweenSettings->VectorTweenCapacity);
+        Vector2DTweenManager = new NsTweenManager<FNsTweenInstanceVector2D>(TweenSettings->Vector2DTweenCapacity);
+        QuatTweenManager = new NsTweenManager<FNsTweenInstanceQuat>(TweenSettings->QuatTweenCapacity);
     }
 }
 
@@ -43,7 +44,7 @@ void NsTweenCore::EnsureCapacity(const int32 NumFloatTweens, const int32 NumVect
     EnsureManagerCapacity(QuatTweenManager, NumQuatTweens);
 }
 
-void NsTweenCore::EnsureCapacity(const int NumTweens)
+void NsTweenCore::EnsureCapacity(const int32 NumTweens)
 {
     EnsureCapacity(NumTweens, NumTweens, NumTweens, NumTweens);
 }
@@ -82,22 +83,22 @@ float NsTweenCore::Ease(const float T, const ENsTweenEase EaseType)
     return NsTweenEasing::Ease(T, EaseType);
 }
 
-NsTweenInstanceFloat& NsTweenCore::Play(const float Start, const float End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(float)> OnUpdate)
+FNsTweenInstanceFloat& NsTweenCore::Play(const float Start, const float End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(float)> OnUpdate)
 {
     return *PlayInternal(FloatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
-NsTweenInstanceVector& NsTweenCore::Play(const FVector& Start, const FVector& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate)
+FNsTweenInstanceVector& NsTweenCore::Play(const FVector& Start, const FVector& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector)> OnUpdate)
 {
     return *PlayInternal(VectorTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
-NsTweenInstanceVector2D& NsTweenCore::Play(const FVector2D Start, const FVector2D End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate)
+FNsTweenInstanceVector2D& NsTweenCore::Play(const FVector2D Start, const FVector2D End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FVector2D)> OnUpdate)
 {
     return *PlayInternal(Vector2DTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }
 
-NsTweenInstanceQuat& NsTweenCore::Play(const FQuat& Start, const FQuat& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate)
+FNsTweenInstanceQuat& NsTweenCore::Play(const FQuat& Start, const FQuat& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate)
 {
     return *PlayInternal(QuatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
 }

@@ -1,49 +1,7 @@
 // Copyright (C) 2025 mykaadev. All rights reserved.
 
 #pragma once
-
-/**
- * Enum used to represent the Ease type
- */
-UENUM(BlueprintType)
-enum class ENsTweenEase : uint8
-{
-    Linear,
-    Smoothstep,
-    Stepped,
-    InSine,
-    OutSine,
-    InOutSine,
-    InQuad,
-    OutQuad,
-    InOutQuad,
-    InCubic,
-    OutCubic,
-    InOutCubic,
-    InQuart,
-    OutQuart,
-    InOutQuart,
-    InQuint,
-    OutQuint,
-    InOutQuint,
-    // Like Quintic but even sharper
-    InExpo,
-    OutExpo,
-    InOutExpo,
-    InCirc,
-    OutCirc,
-    InOutCirc,
-    InElastic,
-    OutElastic,
-    InOutElastic,
-    InBounce,
-    OutBounce,
-    InOutBounce,
-    // Anticipation; pull back a little before going forward
-    InBack,
-    OutBack,
-    InOutBack,
-};
+#include "Library/NsTweenTypeLibrary.h"
 
 /**
  * Night Shift - Tween Easing
@@ -55,6 +13,7 @@ public:
 
     /** Ease function */
     static float Ease(const float InT, ENsTweenEase EaseType);
+
     /**
      * Ease with overriding parameters
      * @param InT Progress

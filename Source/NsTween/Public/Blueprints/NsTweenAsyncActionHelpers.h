@@ -18,13 +18,13 @@ namespace NsTweenAsyncActionHelpers
     }
 
     template<typename T, typename Callback>
-    FORCEINLINE NsTweenInstance* CreateTween(const T& Start, const T& End, float DurationSecs, ENsTweenEase EaseType, Callback&& OnUpdate)
+    FORCEINLINE FNsTweenInstance* CreateTween(const T& Start, const T& End, float DurationSecs, ENsTweenEase EaseType, Callback&& OnUpdate)
     {
         return &NsTweenCore::Play(Start, End, DurationSecs, EaseType, Forward<Callback>(OnUpdate));
     }
 
     template<typename T, typename Callback>
-    FORCEINLINE NsTweenInstance* CreateTweenCustomCurve(const T& Start, const T& End, float DurationSecs, UCurveFloat* Curve, ENsTweenEase EaseType, Callback&& OnUpdate)
+    FORCEINLINE FNsTweenInstance* CreateTweenCustomCurve(const T& Start, const T& End, float DurationSecs, UCurveFloat* Curve, ENsTweenEase EaseType, Callback&& OnUpdate)
     {
         return &NsTweenCore::Play(0.f, 1.f, DurationSecs, EaseType, [=](float TVal)
         {

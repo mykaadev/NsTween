@@ -3,7 +3,49 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NsTweenEasing.h"
+
+/**
+ * Enum used to represent the Ease type
+ */
+UENUM(BlueprintType)
+enum class ENsTweenEase : uint8
+{
+    Linear,
+    Smoothstep,
+    Stepped,
+    InSine,
+    OutSine,
+    InOutSine,
+    InQuad,
+    OutQuad,
+    InOutQuad,
+    InCubic,
+    OutCubic,
+    InOutCubic,
+    InQuart,
+    OutQuart,
+    InOutQuart,
+    InQuint,
+    OutQuint,
+    InOutQuint,
+    // Like Quintic but even sharper
+    InExpo,
+    OutExpo,
+    InOutExpo,
+    InCirc,
+    OutCirc,
+    InOutCirc,
+    InElastic,
+    OutElastic,
+    InOutElastic,
+    InBounce,
+    OutBounce,
+    InOutBounce,
+    // Anticipation; pull back a little before going forward
+    InBack,
+    OutBack,
+    InOutBack,
+};
 
 /**
  * Tween Delay state
@@ -20,7 +62,7 @@ enum class ENsTweenDelayState : uint8
 /**
  * Tween Instance
  */
-struct NSTWEEN_API NsTweenInstance
+struct NSTWEEN_API FNsTweenInstance
 {
 
 // Variables
@@ -86,8 +128,6 @@ public:
     /** Tween delay state */
     ENsTweenDelayState DelayState;
 
-public:
-
     /** Function to run on PingPong */
     TFunction<void()> OnPingPongCallback;
 
@@ -98,17 +138,17 @@ public:
     TFunction<void()> OnCompleteCallback;
 
     /** Assign callback for PingPong */
-    NsTweenInstance& OnPingPong(TFunction<void()> Handler);
+    FNsTweenInstance& OnPingPong(TFunction<void()> Handler);
 
     /** Assign callback for Loop */
-    NsTweenInstance& OnLoop(TFunction<void()> Handler);
+    FNsTweenInstance& OnLoop(TFunction<void()> Handler);
 
     /** Assign callback for Complete */
-    NsTweenInstance& OnComplete(TFunction<void()> Handler);
+    FNsTweenInstance& OnComplete(TFunction<void()> Handler);
 
 
     /** Constructor */
-    NsTweenInstance()
+    FNsTweenInstance()
         : DurationSecs(0)
         , EaseType()
         , Counter(0)
@@ -128,15 +168,15 @@ public:
         , TimeMultiplier(0)
         , EaseParam1(0)
         , EaseParam2(0)
-        , DelayState() {}
-
-    /** Destructor */
-    virtual ~NsTweenInstance()
+        , DelayState()
     {}
 
+    /** Destructor */
+    virtual ~FNsTweenInstance()
+    {}
 
     /** Reset variables and start a fresh tween */
-    void InitializeSharedMembers(float InDurationSecs, ENsTweenEase InEaseType);
+    void InitializeSharedMembers(const float InDurationSecs, const ENsTweenEase InEaseType);
 
     /** Called on the first frame this tween is updated, to set up any options that have been defined */
     void Start();
@@ -176,7 +216,7 @@ private:
 /**
  * Tween Instance - Float
  */
-struct NSTWEEN_API NsTweenInstanceFloat : public NsTweenInstance
+struct NSTWEEN_API FNsTweenInstanceFloat : public FNsTweenInstance
 {
 // Functions
 public:
@@ -204,7 +244,7 @@ public:
 /**
  * Tween Instance - Quat
  */
-struct NSTWEEN_API NsTweenInstanceQuat : public NsTweenInstance
+struct NSTWEEN_API FNsTweenInstanceQuat : public FNsTweenInstance
 {
 // Functions
 public:
@@ -232,7 +272,7 @@ public:
 /**
  * Tween Instance - Vector
  */
-struct NSTWEEN_API NsTweenInstanceVector : public NsTweenInstance
+struct NSTWEEN_API FNsTweenInstanceVector : public FNsTweenInstance
 {
 // Functions
 public:
@@ -260,7 +300,7 @@ public:
 /**
  * Tween Instance - Vector2D
  */
-struct NSTWEEN_API NsTweenInstanceVector2D : public NsTweenInstance
+struct NSTWEEN_API FNsTweenInstanceVector2D : public FNsTweenInstance
 {
 // Functions
 public:
@@ -288,7 +328,7 @@ public:
 /**
  * Tween Instance - Rotator
  */
-struct NSTWEEN_API NsTweenInstanceRotator : public NsTweenInstance
+struct NSTWEEN_API FNsTweenInstanceRotator : public FNsTweenInstance
 {
 // Functions
 public:
