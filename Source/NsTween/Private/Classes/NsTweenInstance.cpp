@@ -1,7 +1,6 @@
 // Copyright (C) 2025 mykaadev. All rights reserved.
 
 #include "Classes/NsTweenInstance.h"
-#include "Classes/NsTweenUObject.h"
 
 
 void NsTweenInstance::InitializeSharedMembers(float InDurationSecs, ENsTweenEase InEaseType)
@@ -89,13 +88,6 @@ void NsTweenInstance::Destroy()
     OnPingPongCallback.Reset();
     OnCompleteCallback.Reset();
 #endif
-}
-
-UNsTweenUObject* NsTweenInstance::CreateUObject(UObject* Outer)
-{
-    UNsTweenUObject* Wrapper = NewObject<UNsTweenUObject>(Outer);
-    Wrapper->SetTweenInstance(this);
-    return Wrapper;
 }
 
 void NsTweenInstance::Pause()

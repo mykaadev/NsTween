@@ -147,9 +147,6 @@ public:
     /** Stop tweening and mark this instance for recycling */
     void Destroy();
 
-    /** Get a UObject wrapper for this tween. It will recycle the tween automatically when it's Outer is destroyed */
-    class UNsTweenUObject* CreateUObject(UObject* Outer = (UObject*)GetTransientPackage());
-
     /** Pause */
     void Pause();
 
