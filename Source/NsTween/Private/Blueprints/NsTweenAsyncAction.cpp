@@ -39,30 +39,30 @@ void UNsTweenAsyncAction::Activate()
         FFrame::KismetExecutionMessage(TEXT("Tween Instance was not created in child class"), ELogVerbosity::Error);
         return;
     }
-    TweenInstance->SetDelay(Delay)
-                 ->SetLoops(Loops)
-                 ->SetLoopDelay(LoopDelay)
-                 ->SetPingPong(bPingPong)
-                 ->SetPingPongDelay(PingPongDelay)
-                 ->SetCanTickDuringPause(bCanTickDuringPause)
-                 ->SetUseGlobalTimeDilation(bUseGlobalTimeDilation)
-                 // we will tell it when to be destroyed on complete, so that we control when
-                 // the tween goes invalid and it can't get recycled by doing something unexpected in BPs
-                 ->SetAutoDestroy(false)
-                 ->SetEaseParam1(EaseParam1)
-                 ->SetEaseParam2(EaseParam2);
+    TweenInstance->DelaySecs = Delay;
+    TweenInstance->NumLoops = Loops;
+    TweenInstance->LoopDelaySecs = LoopDelay;
+    TweenInstance->bShouldPingPong = bPingPong;
+    TweenInstance->PingPongDelaySecs = PingPongDelay;
+    TweenInstance->bCanTickDuringPause = bCanTickDuringPause;
+    TweenInstance->bUseGlobalTimeDilation = bUseGlobalTimeDilation;
+    // we will tell it when to be destroyed on complete, so that we control when
+    // the tween goes invalid and it can't get recycled by doing something unexpected in BPs
+    TweenInstance->bShouldAutoDestroy = false;
+    TweenInstance->EaseParam1 = EaseParam1;
+    TweenInstance->EaseParam2 = EaseParam2;
 
     if (OnLoop.IsBound())
     {
-        TweenInstance->SetOnLoop([&]() { OnLoop.Broadcast(); });
+        TweenInstance->OnLoop([&]() { OnLoop.Broadcast(); });
     }
     if (OnPingPong.IsBound())
     {
-        TweenInstance->SetOnPingPong([&]() { OnPingPong.Broadcast(); });
+        TweenInstance->OnPingPong([&]() { OnPingPong.Broadcast(); });
     }
     if (OnComplete.IsBound())
     {
-        TweenInstance->SetOnComplete([&]()
+        TweenInstance->OnComplete([&]()
         {
             OnComplete.Broadcast();
             Stop();
@@ -70,13 +70,13 @@ void UNsTweenAsyncAction::Activate()
     }
 }
 
-NsTweenInstance* UNsTweenAsyncAction::CreateTween()
+FNsTweenInstance* UNsTweenAsyncAction::CreateTween()
 {
     // override in specific data type tasks
     return nullptr;
 }
 
-NsTweenInstance* UNsTweenAsyncAction::CreateTweenCustomCurve()
+FNsTweenInstance* UNsTweenAsyncAction::CreateTweenCustomCurve()
 {
     return nullptr;
 }
@@ -149,7 +149,7 @@ void UNsTweenAsyncAction::SetTimeMultiplier(float Multiplier)
 {
     if (TweenInstance)
     {
-        TweenInstance->SetTimeMultiplier(Multiplier);
+        TweenInstance->TimeMultiplier = FMath::Abs(Multiplier);
     }
 }
 
@@ -178,13 +178,13 @@ UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloatCustomCurve(float 
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenAsyncActionFloat::CreateTween()
+FNsTweenInstance* UNsTweenAsyncActionFloat::CreateTween()
 {
     return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
         [&](float T) { ApplyEasing.Broadcast(T); });
 }
 
-NsTweenInstance* UNsTweenAsyncActionFloat::CreateTweenCustomCurve()
+FNsTweenInstance* UNsTweenAsyncActionFloat::CreateTweenCustomCurve()
 {
     return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
         [&](float V) { ApplyEasing.Broadcast(V); });
@@ -250,13 +250,13 @@ UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatFromRotatorCustomCurv
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenAsyncActionQuat::CreateTween()
+FNsTweenInstance* UNsTweenAsyncActionQuat::CreateTween()
 {
     return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
         [&](const FQuat& Q) { ApplyEasing.Broadcast(Q); });
 }
 
-NsTweenInstance* UNsTweenAsyncActionQuat::CreateTweenCustomCurve()
+FNsTweenInstance* UNsTweenAsyncActionQuat::CreateTweenCustomCurve()
 {
     return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
         [&](const FQuat& Q) { ApplyEasing.Broadcast(Q); });
@@ -287,7 +287,7 @@ UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotatorCustomCurve(
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenAsyncActionRotator::CreateTween()
+FNsTweenInstance* UNsTweenAsyncActionRotator::CreateTween()
 {
     return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
         [&](const FQuat& Q)
@@ -296,7 +296,7 @@ NsTweenInstance* UNsTweenAsyncActionRotator::CreateTween()
         });
 }
 
-NsTweenInstance* UNsTweenAsyncActionRotator::CreateTweenCustomCurve()
+FNsTweenInstance* UNsTweenAsyncActionRotator::CreateTweenCustomCurve()
 {
     return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
         [&](const FQuat& Q)
@@ -330,13 +330,13 @@ UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVectorCustomCurve(FVe
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenAsyncActionVector::CreateTween()
+FNsTweenInstance* UNsTweenAsyncActionVector::CreateTween()
 {
     return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
         [&](const FVector& V) { ApplyEasing.Broadcast(V); });
 }
 
-NsTweenInstance* UNsTweenAsyncActionVector::CreateTweenCustomCurve()
+FNsTweenInstance* UNsTweenAsyncActionVector::CreateTweenCustomCurve()
 {
     return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
         [&](const FVector& V) { ApplyEasing.Broadcast(V); });
@@ -367,13 +367,13 @@ UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2DCustomCur
     return BlueprintNode;
 }
 
-NsTweenInstance* UNsTweenAsyncActionVector2D::CreateTween()
+FNsTweenInstance* UNsTweenAsyncActionVector2D::CreateTween()
 {
     return NsTweenAsyncActionHelpers::CreateTween(Start, End, DurationSecs, EaseType,
         [&](const FVector2D V) { ApplyEasing.Broadcast(V); });
 }
 
-NsTweenInstance* UNsTweenAsyncActionVector2D::CreateTweenCustomCurve()
+FNsTweenInstance* UNsTweenAsyncActionVector2D::CreateTweenCustomCurve()
 {
     return NsTweenAsyncActionHelpers::CreateTweenCustomCurve(Start, End, DurationSecs, CustomCurve, EaseType,
         [&](const FVector2D V)

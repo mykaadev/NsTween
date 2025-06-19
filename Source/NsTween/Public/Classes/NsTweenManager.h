@@ -61,7 +61,7 @@ public:
 
         for (int32 i = ActiveTweens.Num() - 1; i >= 0; --i)
         {
-            if (NsTweenInstance* CurTween = static_cast<NsTweenInstance*>(ActiveTweens[i]))
+            if (FNsTweenInstance* CurTween = static_cast<FNsTweenInstance*>(ActiveTweens[i]))
             {
                 CurTween->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
                 if (!CurTween->bIsActive)

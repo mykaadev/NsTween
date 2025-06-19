@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Blueprints/NsTweenAsyncActionHelpers.h"
 #include "Classes/NsTweenEasing.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "NsTweenAsyncAction.generated.h"
@@ -26,10 +25,10 @@ public:
     virtual void Activate() override;
 
     /** Create Tween */
-    virtual class NsTweenInstance* CreateTween();
+    virtual struct FNsTweenInstance* CreateTween();
 
     /** Create Tween with custom curve */
-    virtual class NsTweenInstance* CreateTweenCustomCurve();
+    virtual struct FNsTweenInstance* CreateTweenCustomCurve();
 
     /** Set shared tween properties */
     virtual void SetSharedTweenProperties(float InDurationSecs, float InDelay, int InLoops, float InLoopDelay, bool InbPingPong, float InPingPongDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation);
@@ -101,7 +100,7 @@ public:
     TObjectPtr<class UCurveFloat> CustomCurve;
 
     /** Tween Instance */
-    NsTweenInstance* TweenInstance = nullptr;
+    FNsTweenInstance* TweenInstance = nullptr;
 
     /** On Loop */
     UPROPERTY(BlueprintAssignable, AdvancedDisplay)
@@ -169,8 +168,8 @@ public:
     static UNsTweenAsyncActionFloat* TweenFloatCustomCurve(float Start = 0.0f, float End = 1.0f, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
-    virtual NsTweenInstance* CreateTween() override;
-    virtual NsTweenInstance* CreateTweenCustomCurve() override;
+    virtual FNsTweenInstance* CreateTween() override;
+    virtual FNsTweenInstance* CreateTweenCustomCurve() override;
     //~ End UNsTweenAsyncAction Interface
 };
 
@@ -265,8 +264,8 @@ public:
     static UNsTweenAsyncActionQuat* TweenQuatFromRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
-    virtual NsTweenInstance* CreateTween() override;
-    virtual NsTweenInstance* CreateTweenCustomCurve() override;
+    virtual FNsTweenInstance* CreateTween() override;
+    virtual FNsTweenInstance* CreateTweenCustomCurve() override;
     //~ End UNsTweenAsyncAction Interface
 };
 
@@ -322,8 +321,8 @@ public:
     static UNsTweenAsyncActionRotator* TweenRotatorCustomCurve(FRotator Start = FRotator::ZeroRotator, FRotator End = FRotator::ZeroRotator, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
-    virtual NsTweenInstance* CreateTween() override;
-    virtual NsTweenInstance* CreateTweenCustomCurve() override;
+    virtual FNsTweenInstance* CreateTween() override;
+    virtual FNsTweenInstance* CreateTweenCustomCurve() override;
     //~ End UNsTweenAsyncAction Interface
 };
 
@@ -383,8 +382,8 @@ public:
     static UNsTweenAsyncActionVector* TweenVectorCustomCurve(FVector Start = FVector::ZeroVector, FVector End = FVector::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
-    virtual NsTweenInstance* CreateTween() override;
-    virtual NsTweenInstance* CreateTweenCustomCurve() override;
+    virtual FNsTweenInstance* CreateTween() override;
+    virtual FNsTweenInstance* CreateTweenCustomCurve() override;
     //~ End UNsTweenAsyncAction Interface
 };
 
@@ -445,7 +444,7 @@ public:
     static UNsTweenAsyncActionVector2D* TweenVector2DCustomCurve(FVector2D Start = FVector2D::ZeroVector, FVector2D End = FVector2D::ZeroVector, float DurationSecs = 1.0f, UCurveFloat* Curve = nullptr, float Delay = 0, int Loops = 0, float LoopDelay = 0, bool bPingPong = false, float PingPongDelay = 0, bool bCanTickDuringPause = false, bool bUseGlobalTimeDilation = true);
 
     //~ Begin UNsTweenAsyncAction Interface
-    virtual NsTweenInstance* CreateTween() override;
-    virtual NsTweenInstance* CreateTweenCustomCurve() override;
+    virtual FNsTweenInstance* CreateTween() override;
+    virtual FNsTweenInstance* CreateTweenCustomCurve() override;
     //~ End UNsTweenAsyncAction Interface
 };
