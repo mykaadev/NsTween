@@ -2,6 +2,13 @@
 
 #include "Classes/NsTweenSubsystem.h"
 #include "Classes/NsTweenCore.h"
+#include "HAL/IConsoleManager.h"
+
+static TAutoConsoleVariable<int32> CVarNsTweenDebugDraw(
+    TEXT("NsTween.DebugDraw"),
+    0,
+    TEXT("Draw debug info for active tweens each tick (0 = off, 1 = on)"),
+    ECVF_Default);
 
 void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
@@ -45,6 +52,10 @@ void UNsTweenSubsystem::Tick(float DeltaTime)
 #else
             NsTweenCore::Update(GetWorld()->DeltaRealTimeSeconds, GetWorld()->DeltaTimeSeconds, GetWorld()->IsPaused());
 #endif
+            if (CVarNsTweenDebugDraw.GetValueOnGameThread() != 0)
+            {
+                NsTweenCore::DrawActiveTweens(GetWorld());
+            }
         }
     }
 }
