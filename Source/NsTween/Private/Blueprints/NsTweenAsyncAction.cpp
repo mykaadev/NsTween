@@ -39,18 +39,18 @@ void UNsTweenAsyncAction::Activate()
         FFrame::KismetExecutionMessage(TEXT("Tween Instance was not created in child class"), ELogVerbosity::Error);
         return;
     }
-    TweenInstance->DelaySecs = Delay;
-    TweenInstance->NumLoops = Loops;
-    TweenInstance->LoopDelaySecs = LoopDelay;
-    TweenInstance->bShouldPingPong = bPingPong;
-    TweenInstance->PingPongDelaySecs = PingPongDelay;
-    TweenInstance->bCanTickDuringPause = bCanTickDuringPause;
-    TweenInstance->bUseGlobalTimeDilation = bUseGlobalTimeDilation;
+    TweenInstance->SetDelay(Delay);
+    TweenInstance->SetLoops(Loops);
+    TweenInstance->SetLoopDelay(LoopDelay);
+    TweenInstance->SetPingPong(bPingPong);
+    TweenInstance->SetPingPongDelay(PingPongDelay);
+    TweenInstance->SetCanTickDuringPause(bCanTickDuringPause);
+    TweenInstance->SetUseGlobalTimeDilation(bUseGlobalTimeDilation);
     // we will tell it when to be destroyed on complete, so that we control when
     // the tween goes invalid and it can't get recycled by doing something unexpected in BPs
-    TweenInstance->bShouldAutoDestroy = false;
-    TweenInstance->EaseParam1 = EaseParam1;
-    TweenInstance->EaseParam2 = EaseParam2;
+    TweenInstance->SetAutoDestroy(false);
+    TweenInstance->SetEaseParam1(EaseParam1);
+    TweenInstance->SetEaseParam2(EaseParam2);
 
     if (OnLoop.IsBound())
     {
@@ -149,7 +149,7 @@ void UNsTweenAsyncAction::SetTimeMultiplier(float Multiplier)
 {
     if (TweenInstance)
     {
-        TweenInstance->TimeMultiplier = FMath::Abs(Multiplier);
+        TweenInstance->SetTimeMultiplier(FMath::Abs(Multiplier));
     }
 }
 
