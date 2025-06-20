@@ -59,7 +59,7 @@ void AMyActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    auto& Tween = NsTweenCore::Play(
+    NsTweenCore::Play(
         /**Start*/   0.f,
         /**End*/     100.f,
         /**Time*/    2.f,
@@ -83,22 +83,22 @@ void AFloatingItem::BeginPlay()
     Super::BeginPlay();
 
     // Float continuously
-    auto& Tween = NsTweenCore::Play(
+    NsTweenCore::Play(
          /**Start*/   GetActorLocation().Z,
          /**End*/     GetActorLocation().Z + 40.f,
          /**Time*/    1.f,
          /**Ease*/    ENsTweenEase::InOutSine,
          /**Update*/  [this](float Z)
         {
-            const FVector Loc = GetActorLocation();
-            Loc.Z = Z;
-            SetActorLocation(Loc);
+            FVector CurrentLocation = GetActorLocation();
+            CurrentLocation.Z = Z;
+            SetActorLocation(CurrentLocation);
         })
         .SetPingPong(true)
-        .SetLoops(-1);
+        .SetLoops(-1); // Infinite loops
 
     // Rotate once then pop
-    auto& RotTween = NsTweenCore::Play(
+    NsTweenCore::Play(
         /**Start*/   GetActorRotation().Quaternion(),
         /**End*/     GetActorRotation().Quaternion() * FQuat(FRotator(0.f, 360.f, 0.f)),
         /**Time*/    2.f,
@@ -106,11 +106,13 @@ void AFloatingItem::BeginPlay()
         /**Update*/  [this](FQuat Q)
         {
             SetActorRotation(Q.Rotator());
+        })
+        .SetPingPong(true)
+        .SetLoops(10); // Will complete loops
+        .OnPingPong([this]() // Per Loop
+        {
+            Pop();
         });
-    RotTween.OnComplete([this]()
-    {
-        Pop();
-    });
 }
 ```
 
