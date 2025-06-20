@@ -82,7 +82,7 @@ void AFloatingItem::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Float continuously
+        // Float continuously
     NsTweenCore::Play(
          /**Start*/   GetActorLocation().Z,
          /**End*/     GetActorLocation().Z + 40.f,
@@ -95,23 +95,23 @@ void AFloatingItem::BeginPlay()
             SetActorLocation(CurrentLocation);
         })
         .SetPingPong(true)
-        .SetLoops(-1); // Infinite loops
+        .SetLoops(-1); // infinite loops
 
-    // Rotate once then pop
+
+    // Rotate and print 10 times the Loop
     NsTweenCore::Play(
-        /**Start*/   GetActorRotation().Quaternion(),
-        /**End*/     GetActorRotation().Quaternion() * FQuat(FRotator(0.f, 360.f, 0.f)),
-        /**Time*/    2.f,
-        /**Ease*/    ENsTweenEase::Linear,
-        /**Update*/  [this](FQuat Q)
+        /** Start  */  0.f,
+        /** End    */  360.f,
+        /** Time   */  2.f,
+        /** Ease   */  ENsTweenEase::Linear,
+        /** Update */  [this](float Yaw)
         {
-            SetActorRotation(Q.Rotator());
+            SetActorRotation(FRotator(0.f, Yaw, 0.f));
         })
-        .SetPingPong(true)
-        .SetLoops(10); // Will complete loops
-        .OnPingPong([this]() // Per Loop
+        .SetLoops(10) // 10 full spins
+        .OnLoop([this]()
         {
-            Pop();
+            UE_LOG(LogTemp, Warning, TEXT("Spin finished"));
         });
 }
 ```
