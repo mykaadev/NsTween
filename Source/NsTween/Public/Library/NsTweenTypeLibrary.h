@@ -66,7 +66,7 @@ struct NSTWEEN_API FNsTweenInstance
 {
 
 // Variables
-public:
+private:
 
     /** Duration */
     float DurationSecs;
@@ -137,6 +137,9 @@ public:
     /** Function to run on Complete */
     TFunction<void()> OnCompleteCallback;
 
+// Functions
+public:
+
     /** Assign callback for PingPong */
     FNsTweenInstance& OnPingPong(TFunction<void()> Handler);
 
@@ -148,6 +151,12 @@ public:
 
     /** Enable/disable pingpong behaviour */
     FNsTweenInstance& SetPingPong(bool bPingPong);
+
+    /** Get is tween active */
+    bool IsActive() const;
+
+    /** Set tween active state */
+    void SetActive(const bool InState);
 
     /** Get whether pingpong is enabled */
     bool GetPingPong() const;

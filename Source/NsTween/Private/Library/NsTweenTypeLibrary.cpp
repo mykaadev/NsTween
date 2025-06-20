@@ -1,6 +1,7 @@
 ﻿// Copyright (C) 2025 mykaadev. All rights reserved.
 
 #include "Library/NsTweenTypeLibrary.h"
+#include "NsTweenEasing.h"
 
 void FNsTweenInstance::InitializeSharedMembers(const float InDurationSecs, const ENsTweenEase InEaseType)
 {
@@ -37,15 +38,9 @@ void FNsTweenInstance::InitializeSharedMembers(const float InDurationSecs, const
 
     DelayState = ENsTweenDelayState::None;
 
-#if ENGINE_MAJOR_VERSION < 5
-    OnPingPongCallback = nullptr;
-    OnLoopCallback = nullptr;
-    OnCompleteCallback = nullptr;
-#else
     OnPingPongCallback.Reset();
     OnLoopCallback.Reset();
     OnCompleteCallback.Reset();
-#endif
 }
 
 void FNsTweenInstance::Start()
@@ -78,15 +73,9 @@ void FNsTweenInstance::Destroy()
     // Mark for recycling
     bIsActive = false;
 
-#if ENGINE_MAJOR_VERSION < 5
-    OnLoopCallback  = nullptr;
-    OnPingPongCallback  = nullptr;
-    OnCompleteCallback = nullptr;
-#else
     OnLoopCallback.Reset();
     OnPingPongCallback.Reset();
     OnCompleteCallback.Reset();
-#endif
 }
 
 void FNsTweenInstance::Pause()
@@ -325,6 +314,16 @@ FNsTweenInstance& FNsTweenInstance::SetPingPong(bool bPingPong)
 {
     bShouldPingPong = bPingPong;
     return *this;
+}
+
+bool FNsTweenInstance::IsActive() const
+{
+    return bIsActive;
+}
+
+void FNsTweenInstance::SetActive(const bool InState)
+{
+    bIsActive = InState;
 }
 
 bool FNsTweenInstance::GetPingPong() const

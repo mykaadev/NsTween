@@ -64,7 +64,7 @@ public:
             if (FNsTweenInstance* CurTween = static_cast<FNsTweenInstance*>(ActiveTweens[i]))
             {
                 CurTween->Update(UnscaledDeltaSeconds, DilatedDeltaSeconds, bIsGamePaused);
-                if (!CurTween->bIsActive)
+                if (!CurTween->IsActive())
                 {
                     RecycleTween(ActiveTweens[i]);
                     ActiveTweens.RemoveAt(i);
@@ -102,7 +102,7 @@ private:
     {
         if (RecycledTweens.Num() > 0)
         {
-            return RecycledTweens.Pop(false);
+            return RecycledTweens.Pop(EAllowShrinking::No);
         }
         return new T();
     }
