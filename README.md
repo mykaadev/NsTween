@@ -93,9 +93,9 @@ void AFloatingItem::BeginPlay()
             const FVector Loc = GetActorLocation();
             Loc.Z = Z;
             SetActorLocation(Loc);
-        });
-    Tween.bShouldPingPong = true;
-    Tween.NumLoops = -1;
+        })
+        .SetPingPong(true)
+        .SetLoops(-1);
 
     // Rotate once then pop
     auto& RotTween = NsTweenCore::Play(

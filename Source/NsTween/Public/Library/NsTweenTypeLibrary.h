@@ -66,7 +66,7 @@ struct NSTWEEN_API FNsTweenInstance
 {
 
 // Variables
-public:
+private:
 
     /** Duration */
     float DurationSecs;
@@ -137,6 +137,9 @@ public:
     /** Function to run on Complete */
     TFunction<void()> OnCompleteCallback;
 
+// Functions
+public:
+
     /** Assign callback for PingPong */
     FNsTweenInstance& OnPingPong(TFunction<void()> Handler);
 
@@ -145,6 +148,78 @@ public:
 
     /** Assign callback for Complete */
     FNsTweenInstance& OnComplete(TFunction<void()> Handler);
+
+    /** Enable/disable pingpong behaviour */
+    FNsTweenInstance& SetPingPong(bool bPingPong);
+
+    /** Get is tween active */
+    bool IsActive() const;
+
+    /** Set tween active state */
+    void SetActive(const bool InState);
+
+    /** Get whether pingpong is enabled */
+    bool GetPingPong() const;
+
+    /** Set number of loops */
+    FNsTweenInstance& SetLoops(int InLoops);
+
+    /** Get configured loop count */
+    int GetLoops() const;
+
+    /** Set delay before tween starts */
+    FNsTweenInstance& SetDelay(float InDelay);
+
+    /** Get delay before tween starts */
+    float GetDelay() const;
+
+    /** Set delay between loops */
+    FNsTweenInstance& SetLoopDelay(float InLoopDelay);
+
+    /** Get delay between loops */
+    float GetLoopDelay() const;
+
+    /** Set delay before pingpong */
+    FNsTweenInstance& SetPingPongDelay(float InPingPongDelay);
+
+    /** Get delay before pingpong */
+    float GetPingPongDelay() const;
+
+    /** Allow ticking while game is paused */
+    FNsTweenInstance& SetCanTickDuringPause(bool bInCanTickDuringPause);
+
+    /** Check if tween ticks while game is paused */
+    bool GetCanTickDuringPause() const;
+
+    /** Use global time dilation */
+    FNsTweenInstance& SetUseGlobalTimeDilation(bool bInUseGlobalTimeDilation);
+
+    /** Check if global time dilation is used */
+    bool GetUseGlobalTimeDilation() const;
+
+    /** Set whether tween should auto destroy */
+    FNsTweenInstance& SetAutoDestroy(bool bInShouldAutoDestroy);
+
+    /** Get auto destroy flag */
+    bool GetAutoDestroy() const;
+
+    /** Set time multiplier */
+    FNsTweenInstance& SetTimeMultiplier(float InMultiplier);
+
+    /** Get time multiplier */
+    float GetTimeMultiplier() const;
+
+    /** Set easing parameter one */
+    FNsTweenInstance& SetEaseParam1(float InEaseParam1);
+
+    /** Get easing parameter one */
+    float GetEaseParam1() const;
+
+    /** Set easing parameter two */
+    FNsTweenInstance& SetEaseParam2(float InEaseParam2);
+
+    /** Get easing parameter two */
+    float GetEaseParam2() const;
 
 
     /** Constructor */
