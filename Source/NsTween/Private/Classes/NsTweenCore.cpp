@@ -4,6 +4,7 @@
 #include "Classes/NsTweenManager.h"
 #include "Classes/NsTweenSettings.h"
 #include "NsTweenEasing.h"
+#include "DrawDebugHelpers.h"
 
 DEFINE_LOG_CATEGORY(LogNsTween)
 
@@ -101,4 +102,39 @@ FNsTweenInstanceVector2D& NsTweenCore::Play(const FVector2D Start, const FVector
 FNsTweenInstanceQuat& NsTweenCore::Play(const FQuat& Start, const FQuat& End, const float DurationSecs, const ENsTweenEase EaseType, TFunction<void(FQuat)> OnUpdate)
 {
     return *PlayInternal(QuatTweenManager, Start, End, DurationSecs, EaseType, MoveTemp(OnUpdate));
+}
+
+void NsTweenCore::LogActiveTweens()
+{
+    ForEachManager([](auto* Manager)
+    {
+        for (const auto* Tween : Manager->GetActiveTweens())
+        {
+            UE_LOG(LogNsTween, Log, TEXT("%s"), *Tween->ToDebugString());
+        }
+    });
+}
+
+void NsTweenCore::DrawActiveTweens(UWorld* World)
+{
+    if (!World)
+    {
+        return;
+    }
+    ForEachManager([World](auto* Manager)
+    {
+        for (const auto* Tween : Manager->GetActiveTweens())
+        {
+            if (AActor* DebugActor = Tween->GetDebugActor())
+            {
+                DrawDebugString(World,
+                                 DebugActor->GetActorLocation() + FVector(0, 0, 100.f),
+                                 Tween->ToDebugString(),
+                                 DebugActor,
+                                 FColor::White,
+                                 0.f,
+                                 true);
+            }
+        }
+    });
 }

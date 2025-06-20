@@ -39,6 +39,12 @@ public:
     /** Convenience function for UNsTweenEasing::Ease() */
     static float Ease(float T, ENsTweenEase EaseType);
 
+    /** Log debug information for all active tweens */
+    static void LogActiveTweens();
+
+    /** Draw debug information on screen near each tween's debug actor */
+    static void DrawActiveTweens(UWorld* World);
+
     /** Play Tween - Float */
     static FNsTweenInstanceFloat& Play(float Start, float End, float DurationSecs, ENsTweenEase EaseType, TFunction<void(float)> OnUpdate);
 

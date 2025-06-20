@@ -440,3 +440,15 @@ float FNsTweenInstance::GetEaseParam2() const
 {
     return EaseParam2;
 }
+
+FString FNsTweenInstance::ToDebugString() const
+{
+    const FString EaseName = StaticEnum<ENsTweenEase>()->GetNameStringByValue(static_cast<int64>(EaseType));
+    return FString::Printf(TEXT("%s | Ease: %s | Duration: %.2f | Time: %.2f | Loops: %d/%d"),
+                           *GetValueDebugString(),
+                           *EaseName,
+                           DurationSecs,
+                           Counter,
+                           NumLoopsCompleted,
+                           NumLoops);
+}

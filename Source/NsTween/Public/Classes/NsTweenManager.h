@@ -97,6 +97,11 @@ public:
         return NewTween;
     }
 
+    const TArray<T*>& GetActiveTweens() const
+    {
+        return ActiveTweens;
+    }
+
 private:
     T* GetNewTween()
     {

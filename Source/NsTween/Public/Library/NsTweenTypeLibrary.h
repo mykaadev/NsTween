@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
 
 /**
  * Enum used to represent the Ease type
@@ -137,6 +138,9 @@ private:
     /** Function to run on Complete */
     TFunction<void()> OnCompleteCallback;
 
+    /** Actor used for debug drawing */
+    TWeakObjectPtr<AActor> DebugActor;
+
 // Functions
 public:
 
@@ -221,6 +225,16 @@ public:
     /** Get easing parameter two */
     float GetEaseParam2() const;
 
+    /** Set actor for debug drawing */
+    FNsTweenInstance& SetDebugActor(AActor* InActor)
+    {
+        DebugActor = InActor;
+        return *this;
+    }
+
+    /** Get the debug actor */
+    AActor* GetDebugActor() const { return DebugActor.Get(); }
+
 
     /** Constructor */
     FNsTweenInstance()
@@ -244,6 +258,7 @@ public:
         , EaseParam1(0)
         , EaseParam2(0)
         , DelayState()
+        , DebugActor(nullptr)
     {}
 
     /** Destructor */
@@ -271,7 +286,13 @@ public:
     /** Update  */
     void Update(float UnscaledDeltaSeconds, float DilatedDeltaSeconds, bool bIsGamePaused = false);
 
+    /** Return a debug string describing this tween */
+    virtual FString ToDebugString() const;
+
 protected:
+
+    /** Return debug info for the value type (Start/End) */
+    virtual FString GetValueDebugString() const { return FString(); }
 
     /** Apply Easing */
     virtual void ApplyEasing(float EasedPercent) = 0;
@@ -301,6 +322,10 @@ public:
 
     //~ Begin NsTweenInstance Interface
     virtual void ApplyEasing(float EasedPercent) override;
+    virtual FString GetValueDebugString() const override
+    {
+        return FString::Printf(TEXT("Start: %f End: %f"), StartValue, EndValue);
+    }
     //~ End NsTweenInstance Interface
 
 // Variables
@@ -329,6 +354,10 @@ public:
 
     //~ Begin NsTweenInstance Interface
     virtual void ApplyEasing(float EasedPercent) override;
+    virtual FString GetValueDebugString() const override
+    {
+        return FString::Printf(TEXT("Start: %s End: %s"), *StartValue.ToString(), *EndValue.ToString());
+    }
     //~ End NsTweenInstance Interface
 
 // Variables
@@ -357,6 +386,10 @@ public:
 
     //~ Begin NsTweenInstance Interface
     virtual void ApplyEasing(float EasedPercent) override;
+    virtual FString GetValueDebugString() const override
+    {
+        return FString::Printf(TEXT("Start: %s End: %s"), *StartValue.ToString(), *EndValue.ToString());
+    }
     //~ End NsTweenInstance Interface
 
 // Variables
@@ -385,6 +418,10 @@ public:
 
     //~ Begin NsTweenInstance Interface
     virtual void ApplyEasing(float EasedPercent) override;
+    virtual FString GetValueDebugString() const override
+    {
+        return FString::Printf(TEXT("Start: %s End: %s"), *StartValue.ToString(), *EndValue.ToString());
+    }
     //~ End NsTweenInstance Interface
 
 // Variables
@@ -413,6 +450,10 @@ public:
 
     //~ Begin NsTweenInstance Interface
     virtual void ApplyEasing(float EasedPercent) override;
+    virtual FString GetValueDebugString() const override
+    {
+        return FString::Printf(TEXT("Start: %s End: %s"), *StartValue.ToString(), *EndValue.ToString());
+    }
     //~ End NsTweenInstance Interface
 
 // Variables

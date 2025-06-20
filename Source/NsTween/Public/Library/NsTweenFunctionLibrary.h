@@ -37,4 +37,12 @@ public:
     /** Make sure there are at least these many of each type of tween available in memory. Call this only once, probably in a GameInstance blueprint, if you need more initial memory reserved on game startup. */
     UFUNCTION(BlueprintCallable, Category = "Tween|Utility")
     static void EnsureTweenCapacity(int NumFloatTweens = 75, int NumVectorTweens = 50, int NumVector2DTweens = 50, int NumQuatTweens = 10);
+
+    /** Log information about all active tweens to the output log */
+    UFUNCTION(BlueprintCallable, Category = "Tween|Debug")
+    static void LogActiveTweens();
+
+    /** Draw debug information for active tweens near their debug actors */
+    UFUNCTION(BlueprintCallable, Category = "Tween|Debug", meta = (WorldContext = "WorldContextObject"))
+    static void DrawActiveTweens(UObject* WorldContextObject);
 };
