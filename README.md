@@ -31,7 +31,7 @@
 <!-- GH_ONLY_END -->
 
 ## 👀 Summary
-NsTwee is a small yet powerful tweening framework for Unreal Engine. It allows smooth interpolation of floats, vectors and quaternions using a rich set of easing functions. Tweens can be controlled entirely through C++ or Blueprint nodes.
+NsTween is a small yet powerful tweening framework for Unreal Engine. It allows smooth interpolation of floats, vectors and quaternions using a rich set of easing functions. Tweens can be controlled entirely through C++ or Blueprint nodes.
 
 ## 📦 Features
 - **Multiple data types**: Tween `float`, `vector`, `vector2D`, `rotator` and `quaternion` values.
