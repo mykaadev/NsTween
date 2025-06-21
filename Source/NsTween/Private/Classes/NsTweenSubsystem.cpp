@@ -3,19 +3,16 @@
 #include "Classes/NsTweenSubsystem.h"
 #include "Classes/NsTweenCore.h"
 #include "Engine/World.h"
-#include "Runtime/Launch/Resources/Version.h"
 
 void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
     Super::Initialize(Collection);
     LastTickedFrame = GFrameCounter;
     NsTweenCore::Initialize();
-#if ENGINE_MAJOR_VERSION < 5
-	if(GetWorld() != nullptr)
-	{
-		LastRealTimeSeconds = GetWorld()->RealTimeSeconds;
-	}
-#endif
+    if(GetWorld() != nullptr)
+    {
+        LastRealTimeSeconds = GetWorld()->RealTimeSeconds;
+    }
 
 #if WITH_EDITOR
     NsTweenCore::ClearActiveTweens();
@@ -40,13 +37,7 @@ void UNsTweenSubsystem::Tick(float DeltaTime)
 
         if (GetWorld() != nullptr)
         {
-#if ENGINE_MAJOR_VERSION < 5
-			float DeltaRealTimeSeconds = GetWorld()->RealTimeSeconds - LastRealTimeSeconds;
-			NsTweenCore::Update(DeltaRealTimeSeconds, GetWorld()->DeltaTimeSeconds, GetWorld()->IsPaused());
-			LastRealTimeSeconds = GetWorld()->RealTimeSeconds;
-#else
             NsTweenCore::Update(GetWorld()->DeltaRealTimeSeconds, GetWorld()->DeltaTimeSeconds, GetWorld()->IsPaused());
-#endif
         }
     }
 }
