@@ -3,6 +3,7 @@
 #include "Classes/NsTweenSubsystem.h"
 #include "Classes/NsTweenCore.h"
 #include "Engine/World.h"
+#include "Runtime/Launch/Resources/Version.h"
 
 void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
