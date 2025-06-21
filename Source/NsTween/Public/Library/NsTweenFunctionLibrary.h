@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Classes/NsTweenEasing.h"
+#include "Kismet/BlueprintFunctionLibrary.h"
 #include "NsTweenFunctionLibrary.generated.h"
 
 /**

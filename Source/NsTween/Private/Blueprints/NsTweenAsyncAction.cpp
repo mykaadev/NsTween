@@ -137,11 +137,7 @@ void UNsTweenAsyncAction::Stop()
         TweenInstance->Destroy();
         TweenInstance = nullptr;
         SetReadyToDestroy();
-#if ENGINE_MAJOR_VERSION < 5
-        MarkPendingKill();
-#else
         MarkAsGarbage();
-#endif
     }
 }
 

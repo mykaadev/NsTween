@@ -115,7 +115,7 @@ public:
     FTweenEventOutputPin OnComplete;
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class NSTWEEN_API UNsTweenAsyncActionFloat : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
@@ -173,7 +173,7 @@ public:
     //~ End UNsTweenAsyncAction Interface
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class NSTWEEN_API UNsTweenAsyncActionQuat : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
@@ -269,7 +269,7 @@ public:
     //~ End UNsTweenAsyncAction Interface
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class NSTWEEN_API UNsTweenAsyncActionRotator : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
@@ -326,7 +326,7 @@ public:
     //~ End UNsTweenAsyncAction Interface
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class NSTWEEN_API UNsTweenAsyncActionVector : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
@@ -388,7 +388,7 @@ public:
 };
 
 /**  */
-UCLASS()
+UCLASS(BlueprintType)
 class NSTWEEN_API UNsTweenAsyncActionVector2D : public UNsTweenAsyncAction
 {
     GENERATED_BODY()
