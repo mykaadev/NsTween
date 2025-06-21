@@ -82,7 +82,7 @@ void AFloatingItem::BeginPlay()
 {
     Super::BeginPlay();
 
-        // Float continuously
+    // Float continuously
     NsTweenCore::Play(
          /**Start*/   GetActorLocation().Z,
          /**End*/     GetActorLocation().Z + 40.f,
