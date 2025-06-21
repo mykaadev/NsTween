@@ -2,6 +2,7 @@
 
 #include "Classes/NsTweenSubsystem.h"
 #include "Classes/NsTweenCore.h"
+#include "Engine/World.h"
 
 void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
