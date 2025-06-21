@@ -72,8 +72,7 @@ void AMyActor::BeginPlay()
 ```
 
 The library also exposes Blueprint nodes for the same functionality if you prefer a visual approach.
-
-Below is a slightly more advanced snippet showing how to make an item float up and down while rotating. When the rotation tween finishes we call a custom `Pop()` function:
+Below is a slightly more advanced snippet showing how to make an item float up and down while spinning for 10 complete loops
 
 ```cpp
 #include "NsTweenCore.h"
