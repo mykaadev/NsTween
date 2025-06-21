@@ -2,7 +2,7 @@
 <h1 align="center">
   <br>
   <a href="https://github.com/mykaadev/NsTween">
-    <img src="https://github.com/mykaadev/NsTween/blob/cc9e0b441a9305994196757e401b1465734f7954/Resources/Banner.png" alt="NsTween" width="400">
+    <img src="https://github.com/mykaadev/NsTween/blob/main/Resources/Banner.png" alt="NsTween" width="400">
   </a>
 </h1>
 
@@ -32,6 +32,10 @@
 
 ## 👀 Summary
 NsTween is a small yet powerful tweening framework for Unreal Engine. It allows smooth interpolation of floats, vectors and quaternions using a rich set of easing functions. Tweens can be controlled entirely through C++ or Blueprint nodes.
+
+<div align="center">
+ <img src="https://github.com/mykaadev/NsTween/blob/main/Resources/SupportedCurvesRow.png" alt="NsTween" width="650">
+</div>
 
 ## 📦 Features
 - **Multiple data types**: Tween `float`, `vector`, `vector2D`, `rotator` and `quaternion` values.
