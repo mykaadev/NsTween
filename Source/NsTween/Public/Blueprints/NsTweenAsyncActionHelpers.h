@@ -1,3 +1,5 @@
+// Copyright (C) 2025 mykaadev. All rights reserved.
+
 #pragma once
 
 #include "NsTweenCore.h"
