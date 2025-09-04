@@ -1,4 +1,4 @@
-// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #include "Blueprints/NsTweenAsyncAction.h"
 #include "Blueprints/NsTweenAsyncActionHelpers.h"

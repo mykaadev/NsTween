@@ -1,4 +1,4 @@
-﻿// Copyright (C) 2025 mykaadev. All rights reserved.
+﻿// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #pragma once
 
@@ -102,7 +102,11 @@ private:
     {
         if (RecycledTweens.Num() > 0)
         {
+#if ENGINE_MAJOR_VERSION >= 5 && ENGINE_MINOR_VERSION >= 4
             return RecycledTweens.Pop(EAllowShrinking::No);
+#else
+            return RecycledTweens.Pop(false);
+#endif
         }
         return new T();
     }

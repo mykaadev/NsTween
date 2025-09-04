@@ -1,4 +1,4 @@
-// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #pragma once
 
@@ -6,7 +6,7 @@
 #include "Modules/ModuleManager.h"
 
 /**
- * Night Shift Tween Runtime Module
+ * Nulled Softworks Tween Runtime Module
  */
 class FNsTweenModule : public IModuleInterface
 {

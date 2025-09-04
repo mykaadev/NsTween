@@ -1,10 +1,10 @@
-// Copyright (C) 2025 mykaadev. All rights reserved.
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #pragma once
 #include "Library/NsTweenTypeLibrary.h"
 
 /**
- * Night Shift - Tween Easing
+ * Nulled Softworks - Tween Easing
  */
 class NSTWEEN_API NsTweenEasing
 {
