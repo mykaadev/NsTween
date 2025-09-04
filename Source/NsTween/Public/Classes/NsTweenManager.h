@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "Launch/Resources/Version.h"
+
 /**
  * Tween Manager
  */
