@@ -1,8 +1,13 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 /**
- * Adapted from Easing by RobertPenner (MIT) — refactored for NsTween types.
- * Original project license is bundled at ThirdPartyLicenses/RobertPenner-Easing-LICENSE
+ * Adapted from Fresh Cooked Tweens by Jared Cook (MIT)
+ *
+ * Easing functions by RobertPenner, license is bundled at ThirdPartyLicenses/RobertPenner-Easing-LICENSE
+ *
+ * Elastic and Stepped easing equations by Phaser, license is bundled at ThirdPartyLicenses/Phaser-Easing-LICENSE
+ *
+ * Optimized easing functions by Michaelangel007, license is bundled at ThirdPartyLicenses/Michaelange1007-Easing-LICENSE
  */
 
 #pragma once
