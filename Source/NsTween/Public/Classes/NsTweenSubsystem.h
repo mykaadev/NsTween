@@ -1,5 +1,9 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
+/**
+ * Adapted from Fresh Cooked Tweens by Jared Cook (MIT), with project-specific refactors.
+ * License: ThirdPartyLicenses/JaredCook-FreshCookedTweens-LICENSE
+ */
 #pragma once
 
 #include "Subsystems/GameInstanceSubsystem.h"

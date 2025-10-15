@@ -1,5 +1,9 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
+/**
+ * Adapted from Fresh Cooked Tweens by Jared Cook (MIT) — refactored for NsTween types and API.
+ * Original project license is bundled at ThirdPartyLicenses/JaredCook-FreshCookedTweens-LICENSE
+ */
 #pragma once
 
 #include "Classes/NsTweenEasing.h"

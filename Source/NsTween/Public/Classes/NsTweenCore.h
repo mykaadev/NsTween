@@ -1,5 +1,10 @@
 ﻿// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
+/**
+ * Adapted from Fresh Cooked Tweens by Jared Cook (MIT), internals reworked for NsTween.
+ * See ThirdPartyLicenses/JaredCook-FreshCookedTweens-LICENSE
+ */
+
 #pragma once
 
 #include "Library/NsTweenTypeLibrary.h"

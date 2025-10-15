@@ -141,4 +141,16 @@ Reach out via the **[profile page](https://github.com/mykaadev)**.
 
 ## 📃 License
 [![License](https://img.shields.io/badge/license-MIT-green)](https://www.tldrlegal.com/license/mit-license)
+
+## 🧾 Attribution
+
+NsTween is a fork of **Fresh Cooked Tweens** (MIT) by **Jared Cook**.
+Original project: https://github.com/jdcook/fresh_cooked_tweens
+The full Fresh Cooked Tweens MIT license is shipped at:
+`ThirdPartyLicenses/JaredCook-FreshCookedTweens-LICENSE`.
+
+NsTween easing functions are written and licensed by:
+`ThirdPartyLicenses/Michaelange1007-Easing-LICENSE`.
+`ThirdPartyLicenses/Phaser-Easing-LICENSE`.
+`ThirdPartyLicenses/RobertPenner-Easing-LICENSE`.
 <!-- GH_ONLY_END -->

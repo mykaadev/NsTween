@@ -1,5 +1,9 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
+/**
+ * Adapted from the Blueprint async action pattern used in Fresh Cooked Tweens by Jared Cook (MIT), consolidated and extended for NsTween.
+ * License at ThirdPartyLicenses/JaredCook-FreshCookedTweens-LICENSE
+ */
 #pragma once
 
 #include "Classes/NsTweenEasing.h"

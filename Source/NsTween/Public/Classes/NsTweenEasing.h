@@ -1,5 +1,10 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
+/**
+ * Adapted from Easing by RobertPenner (MIT) — refactored for NsTween types.
+ * Original project license is bundled at ThirdPartyLicenses/RobertPenner-Easing-LICENSE
+ */
+
 #pragma once
 #include "Library/NsTweenTypeLibrary.h"
 
