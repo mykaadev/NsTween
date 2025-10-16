@@ -8,45 +8,22 @@ public class NsTween : ModuleRules
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
 
-        PublicIncludePaths.AddRange(
-            new string[]
-            {
-                System.IO.Path.Combine(ModuleDirectory, "Public", "Classes")
-            }
-        );
-
-        PrivateIncludePaths.AddRange(
-            new string[]
-            {
-                System.IO.Path.Combine(ModuleDirectory, "Private", "Classes")
-            }
-        );
-
         PublicDependencyModuleNames.AddRange(
             new string[]
             {
                 "Core",
-                "DeveloperSettings",
-                // ... add other public dependencies that you statically link with here ...
+                "CoreUObject",
+                "Engine",
             }
         );
 
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
-                "CoreUObject",
-                "Engine",
                 "Slate",
-                "SlateCore",
-                // ... add private dependencies that you statically link with here ...
+                "SlateCore"
             }
         );
 
-        DynamicallyLoadedModuleNames.AddRange(
-            new string[]
-            {
-                // ... add any modules that your module loads dynamically here ...
-            }
-        );
     }
 }
