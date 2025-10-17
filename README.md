@@ -151,7 +151,44 @@ Use the following map when you need to dive deeper than the high-level feature o
 
 ### Authoring Guidance
 - Link your tutorials back to these files so the code snippets stay anchored to real implementations.
-- The next revision will add a Mermaid sequence diagram summarizing the `FNsTween::Play → Builder → Subsystem` hand-off to give reviewers a visual companion to the sections above.
+
+### Runtime Architecture Diagram
+Drop the following Mermaid block into any Markdown viewer that supports the `architecture-beta` syntax. It maps every hop a tween takes, from the public `FNsTween::Play` entry point through the builder and subsystem queue, into the runtime instance that ultimately calls your `ITweenValue` strategy and easing curve implementation.
+
+```mermaid
+---
+title: NsTween Runtime Architecture
+---
+architecture-beta
+    group publicApi(cloud)[Public API Surface]
+    service play(entrypoints)[FNsTween::Play<T>] in publicApi
+    service builder(builder)[FNsTweenBuilder] in publicApi
+    service state(stack)[FNsTweenBuilder::FState] in publicApi
+
+    group subsystem(server)[UNsTweenSubsystem]
+    service enqueue(queue)[EnqueueSpawn/Pause/Resume/Cancel] in subsystem
+    service commandQueue(queue)[MPSC CommandQueue] in subsystem
+    service process(flow)[ProcessCommands + SpawnTween] in subsystem
+    service ticker(clock)[FTSTicker Tick] in subsystem
+    service pool(database)[TweenPool] in subsystem
+
+    group instance(block)[Active Tween]
+    service tween(actor)[FNsTween] in instance
+    service strategy(settings)[ITweenValue Strategy] in instance
+    service easing(curve)[IEasingCurve] in instance
+
+    play:R -- L:builder
+    builder:B -- T:state
+    state:R -- L:enqueue
+    enqueue:B -- T:commandQueue
+    ticker:R -- L:process
+    commandQueue:R -- L:process
+    process:B -- T:pool
+    pool:R -- L:tween
+    tween:B -- T:strategy
+    tween:T -- B:easing
+    ticker:B -- T:pool
+```
 
 <!-- GH_ONLY_START -->
 ## ❤️ Credits
