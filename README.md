@@ -1,3 +1,5 @@
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
+
 <!-- GH_ONLY_START -->
 <h1 align="center">
   <br>
@@ -133,15 +135,23 @@ void AFloatingItem::BeginPlay()
 - `FNsTweenBuilder` – chainable object for configuring and controlling tweens.
 
 ## 🧭 Tech Documentation Layout
-The plugin’s public surface now mirrors the documented header structure, making it easier to locate examples and API references:
+Use the following map when you need to dive deeper than the high-level feature overview. Each entry mirrors the folder layout inside the plugin so you can jump straight from prose into the exact file that owns the logic.
 
-- `Source/NsTween/Public/NsTween.h` &mdash; entry point exposing `FNsTween::Play` and the default typed builders.
-- `Source/NsTween/Public/NsTweenTypeLibrary.h` &mdash; the consolidated enum/delegate/struct type library referenced throughout the docs.
-- `Source/NsTween/Public/Interfaces/ITweenValue.h` &mdash; interface contract for value strategies discussed in advanced topics.
-- `Source/NsTween/Public/Templates/` &mdash; header-only interpolator and callback strategy templates used in examples.
-- `Source/NsTween/Private/` &mdash; implementation details, including the subsystem, builder, and runtime strategies that are described in the “Under the Hood” section.
+### Public Surface (what consumers include)
+- [`Source/NsTween/Public/NsTween.h`](Source/NsTween/Public/NsTween.h) &mdash; contains `FNsTween::Play` and the templated `BuildT<T>` helpers that every example in the docs references.
+- [`Source/NsTween/Public/NsTweenTypeLibrary.h`](Source/NsTween/Public/NsTweenTypeLibrary.h) &mdash; enums, delegates, and light-weight structs used across the tutorials.
+- [`Source/NsTween/Public/Interfaces/ITweenValue.h`](Source/NsTween/Public/Interfaces/ITweenValue.h) &mdash; the strategy contract implemented by each type-specific value driver.
+- [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; header-only interpolators and callback strategies. These are safe to inspect even in Blueprint-only projects because they do not require linking.
 
-When writing tutorials or guides, link to these exact files so the layout stays consistent between prose and source.
+### Runtime Flow (what powers `FNsTween::Play`)
+- [`Source/NsTween/Private/NsTween.cpp`](Source/NsTween/Private/NsTween.cpp) &mdash; documents the lifetime of an active tween, including pause/cancel semantics and wrap modes.
+- [`Source/NsTween/Private/NsTweenBuilder.cpp`](Source/NsTween/Private/NsTweenBuilder.cpp) &mdash; shows how specs become runtime objects before entering the subsystem.
+- [`Source/NsTween/Private/NsTweenSubsystem.cpp`](Source/NsTween/Private/NsTweenSubsystem.cpp) &mdash; central tick loop and allocation strategy for live tweens.
+- [`Source/NsTween/Private/NsTweenFunctionLibrary.cpp`](Source/NsTween/Private/NsTweenFunctionLibrary.cpp) &mdash; Blueprint entry points that now delegate into the builder so C++ and Blueprint stay in sync.
+
+### Authoring Guidance
+- Link your tutorials back to these files so the code snippets stay anchored to real implementations.
+- The next revision will add a Mermaid sequence diagram summarizing the `FNsTween::Play → Builder → Subsystem` hand-off to give reviewers a visual companion to the sections above.
 
 <!-- GH_ONLY_START -->
 ## ❤️ Credits
