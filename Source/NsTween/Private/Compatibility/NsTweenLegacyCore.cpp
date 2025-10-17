@@ -3,18 +3,18 @@
 #include "Compatibility/NsTweenLegacyCore.h"
 
 #include "Engine/Engine.h"
-#include "TweenManager.h"
+#include "NsTweenSubsystem.h"
 
 namespace
 {
-UNsTweenManagerSubsystem* GetLegacyManager()
+UNsTweenSubsystem* GetLegacyManager()
 {
     if (!GEngine)
     {
         return nullptr;
     }
 
-    return GEngine->GetEngineSubsystem<UNsTweenManagerSubsystem>();
+    return GEngine->GetEngineSubsystem<UNsTweenSubsystem>();
 }
 }
 
@@ -154,7 +154,7 @@ FNsTweenInstance& FNsTweenInstance::OnPingPong(TFunction<void()> Callback)
 void FNsTweenInstance::Pause() const
 {
     Activate();
-    if (UNsTweenManagerSubsystem* Manager = GetLegacyManager())
+    if (UNsTweenSubsystem* Manager = GetLegacyManager())
     {
         Manager->EnqueuePause(State->Handle);
     }
@@ -163,7 +163,7 @@ void FNsTweenInstance::Pause() const
 void FNsTweenInstance::Resume() const
 {
     Activate();
-    if (UNsTweenManagerSubsystem* Manager = GetLegacyManager())
+    if (UNsTweenSubsystem* Manager = GetLegacyManager())
     {
         Manager->EnqueueResume(State->Handle);
     }
@@ -172,7 +172,7 @@ void FNsTweenInstance::Resume() const
 void FNsTweenInstance::Cancel(bool bApplyFinal) const
 {
     Activate();
-    if (UNsTweenManagerSubsystem* Manager = GetLegacyManager())
+    if (UNsTweenSubsystem* Manager = GetLegacyManager())
     {
         Manager->EnqueueCancel(State->Handle, bApplyFinal);
     }
@@ -186,17 +186,17 @@ bool FNsTweenInstance::IsActive() const
     }
 
     Activate();
-    if (UNsTweenManagerSubsystem* Manager = GetLegacyManager())
+    if (UNsTweenSubsystem* Manager = GetLegacyManager())
     {
         return Manager->IsActive(State->Handle);
     }
     return false;
 }
 
-FNovaTweenHandle FNsTweenInstance::GetHandle() const
+FNsTweenHandle FNsTweenInstance::GetHandle() const
 {
     Activate();
-    return State.IsValid() ? State->Handle : FNovaTweenHandle();
+    return State.IsValid() ? State->Handle : FNsTweenHandle();
 }
 
 void FNsTweenInstance::Activate() const
@@ -211,7 +211,7 @@ void FNsTweenInstance::Activate() const
         return;
     }
 
-    if (UNsTweenManagerSubsystem* Manager = GetLegacyManager())
+    if (UNsTweenSubsystem* Manager = GetLegacyManager())
     {
         TSharedPtr<ITweenValue> Strategy = State->StrategyFactory();
         if (Strategy.IsValid())
@@ -236,18 +236,18 @@ void FNsTweenInstance::UpdateLoopSettings() const
 
     if (State->bPingPong)
     {
-        State->Spec.WrapMode = ENovaTweenWrapMode::PingPong;
+        State->Spec.WrapMode = ENsTweenWrapMode::PingPong;
     }
     else if (State->RequestedLoopCount != 0)
     {
-        State->Spec.WrapMode = ENovaTweenWrapMode::Loop;
+        State->Spec.WrapMode = ENsTweenWrapMode::Loop;
     }
     else
     {
-        State->Spec.WrapMode = ENovaTweenWrapMode::Once;
+        State->Spec.WrapMode = ENsTweenWrapMode::Once;
     }
 
-    if (State->Spec.WrapMode == ENovaTweenWrapMode::Once)
+    if (State->Spec.WrapMode == ENsTweenWrapMode::Once)
     {
         State->Spec.LoopCount = 0;
     }
@@ -257,31 +257,10 @@ void FNsTweenInstance::UpdateLoopSettings() const
     }
 }
 
-ENovaEasingPreset NsTweenCore::Internal::ConvertEase(ENsTweenEase Ease)
-{
-    switch (Ease)
-    {
-    default:
-    case ENsTweenEase::Linear: return ENovaEasingPreset::Linear;
-    case ENsTweenEase::InSine: return ENovaEasingPreset::EaseInSine;
-    case ENsTweenEase::OutSine: return ENovaEasingPreset::EaseOutSine;
-    case ENsTweenEase::InOutSine: return ENovaEasingPreset::EaseInOutSine;
-    case ENsTweenEase::InQuad: return ENovaEasingPreset::EaseInQuad;
-    case ENsTweenEase::OutQuad: return ENovaEasingPreset::EaseOutQuad;
-    case ENsTweenEase::InOutQuad: return ENovaEasingPreset::EaseInOutQuad;
-    case ENsTweenEase::InCubic: return ENovaEasingPreset::EaseInCubic;
-    case ENsTweenEase::OutCubic: return ENovaEasingPreset::EaseOutCubic;
-    case ENsTweenEase::InOutCubic: return ENovaEasingPreset::EaseInOutCubic;
-    case ENsTweenEase::InExpo: return ENovaEasingPreset::EaseInExpo;
-    case ENsTweenEase::OutExpo: return ENovaEasingPreset::EaseOutExpo;
-    case ENsTweenEase::InOutExpo: return ENovaEasingPreset::EaseInOutExpo;
-    }
-}
-
 namespace NsTweenCore
 {
 
-TTweenBuilder<float> Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(float)> Update)
+TTweenBuilder<float> Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update)
 {
     return TTweenBuilder<float>(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
 }

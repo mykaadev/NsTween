@@ -3,30 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "TweenHandle.h"
-#include "TweenSpec.h"
+#include "NsTweenTypeLibrary.h"
 
 class ITweenValue;
 class IEasingCurve;
 
-struct FTweenInstance
+struct FNsTween
 {
-    FTweenInstance(const FNovaTweenHandle& InHandle, FNovaTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing);
+    FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing);
 
     bool Tick(float DeltaSeconds);
     void Cancel(bool bApplyFinal);
     void SetPaused(bool bInPaused);
 
     bool IsActive() const { return bActive; }
-    const FNovaTweenHandle& GetHandle() const { return Handle; }
+    const FNsTweenHandle& GetHandle() const { return Handle; }
 
 private:
     void Apply(float CycleTime);
     bool HandleBoundary(float& RemainingTime);
 
 private:
-    FNovaTweenHandle Handle;
-    FNovaTweenSpec Spec;
+    FNsTweenHandle Handle;
+    FNsTweenSpec Spec;
     TSharedPtr<ITweenValue> Strategy;
     TSharedPtr<IEasingCurve> Easing;
 

@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
-#include "TweenHandle.h"
-#include "TweenSpec.h"
+#include "NsTweenTypeLibrary.h"
 #include "NsTweenAsyncAction.generated.h"
 
-class UNsTweenManagerSubsystem;
+class UNsTweenSubsystem;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNovaTweenAsyncUpdate, float, NormalizedAlpha);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNovaTweenAsyncEvent);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FNsTweenAsyncUpdate, float, NormalizedAlpha);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNsTweenAsyncEvent);
 
 UCLASS()
 class NSTWEEN_API UNsTweenAsyncAction : public UBlueprintAsyncActionBase
@@ -20,19 +19,19 @@ class NSTWEEN_API UNsTweenAsyncAction : public UBlueprintAsyncActionBase
 
 public:
     UPROPERTY(BlueprintAssignable)
-    FNovaTweenAsyncUpdate OnUpdate;
+    FNsTweenAsyncUpdate OnUpdate;
 
     UPROPERTY(BlueprintAssignable)
-    FNovaTweenAsyncEvent OnComplete;
+    FNsTweenAsyncEvent OnComplete;
 
     UPROPERTY(BlueprintAssignable)
-    FNovaTweenAsyncEvent OnLoop;
+    FNsTweenAsyncEvent OnLoop;
 
     UPROPERTY(BlueprintAssignable)
-    FNovaTweenAsyncEvent OnPingPong;
+    FNsTweenAsyncEvent OnPingPong;
 
     UFUNCTION(BlueprintCallable, meta = (BlueprintInternalUseOnly = "true", WorldContext = "WorldContextObject"))
-    static UNsTweenAsyncAction* PlayFloatTween(UObject* WorldContextObject, float StartValue, float EndValue, UPARAM(ref) float& Target, const FNovaTweenSpec& Spec);
+    static UNsTweenAsyncAction* PlayFloatTween(UObject* WorldContextObject, float StartValue, float EndValue, UPARAM(ref) float& Target, const FNsTweenSpec& Spec);
 
     void Activate() override;
     virtual void SetReadyToDestroy() override;
@@ -56,8 +55,8 @@ private:
     UPROPERTY()
     UObject* WorldContext = nullptr;
 
-    FNovaTweenSpec Spec;
-    FNovaTweenHandle Handle;
+    FNsTweenSpec Spec;
+    FNsTweenHandle Handle;
     float StartValue = 0.f;
     float EndValue = 1.f;
     float* TargetPtr = nullptr;

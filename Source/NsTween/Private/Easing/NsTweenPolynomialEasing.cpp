@@ -1,40 +1,40 @@
-#include "Easing/PolynomialEasing.h"
+#include "Easing/NsTweenPolynomialEasing.h"
 #include "Math/UnrealMathUtility.h"
 
-FPolynomialEasing::FPolynomialEasing(ENovaEasingPreset InPreset)
+FNsTweenPolynomialEasing::FNsTweenPolynomialEasing(ENsTweenEase InPreset)
     : Preset(InPreset)
 {
 }
 
-float FPolynomialEasing::Evaluate(float T) const
+float FNsTweenPolynomialEasing::Evaluate(float T) const
 {
     T = FMath::Clamp(T, 0.f, 1.f);
 
     switch (Preset)
     {
-    case ENovaEasingPreset::EaseInSine:
+    case ENsTweenEase::InSine:
         return 1.f - FMath::Cos((T * PI) * 0.5f);
-    case ENovaEasingPreset::EaseOutSine:
+    case ENsTweenEase::OutSine:
         return FMath::Sin((T * PI) * 0.5f);
-    case ENovaEasingPreset::EaseInOutSine:
+    case ENsTweenEase::InOutSine:
         return -0.5f * (FMath::Cos(PI * T) - 1.f);
-    case ENovaEasingPreset::EaseInQuad:
+    case ENsTweenEase::InQuad:
         return T * T;
-    case ENovaEasingPreset::EaseOutQuad:
+    case ENsTweenEase::OutQuad:
         return 1.f - (1.f - T) * (1.f - T);
-    case ENovaEasingPreset::EaseInOutQuad:
+    case ENsTweenEase::InOutQuad:
         return T < 0.5f ? 2.f * T * T : 1.f - FMath::Pow(-2.f * T + 2.f, 2.f) * 0.5f;
-    case ENovaEasingPreset::EaseInCubic:
+    case ENsTweenEase::InCubic:
         return T * T * T;
-    case ENovaEasingPreset::EaseOutCubic:
+    case ENsTweenEase::OutCubic:
         return 1.f - FMath::Pow(1.f - T, 3.f);
-    case ENovaEasingPreset::EaseInOutCubic:
+    case ENsTweenEase::InOutCubic:
         return T < 0.5f ? 4.f * T * T * T : 1.f - FMath::Pow(-2.f * T + 2.f, 3.f) * 0.5f;
-    case ENovaEasingPreset::EaseInExpo:
+    case ENsTweenEase::InExpo:
         return FMath::IsNearlyZero(T) ? 0.f : FMath::Pow(2.f, 10.f * T - 10.f);
-    case ENovaEasingPreset::EaseOutExpo:
+    case ENsTweenEase::OutExpo:
         return FMath::IsNearlyEqual(T, 1.f) ? 1.f : 1.f - FMath::Pow(2.f, -10.f * T);
-    case ENovaEasingPreset::EaseInOutExpo:
+    case ENsTweenEase::InOutExpo:
         if (FMath::IsNearlyZero(T))
         {
             return 0.f;
@@ -48,7 +48,7 @@ float FPolynomialEasing::Evaluate(float T) const
             return FMath::Pow(2.f, 20.f * T - 10.f) * 0.5f;
         }
         return (2.f - FMath::Pow(2.f, -20.f * T + 10.f)) * 0.5f;
-    case ENovaEasingPreset::Linear:
+    case ENsTweenEase::Linear:
     default:
         return T;
     }

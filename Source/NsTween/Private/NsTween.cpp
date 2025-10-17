@@ -1,9 +1,8 @@
 // Copyright (C) 2024 mykaa. All rights reserved.
 
-#include "TweenInstance.h"
+#include "NsTween.h"
 #include "Interfaces/ITweenValue.h"
 #include "Interfaces/IEasingCurve.h"
-#include "TweenDelegates.h"
 #include "Math/UnrealMathUtility.h"
 
 namespace
@@ -11,18 +10,18 @@ namespace
     constexpr float SMALL_DELTA = 1.e-6f;
 }
 
-FTweenInstance::FTweenInstance(const FNovaTweenHandle& InHandle, FNovaTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing)
+FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing)
     : Handle(InHandle)
     , Spec(MoveTemp(InSpec))
     , Strategy(MoveTemp(InStrategy))
     , Easing(MoveTemp(InEasing))
     , DelayRemaining(FMath::Max(0.f, InSpec.DelaySeconds))
-    , CycleTime(InSpec.Direction == ENovaTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_DELTA))
-    , bPlayingForward(InSpec.Direction != ENovaTweenDirection::Backward)
+    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_DELTA))
+    , bPlayingForward(InSpec.Direction != ENsTweenDirection::Backward)
 {
 }
 
-bool FTweenInstance::Tick(float DeltaSeconds)
+bool FNsTween::Tick(float DeltaSeconds)
 {
     if (!bActive || bPaused || !Strategy.IsValid() || !Easing.IsValid())
     {
@@ -32,7 +31,7 @@ bool FTweenInstance::Tick(float DeltaSeconds)
     if (!bInitialized)
     {
         Strategy->Initialize();
-        if (Spec.Direction == ENovaTweenDirection::Backward)
+        if (Spec.Direction == ENsTweenDirection::Backward)
         {
             Strategy->ApplyFinal();
         }
@@ -89,7 +88,7 @@ bool FTweenInstance::Tick(float DeltaSeconds)
     return bActive;
 }
 
-void FTweenInstance::Cancel(bool bApplyFinal)
+void FNsTween::Cancel(bool bApplyFinal)
 {
     if (!bActive)
     {
@@ -109,21 +108,21 @@ void FTweenInstance::Cancel(bool bApplyFinal)
     bActive = false;
 }
 
-void FTweenInstance::SetPaused(bool bInPaused)
+void FNsTween::SetPaused(bool bInPaused)
 {
     bPaused = bInPaused;
 }
 
-void FTweenInstance::Apply(float InCycleTime)
+void FNsTween::Apply(float InCycleTime)
 {
     if (!Strategy.IsValid() || !Easing.IsValid())
     {
         return;
     }
 
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
-    float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
-    float EasedAlpha = Easing->Evaluate(LinearAlpha);
+    const float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    const float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
+    const float EasedAlpha = Easing->Evaluate(LinearAlpha);
 
     Strategy->Apply(EasedAlpha);
     if (Spec.OnUpdate.IsBound())
@@ -132,13 +131,13 @@ void FTweenInstance::Apply(float InCycleTime)
     }
 }
 
-bool FTweenInstance::HandleBoundary(float& RemainingTime)
+bool FNsTween::HandleBoundary(float& RemainingTime)
 {
     float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
 
     switch (Spec.WrapMode)
     {
-    case ENovaTweenWrapMode::Once:
+    case ENsTweenWrapMode::Once:
         if (Spec.OnComplete.IsBound())
         {
             Spec.OnComplete.Execute();
@@ -147,7 +146,7 @@ bool FTweenInstance::HandleBoundary(float& RemainingTime)
         bActive = false;
         return false;
 
-    case ENovaTweenWrapMode::Loop:
+    case ENsTweenWrapMode::Loop:
         ++CompletedCycles;
         if (Spec.OnLoop.IsBound())
         {
@@ -166,10 +165,10 @@ bool FTweenInstance::HandleBoundary(float& RemainingTime)
         }
 
         CycleTime = 0.f;
-        bPlayingForward = (Spec.Direction != ENovaTweenDirection::Backward);
+        bPlayingForward = (Spec.Direction != ENsTweenDirection::Backward);
         break;
 
-    case ENovaTweenWrapMode::PingPong:
+    case ENsTweenWrapMode::PingPong:
         bPlayingForward = !bPlayingForward;
         if (Spec.OnPingPong.IsBound())
         {

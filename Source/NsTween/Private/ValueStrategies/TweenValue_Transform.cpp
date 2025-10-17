@@ -24,11 +24,12 @@ void FTweenValue_Transform::Apply(float EasedAlpha)
         return;
     }
 
-    FVector Location = FMath::Lerp(StartValue.GetLocation(), EndValue.GetLocation(), EasedAlpha);
-    FVector Scale = FMath::Lerp(StartValue.GetScale3D(), EndValue.GetScale3D(), EasedAlpha);
-    FQuat Rotation = FQuat::Slerp(StartValue.GetRotation(), EndValue.GetRotation(), EasedAlpha).GetNormalized();
+    const FVector Location = FMath::Lerp(StartValue.GetLocation(), EndValue.GetLocation(), EasedAlpha);
+    const FVector Scale = FMath::Lerp(StartValue.GetScale3D(), EndValue.GetScale3D(), EasedAlpha);
+    const FQuat Rotation = FQuat::Slerp(StartValue.GetRotation(), EndValue.GetRotation(), EasedAlpha).GetNormalized();
 
-    Target->SetLocationAndRotation(Location, Rotation);
+    Target->SetLocation(Location);
+    Target->SetRotation(Rotation);
     Target->SetScale3D(Scale);
 }
 

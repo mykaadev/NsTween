@@ -1,13 +1,13 @@
-#include "Easing/CurveAssetEasingAdapter.h"
+#include "Easing/NsTweenCurveAssetEasingAdapter.h"
 #include "Curves/CurveFloat.h"
 #include "Math/UnrealMathUtility.h"
 
-FCurveAssetEasingAdapter::FCurveAssetEasingAdapter(TWeakObjectPtr<UCurveFloat> InCurve)
+FNsTweenCurveAssetEasingAdapter::FNsTweenCurveAssetEasingAdapter(TWeakObjectPtr<UCurveFloat> InCurve)
     : Curve(InCurve)
 {
 }
 
-float FCurveAssetEasingAdapter::Evaluate(float T) const
+float FNsTweenCurveAssetEasingAdapter::Evaluate(float T) const
 {
     if (const UCurveFloat* CurveAsset = Curve.Get())
     {

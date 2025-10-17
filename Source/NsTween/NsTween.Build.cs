@@ -25,5 +25,13 @@ public class NsTween : ModuleRules
             }
         );
 
+        // Editor-only deps guarded
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.AddRange(new[]
+            {
+                "UnrealEd"
+            });
+        }
     }
 }

@@ -1,7 +1,7 @@
 #include "NsTweenAsyncAction.h"
-#include "TweenBlueprintLibrary.h"
+#include "NsTweenFunctionLibrary.h"
 
-UNsTweenAsyncAction* UNsTweenAsyncAction::PlayFloatTween(UObject* WorldContextObject, float StartValue, float EndValue, float& Target, const FNovaTweenSpec& Spec)
+UNsTweenAsyncAction* UNsTweenAsyncAction::PlayFloatTween(UObject* WorldContextObject, float StartValue, float EndValue, float& Target, const FNsTweenSpec& Spec)
 {
     UNsTweenAsyncAction* Action = NewObject<UNsTweenAsyncAction>();
     Action->WorldContext = WorldContextObject;
@@ -49,10 +49,10 @@ void UNsTweenAsyncAction::SetReadyToDestroy()
 
 void UNsTweenAsyncAction::BindDelegates()
 {
-    Spec.OnUpdate.BindDynamic(this, &UNsTweenAsyncAction::HandleUpdate);
-    Spec.OnComplete.BindDynamic(this, &UNsTweenAsyncAction::HandleComplete);
-    Spec.OnLoop.BindDynamic(this, &UNsTweenAsyncAction::HandleLoop);
-    Spec.OnPingPong.BindDynamic(this, &UNsTweenAsyncAction::HandlePingPong);
+    Spec.OnUpdate.BindUObject(this, &UNsTweenAsyncAction::HandleUpdate);
+    Spec.OnComplete.BindUObject(this, &UNsTweenAsyncAction::HandleComplete);
+    Spec.OnLoop.BindUObject(this, &UNsTweenAsyncAction::HandleLoop);
+    Spec.OnPingPong.BindUObject(this, &UNsTweenAsyncAction::HandlePingPong);
 }
 
 void UNsTweenAsyncAction::HandleUpdate(float NormalizedAlpha)

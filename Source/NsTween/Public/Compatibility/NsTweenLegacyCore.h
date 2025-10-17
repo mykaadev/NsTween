@@ -4,43 +4,21 @@
 
 #include "CoreMinimal.h"
 #include "Interfaces/ITweenValue.h"
-#include "TweenEnums.h"
-#include "TweenHandle.h"
-#include "TweenSpec.h"
+#include "NsTweenTypeLibrary.h"
 
-class UNsTweenManagerSubsystem;
-
-namespace NsTweenCore
-{
-enum class ENsTweenEase : uint8
-{
-    Linear = 0,
-    InSine,
-    OutSine,
-    InOutSine,
-    InQuad,
-    OutQuad,
-    InOutQuad,
-    InCubic,
-    OutCubic,
-    InOutCubic,
-    InExpo,
-    OutExpo,
-    InOutExpo
-};
-}
+class UNsTweenSubsystem;
 
 class NSTWEEN_API FNsTweenInstance
 {
 public:
     struct FSharedState : public TSharedFromThis<FSharedState>
     {
-        FNovaTweenSpec Spec;
+        FNsTweenSpec Spec;
         TFunction<TSharedPtr<ITweenValue>()> StrategyFactory;
         TSharedPtr<TFunction<void()>> CompleteCallback;
         TSharedPtr<TFunction<void()>> LoopCallback;
         TSharedPtr<TFunction<void()>> PingPongCallback;
-        FNovaTweenHandle Handle;
+        FNsTweenHandle Handle;
         int32 RequestedLoopCount = 0;
         bool bPingPong = false;
         bool bActivated = false;
@@ -65,7 +43,7 @@ public:
     void Cancel(bool bApplyFinal = true) const;
     bool IsActive() const;
 
-    FNovaTweenHandle GetHandle() const;
+    FNsTweenHandle GetHandle() const;
 
 protected:
     void Activate() const;
@@ -93,7 +71,15 @@ namespace Internal
     {
         static FRotator Lerp(const FRotator& A, const FRotator& B, float Alpha)
         {
-            return FMath::LerpShortestPath(A, B, Alpha);
+            const float T = FMath::Clamp(Alpha, 0.f, 1.f);
+
+            // Convert to quaternions and slerp; FQuat::Slerp uses the shortest path
+            const FQuat QA = A.Quaternion();
+            const FQuat QB = B.Quaternion();
+            const FQuat Q  = FQuat::Slerp(QA, QB, T).GetNormalized();
+
+            // Convert back to rotator; normalize to keep angles tidy
+            return Q.Rotator();
         }
     };
 
@@ -166,8 +152,6 @@ namespace Internal
     {
         return MakeShared<TCallbackTweenValue<TValue>>(StartValue, EndValue, MoveTemp(Update));
     }
-
-    NSTWEEN_API ENovaEasingPreset ConvertEase(ENsTweenEase Ease);
 }
 
 template <typename TValue>
@@ -182,10 +166,10 @@ public:
         State->Spec.DurationSeconds = Duration;
         State->Spec.DelaySeconds = 0.f;
         State->Spec.TimeScale = 1.f;
-        State->Spec.WrapMode = ENovaTweenWrapMode::Once;
+        State->Spec.WrapMode = ENsTweenWrapMode::Once;
         State->Spec.LoopCount = 0;
-        State->Spec.Direction = ENovaTweenDirection::Forward;
-        State->Spec.EasingPreset = Internal::ConvertEase(Ease);
+        State->Spec.Direction = ENsTweenDirection::Forward;
+        State->Spec.EasingPreset = Ease;
         State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
         {
             return Internal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
@@ -207,7 +191,7 @@ public:
     }
 };
 
-NSTWEEN_API TTweenBuilder<float> Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(float)> Update);
+NSTWEEN_API TTweenBuilder<float> Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update);
 NSTWEEN_API TTweenBuilder<FVector> Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector&)> Update);
 NSTWEEN_API TTweenBuilder<FRotator> Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FRotator&)> Update);
 NSTWEEN_API TTweenBuilder<FTransform> Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FTransform&)> Update);
@@ -216,7 +200,7 @@ NSTWEEN_API TTweenBuilder<FLinearColor> Play(const FLinearColor& StartValue, con
 template <typename TCallable>
 TTweenBuilder<float> Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
 {
-    return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(float)>(Forward<TCallable>(Update)));
+    return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const float&)>(Forward<TCallable>(Update)));
 }
 
 template <typename TCallable>

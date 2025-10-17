@@ -7,10 +7,10 @@
 
 class UCurveFloat;
 
-class NSTWEEN_API FCurveAssetEasingAdapter : public IEasingCurve
+class NSTWEEN_API FNsTweenCurveAssetEasingAdapter : public IEasingCurve
 {
 public:
-    explicit FCurveAssetEasingAdapter(TWeakObjectPtr<UCurveFloat> InCurve);
+    explicit FNsTweenCurveAssetEasingAdapter(TWeakObjectPtr<UCurveFloat> InCurve);
 
     virtual float Evaluate(float T) const override;
 
