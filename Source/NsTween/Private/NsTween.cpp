@@ -4,11 +4,8 @@
 #include "Interfaces/ITweenValue.h"
 #include "Interfaces/IEasingCurve.h"
 #include "Math/UnrealMathUtility.h"
-
-namespace
-{
-    constexpr float SMALL_DELTA = 1.e-6f;
-}
+#include "Engine/Engine.h"
+#include "NsTweenSubsystem.h"
 
 FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing)
     : Handle(InHandle)
@@ -16,7 +13,7 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
     , Strategy(MoveTemp(InStrategy))
     , Easing(MoveTemp(InEasing))
     , DelayRemaining(FMath::Max(0.f, InSpec.DelaySeconds))
-    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_DELTA))
+    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_NUMBER))
     , bPlayingForward(InSpec.Direction != ENsTweenDirection::Backward)
 {
 }
@@ -39,12 +36,12 @@ bool FNsTween::Tick(float DeltaSeconds)
     }
 
     float ScaledDelta = DeltaSeconds * FMath::Max(Spec.TimeScale, 0.f);
-    if (ScaledDelta <= SMALL_DELTA)
+    if (ScaledDelta <= SMALL_NUMBER)
     {
         return true;
     }
 
-    if (DelayRemaining > SMALL_DELTA)
+    if (DelayRemaining > SMALL_NUMBER)
     {
         if (ScaledDelta < DelayRemaining)
         {
@@ -57,9 +54,9 @@ bool FNsTween::Tick(float DeltaSeconds)
     }
 
     float RemainingTime = ScaledDelta;
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
 
-    while (RemainingTime > SMALL_DELTA && bActive)
+    while (RemainingTime > SMALL_NUMBER && bActive)
     {
         const float DirectionFactor = bPlayingForward ? 1.f : -1.f;
         float NextCycleTime = CycleTime + RemainingTime * DirectionFactor;
@@ -120,7 +117,7 @@ void FNsTween::Apply(float InCycleTime)
         return;
     }
 
-    const float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    const float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
     const float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
     const float EasedAlpha = Easing->Evaluate(LinearAlpha);
 
@@ -133,7 +130,7 @@ void FNsTween::Apply(float InCycleTime)
 
 bool FNsTween::HandleBoundary(float& RemainingTime)
 {
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
 
     switch (Spec.WrapMode)
     {

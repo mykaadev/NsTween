@@ -89,7 +89,7 @@ bool UNsTweenSubsystem::ShouldTick() const
         {
             const EWorldType::Type WT = Ctx.WorldType;
             const bool bGameLike = (WT == EWorldType::PIE) || (WT == EWorldType::Game) || (WT == EWorldType::GamePreview);
-            if (bGameLike && !orldWWorld->bIsTearingDown)
+            if (bGameLike && !World->bIsTearingDown)
             {
                 bHasGameWorld = true;
                 break;
@@ -152,6 +152,32 @@ void UNsTweenSubsystem::StopAllTweens(bool bApplyFinalOnCancel)
         }
     }
     TweenPool.Reset();
+}
+
+UNsTweenSubsystem* UNsTweenSubsystem::GetSubsystem()
+{
+    UNsTweenSubsystem* ToReturn = nullptr;
+
+    if (GEngine != nullptr)
+    {
+        // Iterate through World Contexts until a Game World is found
+        for (const FWorldContext& Context : GEngine->GetWorldContexts())
+        {
+            if (const UWorld* const World = Context.World())
+            {
+                if (World->IsGameWorld() || World->IsPlayInEditor())
+                {
+                    if (UNsTweenSubsystem* const Subsystem = UGameInstance::GetSubsystem<UNsTweenSubsystem>(World->GetGameInstance()))
+                    {
+                        ToReturn = Subsystem;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    return ToReturn;
 }
 
 void UNsTweenSubsystem::DrainCommandQueue()
