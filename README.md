@@ -40,7 +40,7 @@ NsTween is a small yet powerful tweening framework for Unreal Engine. It allows 
 ## 📦 Features
 - **Multiple data types**: `Float`, `Vector`, `Vector2D`, `Rotator`, `Quaternion`, `Transform` and `Color` values.
 - **Custom easing**: Choose from many easing curves or drive interpolation via a user supplied curve.
-- **Warp mode**: Built-in `Looping`, `Delays` and`Ping-Pong` behaviours.
+- **Warp mode**: Built-in `Looping`, `Delays` and `Ping-Pong` behaviours.
 - **Direction**: Chose between `Forward` or `Backward`
 - **Blueprint actions**: Async Blueprint nodes for quick setup without code.
 - **Subsystem based**: A Subsystem to handle all the active tweens.
