@@ -140,13 +140,12 @@ Use the following map when you need to dive deeper than the high-level feature o
 - [`Source/NsTween/Public/NsTween.h`](Source/NsTween/Public/NsTween.h) &mdash; contains `FNsTween::Play` and the templated `BuildT<T>` helpers that every example in the docs references.
 - [`Source/NsTween/Public/NsTweenTypeLibrary.h`](Source/NsTween/Public/NsTweenTypeLibrary.h) &mdash; enums, delegates, and light-weight structs used across the tutorials.
 - [`Source/NsTween/Public/Interfaces/ITweenValue.h`](Source/NsTween/Public/Interfaces/ITweenValue.h) &mdash; the strategy contract implemented by each type-specific value driver.
-- [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; header-only interpolators and callback strategies. These are safe to inspect even in Blueprint-only projects because they do not require linking.
+- [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; header-only interpolators and callback strategies.
 
 ### Runtime Flow
 - [`Source/NsTween/Private/NsTween.cpp`](Source/NsTween/Private/NsTween.cpp) &mdash; documents the lifetime of an active tween, including pause/cancel semantics and wrap modes.
 - [`Source/NsTween/Private/NsTweenBuilder.cpp`](Source/NsTween/Private/NsTweenBuilder.cpp) &mdash; shows how specs become runtime objects before entering the subsystem.
-- [`Source/NsTween/Private/NsTweenSubsystem.cpp`](Source/NsTween/Private/NsTweenSubsystem.cpp) &mdash; central tick loop and allocation strategy for live tweens.
-- [`Source/NsTween/Private/NsTweenFunctionLibrary.cpp`](Source/NsTween/Private/NsTweenFunctionLibrary.cpp) &mdash; Blueprint entry points that now delegate into the builder so C++ and Blueprint stay in sync.
+- [`Source/NsTween/Private/NsTweenSubsystem.cpp`](Source/NsTween/Private/NsTweenSubsystem.cpp) &mdash; central tick loop and allocation strategy for live tweens
 
 <!-- GH_ONLY_START -->
 ## ❤️ Credits
@@ -158,7 +157,6 @@ Reach out via the **[profile page](https://github.com/mykaadev)**.
 ## 📃 License
 [![License](https://img.shields.io/badge/license-MIT-green)](https://www.tldrlegal.com/license/mit-license)
 
-## 🧾 Acknowledgements
 ## 🧾 Acknowledgement
 Special thanks to **Jared Cook** and **Fresh Cooked Tweens** for inspiring this project. From this point forward, our roadmap and priorities differ, and the projects will evolve independently.
 <!-- GH_ONLY_END -->
