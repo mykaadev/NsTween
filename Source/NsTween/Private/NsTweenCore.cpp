@@ -76,6 +76,15 @@ FNsTweenHandleRef& FNsTweenHandleRef::SetTimeScale(float TimeScale)
     return *this;
 }
 
+FNsTweenHandleRef& FNsTweenHandleRef::SetCurveAsset(UCurveFloat* Curve)
+{
+    if (CanConfigure())
+    {
+        State->Spec.CurveAsset = Curve;
+    }
+    return *this;
+}
+
 FNsTweenHandleRef& FNsTweenHandleRef::OnComplete(TFunction<void()> Callback)
 {
     if (CanConfigure())
@@ -270,7 +279,17 @@ FBuilder Play(const FVector& StartValue, const FVector& EndValue, float Duration
     return FBuilder::Create(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
 }
 
+FBuilder Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector2D&)> Update)
+{
+    return FBuilder::Create(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+}
+
 FBuilder Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FRotator&)> Update)
+{
+    return FBuilder::Create(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+}
+
+FBuilder Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FQuat&)> Update)
 {
     return FBuilder::Create(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
 }

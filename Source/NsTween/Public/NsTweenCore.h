@@ -6,6 +6,8 @@
 #include "Interfaces/ITweenValue.h"
 #include "NsTweenTypeLibrary.h"
 
+class UCurveFloat;
+
 class UNsTweenSubsystem;
 
 class NSTWEEN_API FNsTweenHandleRef
@@ -33,6 +35,7 @@ public:
     FNsTweenHandleRef& SetLoops(int32 LoopCount);
     FNsTweenHandleRef& SetDelay(float DelaySeconds);
     FNsTweenHandleRef& SetTimeScale(float TimeScale);
+    FNsTweenHandleRef& SetCurveAsset(UCurveFloat* Curve);
 
     FNsTweenHandleRef& OnComplete(TFunction<void()> Callback);
     FNsTweenHandleRef& OnLoop(TFunction<void()> Callback);
@@ -63,6 +66,15 @@ namespace Internal
         static TValue Lerp(const TValue& A, const TValue& B, float Alpha)
         {
             return FMath::Lerp(A, B, Alpha);
+        }
+    };
+
+    template <>
+    struct TInterpolator<FVector2D>
+    {
+        static FVector2D Lerp(const FVector2D& A, const FVector2D& B, float Alpha)
+        {
+            return A + (B - A) * Alpha;
         }
     };
 
@@ -98,6 +110,16 @@ namespace Internal
         static FLinearColor Lerp(const FLinearColor& A, const FLinearColor& B, float Alpha)
         {
             return FLinearColor::LerpUsingHSV(A, B, Alpha);
+        }
+    };
+
+    template <>
+    struct TInterpolator<FQuat>
+    {
+        static FQuat Lerp(const FQuat& A, const FQuat& B, float Alpha)
+        {
+            const float T = FMath::Clamp(Alpha, 0.f, 1.f);
+            return FQuat::Slerp(A, B, T).GetNormalized();
         }
     };
 
@@ -194,7 +216,9 @@ public:
 
 NSTWEEN_API FBuilder Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update);
 NSTWEEN_API FBuilder Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector&)> Update);
+NSTWEEN_API FBuilder Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector2D&)> Update);
 NSTWEEN_API FBuilder Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FRotator&)> Update);
+NSTWEEN_API FBuilder Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FQuat&)> Update);
 NSTWEEN_API FBuilder Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FTransform&)> Update);
 NSTWEEN_API FBuilder Play(const FLinearColor& StartValue, const FLinearColor& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FLinearColor&)> Update);
 
