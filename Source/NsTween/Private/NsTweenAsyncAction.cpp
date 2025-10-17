@@ -65,7 +65,7 @@ void UNsTweenAsyncAction::InitialiseCommon(UObject* WorldContextObject,
     CurveOverride = InCurve;
     bUseCurveOverride = bInUseCustomCurve && InCurve != nullptr;
     TimeMultiplier = 1.f;
-    ActiveTween = FNsTween::FBuilder();
+    ActiveTween = FNsTweenBuilder();
     bHasActivated = false;
 }
 
@@ -79,7 +79,7 @@ ENsTweenEase UNsTweenAsyncAction::GetEffectiveEase() const
     return EaseType;
 }
 
-void UNsTweenAsyncAction::ApplyBuilderOptions(FNsTween::FBuilder& Builder)
+void UNsTweenAsyncAction::ApplyBuilderOptions(FNsTweenBuilder& Builder)
 {
     if (bUseCurveOverride && CurveOverride)
     {
@@ -155,7 +155,7 @@ void UNsTweenAsyncAction::ApplyBuilderOptions(FNsTween::FBuilder& Builder)
 
 void UNsTweenAsyncAction::HandleCompletedTween()
 {
-    ActiveTween = FNsTween::FBuilder();
+    ActiveTween = FNsTweenBuilder();
     SetReadyToDestroy();
 }
 
@@ -190,7 +190,7 @@ void UNsTweenAsyncAction::BeginDestroy()
     if (ActiveTween.IsValid())
     {
         ActiveTween.Cancel(false);
-    ActiveTween = FNsTween::FBuilder();
+    ActiveTween = FNsTweenBuilder();
     }
 
     Super::BeginDestroy();
@@ -223,7 +223,7 @@ void UNsTweenAsyncAction::Restart()
     if (ActiveTween.IsValid())
     {
         ActiveTween.Cancel(false);
-        ActiveTween = FNsTween::FBuilder();
+        ActiveTween = FNsTweenBuilder();
     }
 
     LaunchTween();
@@ -234,7 +234,7 @@ void UNsTweenAsyncAction::Stop()
     if (ActiveTween.IsValid())
     {
         ActiveTween.Cancel(false);
-        ActiveTween = FNsTween::FBuilder();
+        ActiveTween = FNsTweenBuilder();
     }
 
     SetReadyToDestroy();
@@ -282,7 +282,7 @@ UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloatCustomCurve(UObjec
 void UNsTweenAsyncActionFloat::LaunchTween()
 {
     TWeakObjectPtr<UNsTweenAsyncActionFloat> WeakThis(this);
-    FNsTween::FBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const float& Value)
+    FNsTweenBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const float& Value)
     {
         if (UNsTweenAsyncActionFloat* StrongThis = WeakThis.Get())
         {
@@ -336,7 +336,7 @@ UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatFromRotatorCustomCurv
 void UNsTweenAsyncActionQuat::LaunchTween()
 {
     TWeakObjectPtr<UNsTweenAsyncActionQuat> WeakThis(this);
-    FNsTween::FBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const FQuat& Value)
+    FNsTweenBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const FQuat& Value)
     {
         if (UNsTweenAsyncActionQuat* StrongThis = WeakThis.Get())
         {
@@ -380,7 +380,7 @@ UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotatorCustomCurve(
 void UNsTweenAsyncActionRotator::LaunchTween()
 {
     TWeakObjectPtr<UNsTweenAsyncActionRotator> WeakThis(this);
-    FNsTween::FBuilder Builder = FNsTween::Play(StartQuat, EndQuat, DurationSeconds, GetEffectiveEase(), [WeakThis](const FQuat& Value)
+    FNsTweenBuilder Builder = FNsTween::Play(StartQuat, EndQuat, DurationSeconds, GetEffectiveEase(), [WeakThis](const FQuat& Value)
     {
         if (UNsTweenAsyncActionRotator* StrongThis = WeakThis.Get())
         {
@@ -424,7 +424,7 @@ UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVectorCustomCurve(UOb
 void UNsTweenAsyncActionVector::LaunchTween()
 {
     TWeakObjectPtr<UNsTweenAsyncActionVector> WeakThis(this);
-    FNsTween::FBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const FVector& Value)
+    FNsTweenBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const FVector& Value)
     {
         if (UNsTweenAsyncActionVector* StrongThis = WeakThis.Get())
         {
@@ -468,7 +468,7 @@ UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2DCustomCur
 void UNsTweenAsyncActionVector2D::LaunchTween()
 {
     TWeakObjectPtr<UNsTweenAsyncActionVector2D> WeakThis(this);
-    FNsTween::FBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const FVector2D& Value)
+    FNsTweenBuilder Builder = FNsTween::Play(StartValue, EndValue, DurationSeconds, GetEffectiveEase(), [WeakThis](const FVector2D& Value)
     {
         if (UNsTweenAsyncActionVector2D* StrongThis = WeakThis.Get())
         {

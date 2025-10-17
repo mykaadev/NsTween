@@ -130,7 +130,7 @@ void AFloatingItem::BeginPlay()
 - `FNsTween::Play` – start a tween in C++ for various types.
 - `UNsTweenAsyncActionFloat::TweenFloat` – Blueprint node to tween a float value.
 - `UNsTweenAsyncActionVector::TweenVector` – Blueprint node to tween vectors.
-- `FNsTween::FBuilder` – chainable object for configuring and controlling tweens.
+- `FNsTweenBuilder` – chainable object for configuring and controlling tweens.
 
 <!-- GH_ONLY_START -->
 ## ❤️ Credits

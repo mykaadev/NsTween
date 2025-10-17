@@ -2,15 +2,14 @@
 
 #include "NsTween.h"
 
-namespace NsTweenCore
+struct NsTweenCore
 {
-    using FNsTweenInstance = FNsTween::FBuilder;
-    using FNsTweenBuilder = FNsTween::FBuilder;
+    using FNsTweenInstance = FNsTweenBuilder;
+    using FNsTweenBuilder = FNsTweenBuilder;
 
     template <typename... TArgs>
-    auto Play(TArgs&&... Args) -> decltype(FNsTween::Play(Forward<TArgs>(Args)...))
+    static auto Play(TArgs&&... Args) -> decltype(FNsTween::Play(Forward<TArgs>(Args)...))
     {
         return FNsTween::Play(Forward<TArgs>(Args)...);
     }
-}
-
+};

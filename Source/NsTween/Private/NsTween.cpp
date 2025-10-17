@@ -7,137 +7,132 @@
 #include "Engine/Engine.h"
 #include "NsTweenSubsystem.h"
 
-namespace
+static constexpr float GNsTweenSmallDelta = 1.e-6f;
+
+static UNsTweenSubsystem* GetTweenSubsystem()
 {
-    constexpr float SMALL_DELTA = 1.e-6f;
-
-    UNsTweenSubsystem* GetTweenSubsystem()
+    if (!GEngine)
     {
-        if (!GEngine)
-        {
-            return nullptr;
-        }
-
-        return GEngine->GetEngineSubsystem<UNsTweenSubsystem>();
+        return nullptr;
     }
+
+    return GEngine->GetEngineSubsystem<UNsTweenSubsystem>();
 }
 
-namespace NsTweenInternal
+template <typename TValue>
+struct FNsTweenInterpolator
 {
-    template <typename TValue>
-    struct TInterpolator
+    static TValue Lerp(const TValue& A, const TValue& B, float Alpha)
     {
-        static TValue Lerp(const TValue& A, const TValue& B, float Alpha)
-        {
-            return FMath::Lerp(A, B, Alpha);
-        }
-    };
-
-    template <>
-    struct TInterpolator<FVector2D>
-    {
-        static FVector2D Lerp(const FVector2D& A, const FVector2D& B, float Alpha)
-        {
-            return A + (B - A) * Alpha;
-        }
-    };
-
-    template <>
-    struct TInterpolator<FRotator>
-    {
-        static FRotator Lerp(const FRotator& A, const FRotator& B, float Alpha)
-        {
-            const float T = FMath::Clamp(Alpha, 0.f, 1.f);
-            const FQuat QA = A.Quaternion();
-            const FQuat QB = B.Quaternion();
-            const FQuat Q = FQuat::Slerp(QA, QB, T).GetNormalized();
-            return Q.Rotator();
-        }
-    };
-
-    template <>
-    struct TInterpolator<FTransform>
-    {
-        static FTransform Lerp(const FTransform& A, const FTransform& B, float Alpha)
-        {
-            FTransform Result;
-            Result.Blend(A, B, Alpha);
-            return Result;
-        }
-    };
-
-    template <>
-    struct TInterpolator<FLinearColor>
-    {
-        static FLinearColor Lerp(const FLinearColor& A, const FLinearColor& B, float Alpha)
-        {
-            return FLinearColor::LerpUsingHSV(A, B, Alpha);
-        }
-    };
-
-    template <>
-    struct TInterpolator<FQuat>
-    {
-        static FQuat Lerp(const FQuat& A, const FQuat& B, float Alpha)
-        {
-            const float T = FMath::Clamp(Alpha, 0.f, 1.f);
-            return FQuat::Slerp(A, B, T).GetNormalized();
-        }
-    };
-
-    template <typename TValue>
-    class TCallbackTweenValue : public ITweenValue
-    {
-    public:
-        using FUpdateFunction = TFunction<void(const TValue&)>;
-
-        TCallbackTweenValue(const TValue& InStart, const TValue& InEnd, FUpdateFunction InUpdate)
-            : StartValue(InStart)
-            , EndValue(InEnd)
-            , UpdateFunction(MoveTemp(InUpdate))
-        {
-        }
-
-        virtual void Initialize() override
-        {
-            if (UpdateFunction)
-            {
-                UpdateFunction(StartValue);
-            }
-        }
-
-        virtual void Apply(float EasedAlpha) override
-        {
-            if (UpdateFunction)
-            {
-                const TValue Interpolated = TInterpolator<TValue>::Lerp(StartValue, EndValue, EasedAlpha);
-                UpdateFunction(Interpolated);
-            }
-        }
-
-        virtual void ApplyFinal() override
-        {
-            if (UpdateFunction)
-            {
-                UpdateFunction(EndValue);
-            }
-        }
-
-    private:
-        TValue StartValue;
-        TValue EndValue;
-        FUpdateFunction UpdateFunction;
-    };
-
-    template <typename TValue>
-    TSharedPtr<ITweenValue> MakeCallbackStrategy(const TValue& StartValue, const TValue& EndValue, TFunction<void(const TValue&)>
- Update)
-    {
-        return MakeShared<TCallbackTweenValue<TValue>>(StartValue, EndValue, MoveTemp(Update));
+        return FMath::Lerp(A, B, Alpha);
     }
+};
+
+template <>
+struct FNsTweenInterpolator<FVector2D>
+{
+    static FVector2D Lerp(const FVector2D& A, const FVector2D& B, float Alpha)
+    {
+        return A + (B - A) * Alpha;
+    }
+};
+
+template <>
+struct FNsTweenInterpolator<FRotator>
+{
+    static FRotator Lerp(const FRotator& A, const FRotator& B, float Alpha)
+    {
+        const float T = FMath::Clamp(Alpha, 0.f, 1.f);
+        const FQuat QA = A.Quaternion();
+        const FQuat QB = B.Quaternion();
+        const FQuat Q = FQuat::Slerp(QA, QB, T).GetNormalized();
+        return Q.Rotator();
+    }
+};
+
+template <>
+struct FNsTweenInterpolator<FTransform>
+{
+    static FTransform Lerp(const FTransform& A, const FTransform& B, float Alpha)
+    {
+        FTransform Result;
+        Result.Blend(A, B, Alpha);
+        return Result;
+    }
+};
+
+template <>
+struct FNsTweenInterpolator<FLinearColor>
+{
+    static FLinearColor Lerp(const FLinearColor& A, const FLinearColor& B, float Alpha)
+    {
+        return FLinearColor::LerpUsingHSV(A, B, Alpha);
+    }
+};
+
+template <>
+struct FNsTweenInterpolator<FQuat>
+{
+    static FQuat Lerp(const FQuat& A, const FQuat& B, float Alpha)
+    {
+        const float T = FMath::Clamp(Alpha, 0.f, 1.f);
+        return FQuat::Slerp(A, B, T).GetNormalized();
+    }
+};
+
+template <typename TValue>
+class FNsTweenCallbackValue : public ITweenValue
+{
+public:
+    using FUpdateFunction = TFunction<void(const TValue&)>;
+
+    FNsTweenCallbackValue(const TValue& InStart, const TValue& InEnd, FUpdateFunction InUpdate)
+        : StartValue(InStart)
+        , EndValue(InEnd)
+        , UpdateFunction(MoveTemp(InUpdate))
+    {
+    }
+
+    virtual void Initialize() override
+    {
+        if (UpdateFunction)
+        {
+            UpdateFunction(StartValue);
+        }
+    }
+
+    virtual void Apply(float EasedAlpha) override
+    {
+        if (UpdateFunction)
+        {
+            const TValue Interpolated = FNsTweenInterpolator<TValue>::Lerp(StartValue, EndValue, EasedAlpha);
+            UpdateFunction(Interpolated);
+        }
+    }
+
+    virtual void ApplyFinal() override
+    {
+        if (UpdateFunction)
+        {
+            UpdateFunction(EndValue);
+        }
+    }
+
+private:
+    TValue StartValue;
+    TValue EndValue;
+    FUpdateFunction UpdateFunction;
+};
+
+template <typename TValue>
+TSharedPtr<ITweenValue> MakeNsTweenCallbackStrategy(const TValue& StartValue, const TValue& EndValue, TFunction<void(const TValue&)> Update)
+{
+    return MakeShared<FNsTweenCallbackValue<TValue>>(StartValue, EndValue, MoveTemp(Update));
 }
 
-struct FNsTween::FBuilder::FState : public TSharedFromThis<FState>
+
+
+struct FNsTweenBuilder::FState : public TSharedFromThis<FState>
 {
     FNsTweenSpec Spec;
     TFunction<TSharedPtr<ITweenValue>()> StrategyFactory;
@@ -150,27 +145,27 @@ struct FNsTween::FBuilder::FState : public TSharedFromThis<FState>
     bool bActivated = false;
 };
 
-FNsTween::FBuilder::FBuilder()
+FNsTweenBuilder::FNsTweenBuilder()
     : State(nullptr)
 {
 }
 
-FNsTween::FBuilder::FBuilder(const TSharedPtr<FState>& InState)
+FNsTweenBuilder::FNsTweenBuilder(const TSharedPtr<FState>& InState)
     : State(InState)
 {
 }
 
-FNsTween::FBuilder::~FBuilder()
+FNsTweenBuilder::~FNsTweenBuilder()
 {
     Activate();
 }
 
-bool FNsTween::FBuilder::CanConfigure() const
+bool FNsTweenBuilder::CanConfigure() const
 {
     return State.IsValid() && !State->bActivated;
 }
 
-void FNsTween::FBuilder::Activate() const
+void FNsTweenBuilder::Activate() const
 {
     if (!State.IsValid() || State->bActivated)
     {
@@ -200,7 +195,7 @@ void FNsTween::FBuilder::Activate() const
     State->bActivated = true;
 }
 
-void FNsTween::FBuilder::UpdateWrapMode() const
+void FNsTweenBuilder::UpdateWrapMode() const
 {
     if (!State.IsValid())
     {
@@ -222,7 +217,7 @@ void FNsTween::FBuilder::UpdateWrapMode() const
     }
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::SetPingPong(bool bEnable)
+FNsTweenBuilder& FNsTweenBuilder::SetPingPong(bool bEnable)
 {
     if (CanConfigure())
     {
@@ -232,7 +227,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::SetPingPong(bool bEnable)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::SetLoops(int32 LoopCount)
+FNsTweenBuilder& FNsTweenBuilder::SetLoops(int32 LoopCount)
 {
     if (CanConfigure())
     {
@@ -243,7 +238,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::SetLoops(int32 LoopCount)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::SetDelay(float DelaySeconds)
+FNsTweenBuilder& FNsTweenBuilder::SetDelay(float DelaySeconds)
 {
     if (CanConfigure())
     {
@@ -252,7 +247,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::SetDelay(float DelaySeconds)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::SetTimeScale(float TimeScale)
+FNsTweenBuilder& FNsTweenBuilder::SetTimeScale(float TimeScale)
 {
     if (CanConfigure())
     {
@@ -261,7 +256,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::SetTimeScale(float TimeScale)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::SetCurveAsset(UCurveFloat* Curve)
+FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
 {
     if (CanConfigure())
     {
@@ -274,7 +269,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::SetCurveAsset(UCurveFloat* Curve)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::OnComplete(TFunction<void()> Callback)
+FNsTweenBuilder& FNsTweenBuilder::OnComplete(TFunction<void()> Callback)
 {
     if (CanConfigure())
     {
@@ -299,7 +294,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::OnComplete(TFunction<void()> Callback)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::OnLoop(TFunction<void()> Callback)
+FNsTweenBuilder& FNsTweenBuilder::OnLoop(TFunction<void()> Callback)
 {
     if (CanConfigure())
     {
@@ -324,7 +319,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::OnLoop(TFunction<void()> Callback)
     return *this;
 }
 
-FNsTween::FBuilder& FNsTween::FBuilder::OnPingPong(TFunction<void()> Callback)
+FNsTweenBuilder& FNsTweenBuilder::OnPingPong(TFunction<void()> Callback)
 {
     if (CanConfigure())
     {
@@ -349,7 +344,7 @@ FNsTween::FBuilder& FNsTween::FBuilder::OnPingPong(TFunction<void()> Callback)
     return *this;
 }
 
-void FNsTween::FBuilder::Pause() const
+void FNsTweenBuilder::Pause() const
 {
     Activate();
     if (State.IsValid() && State->Handle.IsValid())
@@ -361,7 +356,7 @@ void FNsTween::FBuilder::Pause() const
     }
 }
 
-void FNsTween::FBuilder::Resume() const
+void FNsTweenBuilder::Resume() const
 {
     Activate();
     if (State.IsValid() && State->Handle.IsValid())
@@ -373,7 +368,7 @@ void FNsTween::FBuilder::Resume() const
     }
 }
 
-void FNsTween::FBuilder::Cancel(bool bApplyFinal) const
+void FNsTweenBuilder::Cancel(bool bApplyFinal) const
 {
     Activate();
     if (State.IsValid() && State->Handle.IsValid())
@@ -385,7 +380,7 @@ void FNsTween::FBuilder::Cancel(bool bApplyFinal) const
     }
 }
 
-bool FNsTween::FBuilder::IsActive() const
+bool FNsTweenBuilder::IsActive() const
 {
     if (!State.IsValid())
     {
@@ -401,7 +396,7 @@ bool FNsTween::FBuilder::IsActive() const
     return false;
 }
 
-FNsTweenHandle FNsTween::FBuilder::GetHandle() const
+FNsTweenHandle FNsTweenBuilder::GetHandle() const
 {
     Activate();
     if (!State.IsValid())
@@ -411,15 +406,15 @@ FNsTweenHandle FNsTween::FBuilder::GetHandle() const
     return State->Handle;
 }
 
-bool FNsTween::FBuilder::IsValid() const
+bool FNsTweenBuilder::IsValid() const
 {
     Activate();
     return State.IsValid() && State->Handle.IsValid();
 }
 
-FNsTween::FBuilder FNsTween::Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update)
+FNsTweenBuilder FNsTween::Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -429,15 +424,15 @@ FNsTween::FBuilder FNsTween::Play(float StartValue, float EndValue, float Durati
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
-FNsTween::FBuilder FNsTween::Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, T
+FNsTweenBuilder FNsTween::Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, T
 Function<void(const FVector&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -447,15 +442,15 @@ Function<void(const FVector&)> Update)
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
-FNsTween::FBuilder FNsTween::Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease
+FNsTweenBuilder FNsTween::Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease
 , TFunction<void(const FVector2D&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -465,15 +460,15 @@ FNsTween::FBuilder FNsTween::Play(const FVector2D& StartValue, const FVector2D& 
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
-FNsTween::FBuilder FNsTween::Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, T
+FNsTweenBuilder FNsTween::Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, T
 Function<void(const FRotator&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -483,15 +478,15 @@ Function<void(const FRotator&)> Update)
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
-FNsTween::FBuilder FNsTween::Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TFuncti
+FNsTweenBuilder FNsTween::Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TFuncti
 on<void(const FQuat&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -501,15 +496,15 @@ on<void(const FQuat&)> Update)
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
-FNsTween::FBuilder FNsTween::Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Eas
+FNsTweenBuilder FNsTween::Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Eas
 e, TFunction<void(const FTransform&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -519,15 +514,15 @@ e, TFunction<void(const FTransform&)> Update)
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
-FNsTween::FBuilder FNsTween::Play(const FLinearColor& StartValue, const FLinearColor& EndValue, float DurationSeconds, ENsTweenEase
+FNsTweenBuilder FNsTween::Play(const FLinearColor& StartValue, const FLinearColor& EndValue, float DurationSeconds, ENsTweenEase
  Ease, TFunction<void(const FLinearColor&)> Update)
 {
-    TSharedPtr<FBuilder::FState> State = MakeShared<FBuilder::FState>();
+    TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
     State->Spec.DelaySeconds = 0.f;
     State->Spec.TimeScale = 1.f;
@@ -537,9 +532,9 @@ FNsTween::FBuilder FNsTween::Play(const FLinearColor& StartValue, const FLinearC
     State->Spec.EasingPreset = Ease;
     State->StrategyFactory = [StartValue, EndValue, Update = MoveTemp(Update)]() mutable -> TSharedPtr<ITweenValue>
     {
-        return NsTweenInternal::MakeCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
+        return MakeNsTweenCallbackStrategy(StartValue, EndValue, MoveTemp(Update));
     };
-    return FBuilder(State);
+    return FNsTweenBuilder(State);
 }
 
 FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing)
@@ -548,7 +543,7 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
     , Strategy(MoveTemp(InStrategy))
     , Easing(MoveTemp(InEasing))
     , DelayRemaining(FMath::Max(0.f, InSpec.DelaySeconds))
-    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_DELTA))
+    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, GNsTweenSmallDelta))
     , bPlayingForward(InSpec.Direction != ENsTweenDirection::Backward)
 {
 }
@@ -571,12 +566,12 @@ bool FNsTween::Tick(float DeltaSeconds)
     }
 
     float ScaledDelta = DeltaSeconds * FMath::Max(Spec.TimeScale, 0.f);
-    if (ScaledDelta <= SMALL_DELTA)
+    if (ScaledDelta <= GNsTweenSmallDelta)
     {
         return true;
     }
 
-    if (DelayRemaining > SMALL_DELTA)
+    if (DelayRemaining > GNsTweenSmallDelta)
     {
         if (ScaledDelta < DelayRemaining)
         {
@@ -589,9 +584,9 @@ bool FNsTween::Tick(float DeltaSeconds)
     }
 
     float RemainingTime = ScaledDelta;
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    float Duration = FMath::Max(Spec.DurationSeconds, GNsTweenSmallDelta);
 
-    while (RemainingTime > SMALL_DELTA && bActive)
+    while (RemainingTime > GNsTweenSmallDelta && bActive)
     {
         const float DirectionFactor = bPlayingForward ? 1.f : -1.f;
         float NextCycleTime = CycleTime + RemainingTime * DirectionFactor;
@@ -652,7 +647,7 @@ void FNsTween::Apply(float InCycleTime)
         return;
     }
 
-    const float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    const float Duration = FMath::Max(Spec.DurationSeconds, GNsTweenSmallDelta);
     const float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
     const float EasedAlpha = Easing->Evaluate(LinearAlpha);
 
@@ -665,7 +660,7 @@ void FNsTween::Apply(float InCycleTime)
 
 bool FNsTween::HandleBoundary(float& RemainingTime)
 {
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_DELTA);
+    float Duration = FMath::Max(Spec.DurationSeconds, GNsTweenSmallDelta);
 
     switch (Spec.WrapMode)
     {

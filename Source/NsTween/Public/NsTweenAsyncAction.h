@@ -64,7 +64,7 @@ protected:
         bool bInUseCustomCurve);
 
     ENsTweenEase GetEffectiveEase() const;
-    void ApplyBuilderOptions(FNsTween::FBuilder& Builder);
+    void ApplyBuilderOptions(FNsTweenBuilder& Builder);
     void HandleCompletedTween();
 
     virtual void LaunchTween() PURE_VIRTUAL(UNsTweenAsyncAction::LaunchTween, );
@@ -73,7 +73,7 @@ protected:
     UPROPERTY()
     TObjectPtr<UObject> WorldContext = nullptr;
 
-    FNsTween::FBuilder ActiveTween;
+    FNsTweenBuilder ActiveTween;
     float DurationSeconds = 0.f;
     float DelaySeconds = 0.f;
     int32 LoopCount = 0;
