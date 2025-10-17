@@ -54,16 +54,16 @@ Unreal Engine 5.2+
 3. Generate project files and enable the plugin when prompted.
 
 ## 🚀 Getting Started
-Below is a minimal C++ example showing how to move an actor along the X axis using `NsTweenCore`:
+Below is a minimal C++ example showing how to move an actor along the X axis using the fluent tween helpers built into `FNsTween`:
 
 ```cpp
-#include "NsTweenCore.h"
+#include "NsTween.h"
 
 void AMyActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    NsTweenCore::Play(
+    FNsTween::Play(
         /**Start*/   0.f,
         /**End*/     100.f,
         /**Time*/    2.f,
@@ -79,14 +79,14 @@ The library also exposes Blueprint nodes for the same functionality if you prefe
 Below is a slightly more advanced snippet showing how to make an item float up and down while spinning for 10 complete loops
 
 ```cpp
-#include "NsTweenCore.h"
+#include "NsTween.h"
 
 void AFloatingItem::BeginPlay()
 {
     Super::BeginPlay();
 
     // Float continuously
-    NsTweenCore::Play(
+    FNsTween::Play(
          /**Start*/   GetActorLocation().Z,
          /**End*/     GetActorLocation().Z + 40.f,
          /**Time*/    1.f,
@@ -102,7 +102,7 @@ void AFloatingItem::BeginPlay()
 
 
     // Rotate and print 10 times the Loop
-    NsTweenCore::Play(
+    FNsTween::Play(
         /** Start  */  0.f,
         /** End    */  360.f,
         /** Time   */  2.f,
@@ -121,16 +121,16 @@ void AFloatingItem::BeginPlay()
 
 ## 🔧 API
 ### Key Classes
-- `NsTweenCore` – static helpers to play tweens in C++.
+- `FNsTween` – runtime tween struct with fluent helpers for spawning tweens.
 - `UNsTweenSubsystem` – automatically ticks and manages active tweens.
 - `UNsTweenAsyncAction` – base class for asynchronous Blueprint tween nodes.
 - `UNsTweenBlueprintLibrary` – utility functions including `Ease` helpers.
 
 ### Main Functions
-- `NsTweenCore::Play` – start a tween in C++ for various types.
+- `FNsTween::Play` – start a tween in C++ for various types.
 - `UNsTweenAsyncActionFloat::TweenFloat` – Blueprint node to tween a float value.
 - `UNsTweenAsyncActionVector::TweenVector` – Blueprint node to tween vectors.
-- `NsTweenInstance` – represents a single tween instance with control methods.
+- `FNsTween::FBuilder` – chainable object for configuring and controlling tweens.
 
 <!-- GH_ONLY_START -->
 ## ❤️ Credits

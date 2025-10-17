@@ -1,12 +1,16 @@
 #pragma once
 
-#include "NsTweenCore.h"
+#include "NsTween.h"
 
 namespace NsTweenCore
 {
-    using FNsTweenInstance = FNsTweenHandleRef;
-    using FNsTweenBuilder = ::NsTween::FBuilder;
+    using FNsTweenInstance = FNsTween::FBuilder;
+    using FNsTweenBuilder = FNsTween::FBuilder;
 
-    using ::NsTween::Play;
+    template <typename... TArgs>
+    auto Play(TArgs&&... Args) -> decltype(FNsTween::Play(Forward<TArgs>(Args)...))
+    {
+        return FNsTween::Play(Forward<TArgs>(Args)...);
+    }
 }
 

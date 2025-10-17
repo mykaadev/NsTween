@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
-#include "NsTweenCore.h"
+#include "NsTween.h"
 #include "NsTweenAsyncAction.generated.h"
 
 class UCurveFloat;
@@ -64,7 +64,7 @@ protected:
         bool bInUseCustomCurve);
 
     ENsTweenEase GetEffectiveEase() const;
-    void ApplyBuilderOptions(NsTween::FBuilder& Builder);
+    void ApplyBuilderOptions(FNsTween::FBuilder& Builder);
     void HandleCompletedTween();
 
     virtual void LaunchTween() PURE_VIRTUAL(UNsTweenAsyncAction::LaunchTween, );
@@ -73,7 +73,7 @@ protected:
     UPROPERTY()
     TObjectPtr<UObject> WorldContext = nullptr;
 
-    FNsTweenHandleRef ActiveTween;
+    FNsTween::FBuilder ActiveTween;
     float DurationSeconds = 0.f;
     float DelaySeconds = 0.f;
     int32 LoopCount = 0;

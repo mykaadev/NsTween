@@ -7,9 +7,108 @@
 
 class ITweenValue;
 class IEasingCurve;
+class UCurveFloat;
+class UNsTweenSubsystem;
 
 struct FNsTween
 {
+    struct NSTWEEN_API FBuilder
+    {
+        FBuilder();
+
+        FBuilder(const FBuilder& Other) = default;
+        FBuilder(FBuilder&& Other) = default;
+        FBuilder& operator=(const FBuilder& Other) = default;
+        FBuilder& operator=(FBuilder&& Other) = default;
+
+        ~FBuilder();
+
+        FBuilder& SetPingPong(bool bEnable);
+        FBuilder& SetLoops(int32 LoopCount);
+        FBuilder& SetDelay(float DelaySeconds);
+        FBuilder& SetTimeScale(float TimeScale);
+        FBuilder& SetCurveAsset(UCurveFloat* Curve);
+
+        FBuilder& OnComplete(TFunction<void()> Callback);
+        FBuilder& OnLoop(TFunction<void()> Callback);
+        FBuilder& OnPingPong(TFunction<void()> Callback);
+
+        void Pause() const;
+        void Resume() const;
+        void Cancel(bool bApplyFinal = true) const;
+        bool IsActive() const;
+
+        FNsTweenHandle GetHandle() const;
+        bool IsValid() const;
+
+        operator FNsTweenHandle() const
+        {
+            return GetHandle();
+        }
+
+    private:
+        struct FState;
+
+        explicit FBuilder(const TSharedPtr<FState>& InState);
+
+        bool CanConfigure() const;
+        void Activate() const;
+        void UpdateWrapMode() const;
+
+    private:
+        TSharedPtr<FState> State;
+    };
+
+    static FBuilder Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update);
+    static FBuilder Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector&)> Update);
+    static FBuilder Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector2D&)> Update);
+    static FBuilder Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FRotator&)> Update);
+    static FBuilder Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FQuat&)> Update);
+    static FBuilder Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FTransform&)> Update);
+    static FBuilder Play(const FLinearColor& StartValue, const FLinearColor& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FLinearColor&)> Update);
+
+    template <typename TCallable>
+    static FBuilder Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const float&)>(Forward<TCallable>(Update)));
+    }
+
+    template <typename TCallable>
+    static FBuilder Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const FVector&)>(Forward<TCallable>(Update)));
+    }
+
+    template <typename TCallable>
+    static FBuilder Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const FVector2D&)>(Forward<TCallable>(Update)));
+    }
+
+    template <typename TCallable>
+    static FBuilder Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const FRotator&)>(Forward<TCallable>(Update)));
+    }
+
+    template <typename TCallable>
+    static FBuilder Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const FQuat&)>(Forward<TCallable>(Update)));
+    }
+
+    template <typename TCallable>
+    static FBuilder Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const FTransform&)>(Forward<TCallable>(Update)));
+    }
+
+    template <typename TCallable>
+    static FBuilder Play(const FLinearColor& StartValue, const FLinearColor& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return Play(StartValue, EndValue, DurationSeconds, Ease, TFunction<void(const FLinearColor&)>(Forward<TCallable>(Update)));
+    }
+
     FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing);
 
     bool Tick(float DeltaSeconds);
@@ -38,4 +137,50 @@ private:
     bool bInitialized = false;
     bool bPlayingForward = true;
 };
+
+namespace NsTween
+{
+    using FBuilder = FNsTween::FBuilder;
+
+    inline FBuilder Play(float StartValue, float EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const float&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    inline FBuilder Play(const FVector& StartValue, const FVector& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    inline FBuilder Play(const FVector2D& StartValue, const FVector2D& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FVector2D&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    inline FBuilder Play(const FRotator& StartValue, const FRotator& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FRotator&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    inline FBuilder Play(const FQuat& StartValue, const FQuat& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FQuat&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    inline FBuilder Play(const FTransform& StartValue, const FTransform& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FTransform&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    inline FBuilder Play(const FLinearColor& StartValue, const FLinearColor& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const FLinearColor&)> Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Update));
+    }
+
+    template <typename TValue, typename TCallable>
+    FBuilder Play(const TValue& StartValue, const TValue& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
+    {
+        return FNsTween::Play(StartValue, EndValue, DurationSeconds, Ease, Forward<TCallable>(Update));
+    }
+}
 
