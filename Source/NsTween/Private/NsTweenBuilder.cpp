@@ -1,4 +1,6 @@
-﻿#include "NsTweenBuilder.h"
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
+
+#include "NsTweenBuilder.h"
 #include "NsTweenSubsystem.h"
 
 FNsTweenBuilder::FNsTweenBuilder()
@@ -13,11 +15,13 @@ FNsTweenBuilder::FNsTweenBuilder(const TSharedPtr<FState>& InState)
 
 FNsTweenBuilder::~FNsTweenBuilder()
 {
+    // Builders are designed to auto-activate on destruction so temporary helpers still spawn tweens.
     Activate();
 }
 
 bool FNsTweenBuilder::CanConfigure() const
 {
+    // Any configuration step must occur before the builder activates the tween.
     return State.IsValid() && !State->bActivated;
 }
 
@@ -28,6 +32,7 @@ void FNsTweenBuilder::Activate() const
         return;
     }
 
+    // Ensure wrap-mode flags are synchronized before we create the runtime strategy.
     UpdateWrapMode();
 
     if (!State->StrategyFactory)
@@ -36,6 +41,7 @@ void FNsTweenBuilder::Activate() const
         return;
     }
 
+    // The strategy factory runs lazily so callers can defer heavy allocations until activation.
     TSharedPtr<ITweenValue> Strategy = State->StrategyFactory();
     if (!Strategy.IsValid())
     {
@@ -43,6 +49,7 @@ void FNsTweenBuilder::Activate() const
         return;
     }
 
+    // Pushing into the subsystem hands ownership to the runtime manager.
     if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
     {
         State->Handle = Subsystem->EnqueueSpawn(State->Spec, Strategy);
@@ -58,6 +65,7 @@ void FNsTweenBuilder::UpdateWrapMode() const
         return;
     }
 
+    // Mirror the fluent helper flags onto the underlying spec so the runtime can act on them.
     if (State->bPingPong)
     {
         State->Spec.WrapMode = ENsTweenWrapMode::PingPong;

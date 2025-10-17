@@ -1,11 +1,24 @@
-// Copyright (C) 2024 mykaa. All rights reserved.
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #include "NsTween.h"
+
 #include "Interfaces/ITweenValue.h"
 #include "Interfaces/IEasingCurve.h"
 #include "Math/UnrealMathUtility.h"
 #include "Engine/Engine.h"
 #include "NsTweenSubsystem.h"
+
+/**
+ * The non-templated Play overload wires an explicit specification and strategy factory into the builder.
+ * Everything else funnels through this helper so we only have one place that knows how to seed the shared state.
+ */
+FNsTweenBuilder FNsTween::Play(FNsTweenSpec Spec, TFunction<TSharedPtr<ITweenValue>()> StrategyFactory)
+{
+    const TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
+    State->Spec = MoveTemp(Spec);
+    State->StrategyFactory = MoveTemp(StrategyFactory);
+    return FNsTweenBuilder(State);
+}
 
 FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing)
     : Handle(InHandle)
@@ -20,11 +33,13 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
 
 bool FNsTween::Tick(float DeltaSeconds)
 {
+    // Bail out immediately if the tween is already completed, paused, or missing runtime pieces.
     if (!bActive || bPaused || !Strategy.IsValid() || !Easing.IsValid())
     {
         return bActive;
     }
 
+    // Lazily initialize the strategy the first time we tick so creation happens on the game thread.
     if (!bInitialized)
     {
         Strategy->Initialize();
@@ -35,12 +50,14 @@ bool FNsTween::Tick(float DeltaSeconds)
         bInitialized = true;
     }
 
+    // Respect the time scale so tweens can speed up or slow down deterministically.
     float ScaledDelta = DeltaSeconds * FMath::Max(Spec.TimeScale, 0.f);
     if (ScaledDelta <= SMALL_NUMBER)
     {
         return true;
     }
 
+    // Consume any remaining delay before the tween starts ticking.
     if (DelayRemaining > SMALL_NUMBER)
     {
         if (ScaledDelta < DelayRemaining)
@@ -58,6 +75,7 @@ bool FNsTween::Tick(float DeltaSeconds)
 
     while (RemainingTime > SMALL_NUMBER && bActive)
     {
+        // Figure out how far we will advance during this tick, respecting direction and wrap mode.
         const float DirectionFactor = bPlayingForward ? 1.f : -1.f;
         float NextCycleTime = CycleTime + RemainingTime * DirectionFactor;
 
@@ -71,6 +89,7 @@ bool FNsTween::Tick(float DeltaSeconds)
             break;
         }
 
+        // We will cross a boundary this frame, so finish the current segment first.
         const float TimeToBoundary = FMath::Abs(TargetBoundary - CycleTime);
         CycleTime = TargetBoundary;
         Apply(CycleTime);
@@ -87,6 +106,7 @@ bool FNsTween::Tick(float DeltaSeconds)
 
 void FNsTween::Cancel(bool bApplyFinal)
 {
+    // Cancellation is idempotent; the first call decides whether to apply the final value.
     if (!bActive)
     {
         return;
@@ -112,6 +132,7 @@ void FNsTween::SetPaused(bool bInPaused)
 
 void FNsTween::Apply(float InCycleTime)
 {
+    // Guard against misconfigured tweens that somehow lost their runtime strategy.
     if (!Strategy.IsValid() || !Easing.IsValid())
     {
         return;
@@ -135,6 +156,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
     switch (Spec.WrapMode)
     {
     case ENsTweenWrapMode::Once:
+        // Notify completion exactly once and ensure we end on the last value.
         if (Spec.OnComplete.IsBound())
         {
             Spec.OnComplete.Execute();
@@ -152,6 +174,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 
         if (Spec.LoopCount > 0 && CompletedCycles >= Spec.LoopCount)
         {
+            // Exhausted the requested loop count, so wrap like a completion.
             if (Spec.OnComplete.IsBound())
             {
                 Spec.OnComplete.Execute();
@@ -178,6 +201,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         }
         else if (Spec.LoopCount > 0 && CompletedPingPongPairs >= Spec.LoopCount)
         {
+            // A ping-pong pair counts as a single loop when evaluating completion.
             if (Spec.OnComplete.IsBound())
             {
                 Spec.OnComplete.Execute();
@@ -191,6 +215,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         break;
     }
 
+    // Consume whatever time is left using the new direction or wrap mode.
     RemainingTime = FMath::Max(RemainingTime, 0.f);
     return true;
 }

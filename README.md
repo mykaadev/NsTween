@@ -132,6 +132,17 @@ void AFloatingItem::BeginPlay()
 - `UNsTweenAsyncActionVector::TweenVector` – Blueprint node to tween vectors.
 - `FNsTweenBuilder` – chainable object for configuring and controlling tweens.
 
+## 🧭 Tech Documentation Layout
+The plugin’s public surface now mirrors the documented header structure, making it easier to locate examples and API references:
+
+- `Source/NsTween/Public/NsTween.h` &mdash; entry point exposing `FNsTween::Play` and the default typed builders.
+- `Source/NsTween/Public/NsTweenTypeLibrary.h` &mdash; the consolidated enum/delegate/struct type library referenced throughout the docs.
+- `Source/NsTween/Public/Interfaces/ITweenValue.h` &mdash; interface contract for value strategies discussed in advanced topics.
+- `Source/NsTween/Public/Templates/` &mdash; header-only interpolator and callback strategy templates used in examples.
+- `Source/NsTween/Private/` &mdash; implementation details, including the subsystem, builder, and runtime strategies that are described in the “Under the Hood” section.
+
+When writing tutorials or guides, link to these exact files so the layout stays consistent between prose and source.
+
 <!-- GH_ONLY_START -->
 ## ❤️ Credits
 <a href="https://github.com/mykaadev/NsTween/graphs/contributors"><img src="https://contrib.rocks/image?repo=mykaadev/NsTween"/></a>

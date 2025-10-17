@@ -42,6 +42,9 @@ public:
         return BuildT<TType>(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Fn));
     }
 
+    /** Constructs a builder using explicit tween specification data. */
+    static FNsTweenBuilder Play(FNsTweenSpec Spec, TFunction<TSharedPtr<ITweenValue>()> StrategyFactory);
+
 private:
     /** Applies the tween update for the given cycle time. */
     void Apply(float CycleTime);
@@ -53,22 +56,22 @@ private:
     template <typename TType>
     static FNsTweenBuilder BuildT(const TType& StartValue, const TType& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const TType&)> Update)
     {
-        const TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
-        State->Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
-        State->Spec.DelaySeconds = 0.f;
-        State->Spec.TimeScale = 1.f;
-        State->Spec.WrapMode = ENsTweenWrapMode::Once;
-        State->Spec.LoopCount = 0;
-        State->Spec.Direction = ENsTweenDirection::Forward;
-        State->Spec.EasingPreset = Ease;
+        FNsTweenSpec Spec;
+        Spec.DurationSeconds = FMath::Max(DurationSeconds, 0.f);
+        Spec.DelaySeconds = 0.f;
+        Spec.TimeScale = 1.f;
+        Spec.WrapMode = ENsTweenWrapMode::Once;
+        Spec.LoopCount = 0;
+        Spec.Direction = ENsTweenDirection::Forward;
+        Spec.EasingPreset = Ease;
 
         TFunction<void(const TType&)> Owned = MoveTemp(Update);
-        State->StrategyFactory = [StartValue, EndValue, Owned = MoveTemp(Owned)]() mutable -> TSharedPtr<class ITweenValue>
-        {
-            return MakeNsTweenCallbackStrategy<TType>(StartValue, EndValue, MoveTemp(Owned));
-        };
-
-        return FNsTweenBuilder(State);
+        return Play(
+            MoveTemp(Spec),
+            [StartValue, EndValue, Owned = MoveTemp(Owned)]() mutable -> TSharedPtr<class ITweenValue>
+            {
+                return MakeNsTweenCallbackStrategy<TType>(StartValue, EndValue, MoveTemp(Owned));
+            });
     }
 
 private:
