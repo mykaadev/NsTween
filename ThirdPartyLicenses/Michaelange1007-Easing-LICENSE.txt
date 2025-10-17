@@ -1,3 +1,0 @@
-Optimized Easing Functions by Michael "Code Poet" Pohoreski, aka Michaelangel007
-https://github.com/Michaelangel007/easing
-License: Free as in speech and beer; Attribution is always appreciated!

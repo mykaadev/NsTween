@@ -3,10 +3,39 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "NsTween.h"
+#include "NsTweenBuilder.h"
+#include "NsTweenSubsystem.h"
 #include "NsTweenTypeLibrary.h"
 #include "NsTweenFunctionLibrary.generated.h"
 
 class UNsTweenSubsystem;
+
+/**
+ * Helper that routes every Blueprint spawn call through the same builder logic.
+ * This guarantees parity with the C++ helpers and keeps the redundant boilerplate in one place.
+ */
+template <typename TValue, typename TStrategy>
+FNsTweenHandle PlayTypedTween(TValue& Target, const TValue& StartValue, const TValue& EndValue, const FNsTweenSpec& Spec)
+{
+    const FNsTweenBuilder Builder = FNsTween::Play(Spec, [&Target, StartValue, EndValue]() -> TSharedPtr<ITweenValue>
+    {
+        return MakeShared<TStrategy>(&Target, StartValue, EndValue);
+    });
+
+    // Activating via GetHandle ensures the tween is registered with the subsystem before returning.
+    return Builder.GetHandle();
+}
+
+/** Invokes a subsystem command if the singleton is currently available. */
+template <typename TCallback>
+void DispatchToSubsystem(FNsTweenHandle Handle, TCallback&& Callback)
+{
+    if (UNsTweenSubsystem* Manager = UNsTweenSubsystem::GetSubsystem())
+    {
+        Callback(*Manager, Handle);
+    }
+}
 
 /** Blueprint convenience entry points for spawning and controlling tweens. */
 UCLASS()

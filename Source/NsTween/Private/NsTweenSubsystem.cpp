@@ -1,4 +1,4 @@
-// Copyright (C) 2024 mykaa. All rights reserved.
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #include "NsTweenSubsystem.h"
 #include "Containers/Ticker.h"

@@ -1,7 +1,9 @@
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
+
 #pragma once
 
-#include "Interfaces/ITweenValue.h"
 #include "CoreMinimal.h"
+#include "Interfaces/ITweenValue.h"
 
 class FTweenValue_Float : public ITweenValue
 {

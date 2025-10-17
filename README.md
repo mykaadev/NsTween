@@ -40,12 +40,13 @@ NsTween is a small yet powerful tweening framework for Unreal Engine. It allows 
 </div>
 
 ## 📦 Features
-- **Multiple data types**: Tween `float`, `vector`, `vector2D`, `rotator` and `quaternion` values.
+- **Multiple data types**: `Float`, `Vector`, `Vector2D`, `Rotator`, `Quaternion`, `Transform` and `Color` values.
 - **Custom easing**: Choose from many easing curves or drive interpolation via a user supplied curve.
-- **Looping and yo-yo**: Built-in looping, delays and yo-yo behaviour with callbacks.
+- **Warp mode**: Built-in `Looping`, `Delays` and`Ping-Pong` behaviours.
+- **Direction**: Chose between `Forward` or `Backward`
 - **Blueprint actions**: Async Blueprint nodes for quick setup without code.
-- **Subsystem based**: A game instance subsystem updates active tweens automatically.
-- **Capacity control**: Reserve tween instances up front to avoid runtime allocations.
+- **Subsystem based**: A Subsystem to handle all the active tweens.
+- **Tween-To-Tween Injection**: Inject any different tween behaviour at any time into your current tween.
 
 ## ⚙️ Requirements
 Unreal Engine 5.2+
@@ -137,58 +138,17 @@ void AFloatingItem::BeginPlay()
 ## 🧭 Tech Documentation Layout
 Use the following map when you need to dive deeper than the high-level feature overview. Each entry mirrors the folder layout inside the plugin so you can jump straight from prose into the exact file that owns the logic.
 
-### Public Surface (what consumers include)
+### Public Surface
 - [`Source/NsTween/Public/NsTween.h`](Source/NsTween/Public/NsTween.h) &mdash; contains `FNsTween::Play` and the templated `BuildT<T>` helpers that every example in the docs references.
 - [`Source/NsTween/Public/NsTweenTypeLibrary.h`](Source/NsTween/Public/NsTweenTypeLibrary.h) &mdash; enums, delegates, and light-weight structs used across the tutorials.
 - [`Source/NsTween/Public/Interfaces/ITweenValue.h`](Source/NsTween/Public/Interfaces/ITweenValue.h) &mdash; the strategy contract implemented by each type-specific value driver.
 - [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; header-only interpolators and callback strategies. These are safe to inspect even in Blueprint-only projects because they do not require linking.
 
-### Runtime Flow (what powers `FNsTween::Play`)
+### Runtime Flow
 - [`Source/NsTween/Private/NsTween.cpp`](Source/NsTween/Private/NsTween.cpp) &mdash; documents the lifetime of an active tween, including pause/cancel semantics and wrap modes.
 - [`Source/NsTween/Private/NsTweenBuilder.cpp`](Source/NsTween/Private/NsTweenBuilder.cpp) &mdash; shows how specs become runtime objects before entering the subsystem.
 - [`Source/NsTween/Private/NsTweenSubsystem.cpp`](Source/NsTween/Private/NsTweenSubsystem.cpp) &mdash; central tick loop and allocation strategy for live tweens.
 - [`Source/NsTween/Private/NsTweenFunctionLibrary.cpp`](Source/NsTween/Private/NsTweenFunctionLibrary.cpp) &mdash; Blueprint entry points that now delegate into the builder so C++ and Blueprint stay in sync.
-
-### Authoring Guidance
-- Link your tutorials back to these files so the code snippets stay anchored to real implementations.
-
-### Runtime Architecture Diagram
-Drop the following Mermaid block into any Markdown viewer that supports the `architecture-beta` syntax. It maps every hop a tween takes, from the public `FNsTween::Play` entry point through the builder and subsystem queue, into the runtime instance that ultimately calls your `ITweenValue` strategy and easing curve implementation.
-
-```mermaid
----
-title: NsTween Runtime Architecture
----
-architecture-beta
-    group publicApi(cloud)[Public API Surface]
-    service play(entrypoints)[FNsTween::Play<T>] in publicApi
-    service builder(builder)[FNsTweenBuilder] in publicApi
-    service state(stack)[FNsTweenBuilder::FState] in publicApi
-
-    group subsystem(server)[UNsTweenSubsystem]
-    service enqueue(queue)[EnqueueSpawn/Pause/Resume/Cancel] in subsystem
-    service commandQueue(queue)[MPSC CommandQueue] in subsystem
-    service process(flow)[ProcessCommands + SpawnTween] in subsystem
-    service ticker(clock)[FTSTicker Tick] in subsystem
-    service pool(database)[TweenPool] in subsystem
-
-    group instance(block)[Active Tween]
-    service tween(actor)[FNsTween] in instance
-    service strategy(settings)[ITweenValue Strategy] in instance
-    service easing(curve)[IEasingCurve] in instance
-
-    play:R -- L:builder
-    builder:B -- T:state
-    state:R -- L:enqueue
-    enqueue:B -- T:commandQueue
-    ticker:R -- L:process
-    commandQueue:R -- L:process
-    process:B -- T:pool
-    pool:R -- L:tween
-    tween:B -- T:strategy
-    tween:T -- B:easing
-    ticker:B -- T:pool
-```
 
 <!-- GH_ONLY_START -->
 ## ❤️ Credits
@@ -200,16 +160,7 @@ Reach out via the **[profile page](https://github.com/mykaadev)**.
 ## 📃 License
 [![License](https://img.shields.io/badge/license-MIT-green)](https://www.tldrlegal.com/license/mit-license)
 
-## 🧾 Attribution
-
-NsTween is a fork of **Fresh Cooked Tweens** (MIT) by **Jared Cook**.
-Original project: https://github.com/jdcook/fresh_cooked_tweens
-
-The full Fresh Cooked Tweens MIT license is shipped at:
-- `ThirdPartyLicenses/JaredCook-FreshCookedTweens-LICENSE`.
-
-NsTween easing functions are written and licensed by:
-- `ThirdPartyLicenses/Michaelange1007-Easing-LICENSE`.
-- `ThirdPartyLicenses/Phaser-Easing-LICENSE`.
-- `ThirdPartyLicenses/RobertPenner-Easing-LICENSE`.
+## 🧾 Acknowledgements
+## 🧾 Acknowledgement
+Special thanks to **Jared Cook** and **Fresh Cooked Tweens** for inspiring this project. From this point forward, our roadmap and priorities differ, and the projects will evolve independently.
 <!-- GH_ONLY_END -->

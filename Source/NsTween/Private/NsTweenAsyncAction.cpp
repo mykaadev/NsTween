@@ -10,77 +10,8 @@
 #include "UObject/Stack.h"
 #include "Utils/NsTweenLogging.h"
 
-namespace
-{
-UObject* ResolveWorldContext(UObject* WorldContextObject)
-{
-    if (WorldContextObject)
-    {
-        return WorldContextObject;
-    }
 
-    if (!GEngine)
-    {
-        return nullptr;
-    }
-
-    for (const FWorldContext& Context : GEngine->GetWorldContexts())
-    {
-        if (const UWorld* World = Context.World())
-        {
-            if (UGameInstance* GameInstance = World->GetGameInstance())
-            {
-                return GameInstance;
-            }
-
-            return const_cast<UWorld*>(World);
-        }
-    }
-
-    return nullptr;
-}
-
-template <typename TAction, typename TInitializer>
-TAction* CreateAsyncNode(UObject* WorldContextObject,
-    float DurationSecs,
-    ENsTweenEase EaseType,
-    float Delay,
-    int32 Loops,
-    float LoopDelay,
-    bool bPingPong,
-    float PingPongDelay,
-    bool bCanTickDuringPause,
-    bool bUseGlobalTimeDilation,
-    UCurveFloat* Curve,
-    bool bUseCustomCurve,
-    TInitializer&& Initializer)
-{
-    TAction* Node = NewObject<TAction>();
-    UObject* ContextObject = ResolveWorldContext(WorldContextObject);
-    Node->InitialiseCommon(ContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, bUseCustomCurve);
-    Forward<TInitializer>(Initializer)(*Node);
-
-    if (ContextObject)
-    {
-        Node->RegisterWithGameInstance(ContextObject);
-    }
-
-    return Node;
-}
-}
-
-void UNsTweenAsyncAction::InitialiseCommon(UObject* WorldContextObject,
-    float InDuration,
-    ENsTweenEase InEase,
-    float InDelay,
-    int32 InLoops,
-    float InLoopDelay,
-    bool bInPingPong,
-    float InPingPongDelay,
-    bool bInCanTickDuringPause,
-    bool bInUseGlobalTimeDilation,
-    UCurveFloat* InCurve,
-    bool bInUseCustomCurve)
+void UNsTweenAsyncAction::InitialiseCommon(UObject* WorldContextObject, float InDuration, ENsTweenEase InEase, float InDelay, int32 InLoops, float InLoopDelay, bool bInPingPong, float InPingPongDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation, UCurveFloat* InCurve, bool bInUseCustomCurve)
 {
     WorldContext = WorldContextObject;
     DurationSeconds = FMath::Max(0.f, InDuration);

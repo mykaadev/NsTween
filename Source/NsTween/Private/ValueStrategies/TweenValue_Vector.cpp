@@ -1,3 +1,5 @@
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
+
 #include "ValueStrategies/TweenValue_Vector.h"
 #include "Math/UnrealMathUtility.h"
 

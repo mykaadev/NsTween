@@ -3,32 +3,32 @@
 #include "Easing/NsTweenPolynomialEasing.h"
 #include "Math/UnrealMathUtility.h"
 
-namespace
+namespace NsTweenEaseHelpers
 {
-/** Returns the bounce-out eased value used by several presets. */
-float EaseOutBounce(float T)
-{
-    const float N1 = 7.5625f;
-    const float D1 = 2.75f;
+    /** Returns the bounce-out eased value used by several presets. */
+    float EaseOutBounce(float T)
+    {
+        const float N1 = 7.5625f;
+        const float D1 = 2.75f;
 
-    if (T < 1.f / D1)
-    {
-        return N1 * T * T;
-    }
-    if (T < 2.f / D1)
-    {
-        T -= 1.5f / D1;
-        return N1 * T * T + 0.75f;
-    }
-    if (T < 2.5f / D1)
-    {
-        T -= 2.25f / D1;
-        return N1 * T * T + 0.9375f;
-    }
+        if (T < 1.f / D1)
+        {
+            return N1 * T * T;
+        }
+        if (T < 2.f / D1)
+        {
+            T -= 1.5f / D1;
+            return N1 * T * T + 0.75f;
+        }
+        if (T < 2.5f / D1)
+        {
+            T -= 2.25f / D1;
+            return N1 * T * T + 0.9375f;
+        }
 
-    T -= 2.625f / D1;
-    return N1 * T * T + 0.984375f;
-}
+        T -= 2.625f / D1;
+        return N1 * T * T + 0.984375f;
+    }
 } // namespace
 
 FNsTweenPolynomialEasing::FNsTweenPolynomialEasing(ENsTweenEase InPreset)
@@ -145,29 +145,29 @@ float FNsTweenPolynomialEasing::Evaluate(float T) const
         return FMath::Pow(2.f, -20.f * X + 10.f) * FMath::Sin((20.f * X - 11.125f) * C) * 0.5f + 1.f;
     }
     case ENsTweenEase::InBounce:
-        return 1.f - EaseOutBounce(1.f - X);
+        return 1.f - NsTweenEaseHelpers::EaseOutBounce(1.f - X);
     case ENsTweenEase::OutBounce:
-        return EaseOutBounce(X);
+        return NsTweenEaseHelpers::EaseOutBounce(X);
     case ENsTweenEase::InOutBounce:
         return X < 0.5f
-            ? (1.f - EaseOutBounce(1.f - 2.f * X)) * 0.5f
-            : (1.f + EaseOutBounce(2.f * X - 1.f)) * 0.5f;
+            ? (1.f - NsTweenEaseHelpers::EaseOutBounce(1.f - 2.f * X)) * 0.5f
+            : (1.f + NsTweenEaseHelpers::EaseOutBounce(2.f * X - 1.f)) * 0.5f;
     case ENsTweenEase::InBack:
     {
-        const float C1 = 1.70158f;
-        const float C3 = C1 + 1.f;
+        constexpr float C1 = 1.70158f;
+        constexpr float C3 = C1 + 1.f;
         return C3 * X * X * X - C1 * X * X;
     }
     case ENsTweenEase::OutBack:
     {
-        const float C1 = 1.70158f;
-        const float C3 = C1 + 1.f;
+        constexpr float C1 = 1.70158f;
+        constexpr float C3 = C1 + 1.f;
         return 1.f + C3 * FMath::Pow(X - 1.f, 3.f) + C1 * FMath::Pow(X - 1.f, 2.f);
     }
     case ENsTweenEase::InOutBack:
     {
-        const float C1 = 1.70158f;
-        const float C2 = C1 * 1.525f;
+        constexpr float C1 = 1.70158f;
+        constexpr float C2 = C1 * 1.525f;
         if (X < 0.5f)
         {
             return FMath::Pow(2.f * X, 2.f) * ((C2 + 1.f) * 2.f * X - C2) * 0.5f;

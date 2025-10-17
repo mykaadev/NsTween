@@ -1,3 +1,5 @@
+// Copyright (C) 2025 nulled.softworks. All rights reserved.
+
 #include "ValueStrategies/TweenValue_Rotator.h"
 #include "Math/Quat.h"
 #include "Math/UnrealMathUtility.h"
