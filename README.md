@@ -1,5 +1,3 @@
-// Copyright (C) 2025 nulled.softworks. All rights reserved.
-
 <!-- GH_ONLY_START -->
 <h1 align="center">
   <br>
