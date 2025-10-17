@@ -3,6 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
+#include "Engine/World.h"
 #include "Kismet/BlueprintAsyncActionBase.h"
 #include "NsTween.h"
 #include "NsTweenAsyncAction.generated.h"

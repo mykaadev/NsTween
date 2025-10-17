@@ -5,6 +5,7 @@
 #include "Delegates/DelegateCombinations.h"
 #include "Interfaces/ITweenValue.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Curves/CurveFloat.h"
 #include "NsTweenTypeLibrary.generated.h"
 
 /** Delegate fired every tick of a tween with the normalized alpha. */

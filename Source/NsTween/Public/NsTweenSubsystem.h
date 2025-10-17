@@ -5,10 +5,9 @@
 #include "CoreMinimal.h"
 #include "Containers/Queue.h"
 #include "Containers/Ticker.h"
-#include "HAL/PlatformMutex.h"
 #include "HAL/ThreadSafeCounter.h"
 #include "NsTweenTypeLibrary.h"
-#include "Subsystems/EngineSubsystem.h"
+#include "Subsystems/GameInstanceSubsystem.h"
 #include "NsTweenSubsystem.generated.h"
 
 class ITweenValue;

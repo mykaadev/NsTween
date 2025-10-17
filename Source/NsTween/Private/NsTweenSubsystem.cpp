@@ -6,6 +6,8 @@
 #include "Easing/NsTweenCurveAssetEasingAdapter.h"
 #include "Easing/NsTweenPolynomialEasing.h"
 #include "Engine/World.h"
+#include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "Interfaces/IEasingCurve.h"
 #include "Interfaces/ITweenValue.h"
 #include "Misc/CoreDelegates.h"
