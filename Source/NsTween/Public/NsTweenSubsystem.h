@@ -23,7 +23,7 @@ class FNsTweenCurveAssetEasingAdapter;
 struct FNsTween;
 
 UCLASS()
-class UNsTweenSubsystem : public UEngineSubsystem
+class UNsTweenSubsystem : public UGameInstanceSubsystem
 {
     GENERATED_BODY()
 
@@ -44,6 +44,9 @@ public:
 
     /** Stop everything now (used by teardown/PIE end) */
     void StopAllTweens(bool bApplyFinalOnCancel);
+
+    /** Get Subsystem */
+    static UNsTweenSubsystem* GetSubsystem();
 
 private:
 

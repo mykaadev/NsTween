@@ -14,34 +14,32 @@ class NSTWEEN_API UNsTweenBlueprintLibrary : public UBlueprintFunctionLibrary
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static FNsTweenHandle PlayFloatTween(UObject* WorldContextObject, float StartValue, float EndValue, UPARAM(ref) float& Target, const FNsTweenSpec& Spec);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static FNsTweenHandle PlayVectorTween(UObject* WorldContextObject, const FVector& StartValue, const FVector& EndValue, UPARAM(ref) FVector& Target, const FNsTweenSpec& Spec);
+    static FNsTweenHandle PlayFloatTween(float StartValue, float EndValue, UPARAM(ref) float& Target, const FNsTweenSpec& Spec);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static FNsTweenHandle PlayRotatorTween(UObject* WorldContextObject, const FRotator& StartValue, const FRotator& EndValue, UPARAM(ref) FRotator& Target, const FNsTweenSpec& Spec);
+    static FNsTweenHandle PlayVectorTween(const FVector& StartValue, const FVector& EndValue, UPARAM(ref) FVector& Target, const FNsTweenSpec& Spec);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static FNsTweenHandle PlayTransformTween(UObject* WorldContextObject, const FTransform& StartValue, const FTransform& EndValue, UPARAM(ref) FTransform& Target, const FNsTweenSpec& Spec);
+    static FNsTweenHandle PlayRotatorTween(const FRotator& StartValue, const FRotator& EndValue, UPARAM(ref) FRotator& Target, const FNsTweenSpec& Spec);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static FNsTweenHandle PlayColorTween(UObject* WorldContextObject, const FLinearColor& StartValue, const FLinearColor& EndValue, UPARAM(ref) FLinearColor& Target, const FNsTweenSpec& Spec);
+    static FNsTweenHandle PlayTransformTween(const FTransform& StartValue, const FTransform& EndValue, UPARAM(ref) FTransform& Target, const FNsTweenSpec& Spec);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static void PauseTween(UObject* WorldContextObject, FNsTweenHandle Handle);
+    static FNsTweenHandle PlayColorTween(const FLinearColor& StartValue, const FLinearColor& EndValue, UPARAM(ref) FLinearColor& Target, const FNsTweenSpec& Spec);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static void ResumeTween(UObject* WorldContextObject, FNsTweenHandle Handle);
+    static void PauseTween(FNsTweenHandle Handle);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static void CancelTween(UObject* WorldContextObject, FNsTweenHandle Handle, bool bApplyFinal = true);
+    static void ResumeTween(FNsTweenHandle Handle);
 
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
-    static bool IsTweenActive(UObject* WorldContextObject, FNsTweenHandle Handle);
+    static void CancelTween(FNsTweenHandle Handle, bool bApplyFinal = true);
 
-private:
-    static UNsTweenSubsystem* GetManager(UObject* WorldContextObject);
+    UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
+    static bool IsTweenActive(FNsTweenHandle Handle);
 };
 
