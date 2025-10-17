@@ -128,17 +128,28 @@ void AFloatingItem::BeginPlay()
 
 
 ## 🔧 API
-### Key Classes
-- `FNsTween` – runtime tween struct with fluent helpers for spawning tweens.
-- `UNsTweenSubsystem` – automatically ticks and manages active tweens.
-- `UNsTweenAsyncAction` – base class for asynchronous Blueprint tween nodes.
-- `UNsTweenBlueprintLibrary` – utility functions including `Ease` helpers.
+### Runtime Core
+- `FNsTween` – Runtime tween state tracking easing, wrap modes, delegates, and pause behavior.
+- `FNsTweenBuilder` – Fluent setup handle chaining specs, callbacks, activation, and control forwarding.
+- `UNsTweenSubsystem` – Game-instance subsystem ticking live tweens, processing commands, and allocating easing curves.
 
-### Main Functions
-- `FNsTween::Play` – start a tween in C++ for various types.
-- `UNsTweenAsyncActionFloat::TweenFloat` – Blueprint node to tween a float value.
-- `UNsTweenAsyncActionVector::TweenVector` – Blueprint node to tween vectors.
-- `FNsTweenBuilder` – chainable object for configuring and controlling tweens.
+### Data & Specs
+- `FNsTweenSpec` / `FNsTweenCommand` / `FNsTweenHandle` – Blueprint-ready structs describing playback options, delegate hooks, queued commands, and handles.
+- `UNsTweenSequence` – UObject sequence asset storing ordered tween specs for content-driven playback.
+
+### Blueprint & Async Surface
+- `UNsTweenBlueprintLibrary` – Central Blueprint library spawning tweens, exposing ease presets, and forwarding subsystem controls.
+- `UNsTweenAsyncAction` (base) – Shared async action base normalizing inputs, binding events, and managing lifecycle cleanup.
+- Typed async nodes – Float, vector, rotator, transform, and color broadcasts with curve overrides.
+
+### Strategies & Helpers
+- Callback strategy / interpolators – Lambda-friendly callback strategies and templated interpolators supplying type-appropriate lerp math.
+- Native value strategies – Native ITweenValue implementations initializing targets, applying eased updates, and ensuring completion.
+
+### Easing Implementations
+- `FNsTweenPolynomialEasing` – Polynomial easing evaluator covering sine, expo, elastic, bounce, and back presets.
+- `FNsTweenBezierEasing` – Cubic Bezier easing solver inverting time with Newton steps before sampling output.
+- `FNsTweenCurveAssetEasingAdapter` – Adapter wrapping UCurveFloat assets to drive easing while falling back gracefully.
 
 ## 🧭 Tech Documentation Layout
 Use the following map when you need to dive deeper than the high-level feature overview. Each entry mirrors the folder layout inside the plugin so you can jump straight from prose into the exact file that owns the logic.
