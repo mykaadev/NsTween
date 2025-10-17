@@ -1,0 +1,27 @@
+﻿{
+    "FileVersion":  3,
+    "Version":  1,
+    "VersionName":  "1.0",
+    "FriendlyName":  "NsTween",
+    "Description":  "Nulled Softworks - NsTween",
+    "Category":  "Other",
+    "CreatedBy": "nulled.softworks",
+    "CreatedByURL":  "mykaadev.github.io",
+    "DocsURL":  "https://mykaadev.github.io/plugins/NsTween",
+    "CanContainContent":  true,
+    "IsBetaVersion":  false,
+    "IsExperimentalVersion":  false,
+    "Installed":  false,
+    "Modules":  [
+                    {
+                        "Name":  "NsTween",
+                        "Type":  "Runtime",
+                        "LoadingPhase":  "Default",
+                        "PlatformAllowList":  [
+                                                  "Win64"
+                                              ]
+                    }
+                ],
+    "EngineVersion":  "5.6.0",
+    "FabURL":  "com.epicgames.launcher://ue/Fab/product/f504b9df-82b6-4228-98b4-511ceec388a9"
+}
