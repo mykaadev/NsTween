@@ -87,8 +87,34 @@ private:
     /** Easing curve used to transform normalized time. */
     TSharedPtr<IEasingCurve> Easing;
 
+    /** Cached raw pointer for the strategy to avoid smart pointer overhead on hot paths. */
+    ITweenValue* StrategyPtr = nullptr;
+
+    /** Cached raw pointer for the easing curve to avoid smart pointer overhead on hot paths. */
+    IEasingCurve* EasingPtr = nullptr;
+
+    /** Cached loop limit so we do not repeatedly access the spec in hot paths. */
+    int32 LoopLimit = 0;
+
+    /** Indicates whether the tween has a finite loop limit. */
+    bool bHasLoopLimit = false;
+
+    /** Cached wrap mode flags so boundary handling avoids repeated enum comparisons. */
+    bool bWrapOnce = false;
+    bool bWrapLoop = false;
+    bool bWrapPingPong = false;
+
     /** Remaining delay before the tween starts. */
     float DelayRemaining = 0.0f;
+
+    /** Cached duration to avoid re-evaluating clamped values every tick. */
+    float Duration = 0.0f;
+
+    /** Reciprocal of the cached duration for fast alpha calculation. */
+    float DurationInverse = 1.0f;
+
+    /** Cached time scale to avoid repeated clamping. */
+    float TimeScale = 1.0f;
 
     /** Accumulated time within the current tween cycle. */
     float CycleTime = 0.0f;
@@ -110,5 +136,17 @@ private:
 
     /** Tracks whether the tween is currently playing forward. */
     bool bPlayingForward = true;
+
+    /** Cached delegate state to eliminate repeated IsBound checks in hot paths. */
+    bool bHasOnUpdate = false;
+
+    /** Cached delegate state to eliminate repeated IsBound checks in hot paths. */
+    bool bHasOnComplete = false;
+
+    /** Cached delegate state to eliminate repeated IsBound checks in hot paths. */
+    bool bHasOnLoop = false;
+
+    /** Cached delegate state to eliminate repeated IsBound checks in hot paths. */
+    bool bHasOnPingPong = false;
 };
 
