@@ -9,10 +9,12 @@
 #include "NsTween.h"
 #include "UObject/Stack.h"
 #include "Utils/NsTweenLogging.h"
+#include "Utils/NsTweenProfiling.h"
 
 
 void UNsTweenAsyncAction::InitialiseCommon(UObject* WorldContextObject, float InDuration, ENsTweenEase InEase, float InDelay, int32 InLoops, float InLoopDelay, bool bInPingPong, float InPingPongDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation, UCurveFloat* InCurve, bool bInUseCustomCurve)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::InitialiseCommon");
     WorldContext = WorldContextObject;
     DurationSeconds = FMath::Max(0.f, InDuration);
     DelaySeconds = FMath::Max(0.f, InDelay);
@@ -32,6 +34,7 @@ void UNsTweenAsyncAction::InitialiseCommon(UObject* WorldContextObject, float In
 
 ENsTweenEase UNsTweenAsyncAction::GetEffectiveEase() const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::GetEffectiveEase");
     if (bUseCurveOverride && CurveOverride)
     {
         return ENsTweenEase::CurveAsset;
@@ -42,6 +45,7 @@ ENsTweenEase UNsTweenAsyncAction::GetEffectiveEase() const
 
 void UNsTweenAsyncAction::ApplyBuilderOptions(FNsTweenBuilder& Builder)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::ApplyBuilderOptions");
     if (bUseCurveOverride && CurveOverride)
     {
         Builder.SetCurveAsset(CurveOverride);
@@ -116,12 +120,14 @@ void UNsTweenAsyncAction::ApplyBuilderOptions(FNsTweenBuilder& Builder)
 
 void UNsTweenAsyncAction::HandleCompletedTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::HandleCompletedTween");
     ActiveTween = FNsTweenBuilder();
     SetReadyToDestroy();
 }
 
 void UNsTweenAsyncAction::Activate()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::Activate");
     if (bHasActivated)
     {
         return;
@@ -148,6 +154,7 @@ void UNsTweenAsyncAction::Activate()
 
 void UNsTweenAsyncAction::BeginDestroy()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::BeginDestroy");
     if (ActiveTween.IsValid())
     {
         ActiveTween.Cancel(false);
@@ -160,6 +167,7 @@ void UNsTweenAsyncAction::BeginDestroy()
 
 void UNsTweenAsyncAction::Pause()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::Pause");
     if (ActiveTween.IsValid())
     {
         ActiveTween.Pause();
@@ -168,6 +176,7 @@ void UNsTweenAsyncAction::Pause()
 
 void UNsTweenAsyncAction::Resume()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::Resume");
     if (ActiveTween.IsValid())
     {
         ActiveTween.Resume();
@@ -176,6 +185,7 @@ void UNsTweenAsyncAction::Resume()
 
 void UNsTweenAsyncAction::Restart()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::Restart");
     if (!bHasActivated)
     {
         Activate();
@@ -193,6 +203,7 @@ void UNsTweenAsyncAction::Restart()
 
 void UNsTweenAsyncAction::Stop()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::Stop");
     if (ActiveTween.IsValid())
     {
         ActiveTween.Cancel(false);
@@ -204,6 +215,7 @@ void UNsTweenAsyncAction::Stop()
 
 void UNsTweenAsyncAction::SetTimeMultiplier(float Multiplier)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncAction::SetTimeMultiplier");
     const float SafeMultiplier = FMath::Max(FMath::Abs(Multiplier), KINDA_SMALL_NUMBER);
     TimeMultiplier = SafeMultiplier;
 
@@ -215,6 +227,7 @@ void UNsTweenAsyncAction::SetTimeMultiplier(float Multiplier)
 
 UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloat(UObject* WorldContextObject, float Start, float End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionFloat::TweenFloat");
     return CreateAsyncNode<UNsTweenAsyncActionFloat>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionFloat& Node)
     {
         Node.StartValue = Start;
@@ -224,6 +237,7 @@ UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloat(UObject* WorldCon
 
 UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloatCustomCurve(UObject* WorldContextObject, float Start, float End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionFloat::TweenFloatCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionFloat>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionFloat& Node)
     {
         Node.StartValue = Start;
@@ -233,6 +247,7 @@ UNsTweenAsyncActionFloat* UNsTweenAsyncActionFloat::TweenFloatCustomCurve(UObjec
 
 void UNsTweenAsyncActionFloat::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionFloat::LaunchTween");
     StartTypedTween(this, StartValue, EndValue, [](UNsTweenAsyncActionFloat& Action, const float& Value)
     {
         Action.ApplyEasing.Broadcast(Value);
@@ -241,6 +256,7 @@ void UNsTweenAsyncActionFloat::LaunchTween()
 
 UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuat(UObject* WorldContextObject, FQuat Start, FQuat End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionQuat::TweenQuat");
     return CreateAsyncNode<UNsTweenAsyncActionQuat>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionQuat& Node)
     {
         Node.StartValue = Start.GetNormalized();
@@ -250,11 +266,13 @@ UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuat(UObject* WorldContex
 
 UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatFromRotator(UObject* WorldContextObject, FRotator Start, FRotator End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionQuat::TweenQuatFromRotator");
     return TweenQuat(WorldContextObject, Start.Quaternion(), End.Quaternion(), DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
 }
 
 UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatCustomCurve(UObject* WorldContextObject, FQuat Start, FQuat End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionQuat::TweenQuatCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionQuat>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionQuat& Node)
     {
         Node.StartValue = Start.GetNormalized();
@@ -264,11 +282,13 @@ UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatCustomCurve(UObject* 
 
 UNsTweenAsyncActionQuat* UNsTweenAsyncActionQuat::TweenQuatFromRotatorCustomCurve(UObject* WorldContextObject, FRotator Start, FRotator End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionQuat::TweenQuatFromRotatorCustomCurve");
     return TweenQuatCustomCurve(WorldContextObject, Start.Quaternion(), End.Quaternion(), DurationSecs, Curve, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation);
 }
 
 void UNsTweenAsyncActionQuat::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionQuat::LaunchTween");
     StartTypedTween(this, StartValue, EndValue, [](UNsTweenAsyncActionQuat& Action, const FQuat& Value)
     {
         Action.ApplyEasing.Broadcast(Value);
@@ -277,6 +297,7 @@ void UNsTweenAsyncActionQuat::LaunchTween()
 
 UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotator(UObject* WorldContextObject, FRotator Start, FRotator End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionRotator::TweenRotator");
     return CreateAsyncNode<UNsTweenAsyncActionRotator>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionRotator& Node)
     {
         Node.StartQuat = Start.Quaternion();
@@ -286,6 +307,7 @@ UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotator(UObject* Wo
 
 UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotatorCustomCurve(UObject* WorldContextObject, FRotator Start, FRotator End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionRotator::TweenRotatorCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionRotator>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionRotator& Node)
     {
         Node.StartQuat = Start.Quaternion();
@@ -295,6 +317,7 @@ UNsTweenAsyncActionRotator* UNsTweenAsyncActionRotator::TweenRotatorCustomCurve(
 
 void UNsTweenAsyncActionRotator::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionRotator::LaunchTween");
     StartTypedTween(this, StartQuat, EndQuat, [](UNsTweenAsyncActionRotator& Action, const FQuat& Value)
     {
         Action.ApplyEasing.Broadcast(Value.Rotator());
@@ -303,6 +326,7 @@ void UNsTweenAsyncActionRotator::LaunchTween()
 
 UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVector(UObject* WorldContextObject, FVector Start, FVector End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionVector::TweenVector");
     return CreateAsyncNode<UNsTweenAsyncActionVector>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionVector& Node)
     {
         Node.StartValue = Start;
@@ -312,6 +336,7 @@ UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVector(UObject* World
 
 UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVectorCustomCurve(UObject* WorldContextObject, FVector Start, FVector End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionVector::TweenVectorCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionVector>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionVector& Node)
     {
         Node.StartValue = Start;
@@ -321,6 +346,7 @@ UNsTweenAsyncActionVector* UNsTweenAsyncActionVector::TweenVectorCustomCurve(UOb
 
 void UNsTweenAsyncActionVector::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionVector::LaunchTween");
     StartTypedTween(this, StartValue, EndValue, [](UNsTweenAsyncActionVector& Action, const FVector& Value)
     {
         Action.ApplyEasing.Broadcast(Value);
@@ -329,6 +355,7 @@ void UNsTweenAsyncActionVector::LaunchTween()
 
 UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2D(UObject* WorldContextObject, FVector2D Start, FVector2D End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionVector2D::TweenVector2D");
     return CreateAsyncNode<UNsTweenAsyncActionVector2D>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionVector2D& Node)
     {
         Node.StartValue = Start;
@@ -338,6 +365,7 @@ UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2D(UObject*
 
 UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2DCustomCurve(UObject* WorldContextObject, FVector2D Start, FVector2D End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionVector2D::TweenVector2DCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionVector2D>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionVector2D& Node)
     {
         Node.StartValue = Start;
@@ -347,6 +375,7 @@ UNsTweenAsyncActionVector2D* UNsTweenAsyncActionVector2D::TweenVector2DCustomCur
 
 void UNsTweenAsyncActionVector2D::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionVector2D::LaunchTween");
     StartTypedTween(this, StartValue, EndValue, [](UNsTweenAsyncActionVector2D& Action, const FVector2D& Value)
     {
         Action.ApplyEasing.Broadcast(Value);
@@ -355,6 +384,7 @@ void UNsTweenAsyncActionVector2D::LaunchTween()
 
 UNsTweenAsyncActionTransform* UNsTweenAsyncActionTransform::TweenTransform(UObject* WorldContextObject, const FTransform& Start, const FTransform& End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionTransform::TweenTransform");
     return CreateAsyncNode<UNsTweenAsyncActionTransform>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionTransform& Node)
     {
         Node.StartValue = Start;
@@ -364,6 +394,7 @@ UNsTweenAsyncActionTransform* UNsTweenAsyncActionTransform::TweenTransform(UObje
 
 UNsTweenAsyncActionTransform* UNsTweenAsyncActionTransform::TweenTransformCustomCurve(UObject* WorldContextObject, const FTransform& Start, const FTransform& End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionTransform::TweenTransformCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionTransform>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionTransform& Node)
     {
         Node.StartValue = Start;
@@ -373,6 +404,7 @@ UNsTweenAsyncActionTransform* UNsTweenAsyncActionTransform::TweenTransformCustom
 
 void UNsTweenAsyncActionTransform::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionTransform::LaunchTween");
     StartTypedTween(this, StartValue, EndValue, [](UNsTweenAsyncActionTransform& Action, const FTransform& Value)
     {
         Action.ApplyEasing.Broadcast(Value);
@@ -381,6 +413,7 @@ void UNsTweenAsyncActionTransform::LaunchTween()
 
 UNsTweenAsyncActionLinearColor* UNsTweenAsyncActionLinearColor::TweenLinearColor(UObject* WorldContextObject, FLinearColor Start, FLinearColor End, float DurationSecs, ENsTweenEase EaseType, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionLinearColor::TweenLinearColor");
     return CreateAsyncNode<UNsTweenAsyncActionLinearColor>(WorldContextObject, DurationSecs, EaseType, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, nullptr, false, [Start, End](UNsTweenAsyncActionLinearColor& Node)
     {
         Node.StartValue = Start;
@@ -390,6 +423,7 @@ UNsTweenAsyncActionLinearColor* UNsTweenAsyncActionLinearColor::TweenLinearColor
 
 UNsTweenAsyncActionLinearColor* UNsTweenAsyncActionLinearColor::TweenLinearColorCustomCurve(UObject* WorldContextObject, FLinearColor Start, FLinearColor End, float DurationSecs, UCurveFloat* Curve, float Delay, int32 Loops, float LoopDelay, bool bPingPong, float PingPongDelay, bool bCanTickDuringPause, bool bUseGlobalTimeDilation)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionLinearColor::TweenLinearColorCustomCurve");
     return CreateAsyncNode<UNsTweenAsyncActionLinearColor>(WorldContextObject, DurationSecs, ENsTweenEase::Linear, Delay, Loops, LoopDelay, bPingPong, PingPongDelay, bCanTickDuringPause, bUseGlobalTimeDilation, Curve, true, [Start, End](UNsTweenAsyncActionLinearColor& Node)
     {
         Node.StartValue = Start;
@@ -399,6 +433,7 @@ UNsTweenAsyncActionLinearColor* UNsTweenAsyncActionLinearColor::TweenLinearColor
 
 void UNsTweenAsyncActionLinearColor::LaunchTween()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenAsyncActionLinearColor::LaunchTween");
     StartTypedTween(this, StartValue, EndValue, [](UNsTweenAsyncActionLinearColor& Action, const FLinearColor& Value)
     {
         Action.ApplyEasing.Broadcast(Value);
