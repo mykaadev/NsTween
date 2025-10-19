@@ -146,20 +146,54 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
     };
 
     TArray<FTickCandidate, TInlineAllocator<32>> Candidates;
+    TArray<int32, TInlineAllocator<32>> StaleIndices;
     {
         // Phase 1: Take a read lock and gather the tweens that are still active.
         FReadScopeLock ReadLock(PoolLock);
         Candidates.Reserve(TweenPool.Num());
+        StaleIndices.Reserve(TweenPool.Num());
 
         for (int32 Index = 0; Index < TweenPool.Num(); ++Index)
         {
             const TUniquePtr<FNsTween>& Instance = TweenPool[Index];
-            if (Instance && Instance->IsActive())
+            if (!Instance)
             {
-                FTickCandidate& Candidate = Candidates.Emplace_GetRef();
-                Candidate.Instance = Instance.Get();
-                Candidate.Handle = Instance->GetHandle();
-                Candidate.SourceIndex = Index;
+                StaleIndices.Add(Index);
+                continue;
+            }
+
+            if (!Instance->IsActive())
+            {
+                StaleIndices.Add(Index);
+                continue;
+            }
+
+            FTickCandidate& Candidate = Candidates.Emplace_GetRef();
+            Candidate.Instance = Instance.Get();
+            Candidate.Handle = Instance->GetHandle();
+            Candidate.SourceIndex = Index;
+        }
+    }
+
+    if (StaleIndices.Num() > 0)
+    {
+        FWriteScopeLock WriteLock(PoolLock);
+
+        StaleIndices.Sort([](int32 A, int32 B)
+        {
+            return A > B;
+        });
+        for (const int32 Index : StaleIndices)
+        {
+            if (!TweenPool.IsValidIndex(Index))
+            {
+                continue;
+            }
+
+            const TUniquePtr<FNsTween>& Instance = TweenPool[Index];
+            if (!Instance || !Instance->IsActive())
+            {
+                TweenPool.RemoveAtSwap(Index);
             }
         }
     }
