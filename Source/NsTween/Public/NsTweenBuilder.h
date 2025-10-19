@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "NsTweenTypeLibrary.h"
+#include "Templates/Function.h"
+#include "Templates/UniquePtr.h"
 
 class ITweenValue;
 class IEasingCurve;
@@ -83,9 +85,6 @@ private:
     /** Constructs the builder from explicit specification data. */
     FNsTweenBuilder(FNsTweenSpec&& InSpec, TFunction<TSharedPtr<ITweenValue>()>&& InStrategyFactory);
 
-    /** Returns true when the tween can still be configured. */
-    bool CanConfigure() const;
-
     /** Activates the tween within the subsystem. */
     void Activate() const;
 
@@ -96,40 +95,15 @@ private:
     template <typename DelegateType>
     void ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr<TFunction<void()>>& Storage, DelegateType& Delegate) const;
 
-private:
-    /** Resets the builder back to an empty state. */
-    void Reset();
+    /** Executes an operation when the builder owns a valid handle. */
+    void WithHandle(TFunctionRef<void(UNsTweenSubsystem&, const FNsTweenHandle&)> Operation) const;
 
 private:
-    /** Specification describing the tween configuration. */
-    mutable FNsTweenSpec Spec;
+    /** Container for the live builder state. */
+    struct FState;
 
-    /** Factory that produces the tween value strategy. */
-    TFunction<TSharedPtr<ITweenValue>()> StrategyFactory;
-
-    /** Callback executed on tween completion. */
-    mutable TSharedPtr<TFunction<void()>> CompleteCallback;
-
-    /** Callback executed when the tween loops. */
-    mutable TSharedPtr<TFunction<void()>> LoopCallback;
-
-    /** Callback executed when the tween ping-pongs. */
-    mutable TSharedPtr<TFunction<void()>> PingPongCallback;
-
-    /** Handle used to identify the spawned tween. */
-    mutable FNsTweenHandle Handle;
-
-    /** Tracks whether looping is currently enabled. */
-    bool bLooping = false;
-
-    /** Tracks whether ping-pong behaviour is enabled. */
-    bool bPingPong = false;
-
-    /** Tracks whether the tween has already been activated. */
-    mutable bool bActivated = false;
-
-    /** Tracks whether the builder currently owns valid state. */
-    bool bHasState = false;
+    /** Optional state used while the builder owns a tween. */
+    mutable TUniquePtr<FState> State;
 
     friend struct FNsTween;
 };
