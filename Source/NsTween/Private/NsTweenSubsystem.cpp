@@ -14,6 +14,16 @@
 #include "NsTween.h"
 #include "Utils/NsTweenLogging.h"
 
+#if WITH_AUTOMATION_TESTS
+struct FNsTweenSubsystemTestAccessor
+{
+    static bool DequeueCommand(UNsTweenSubsystem& Subsystem, FNsTweenCommand& OutCommand)
+    {
+        return Subsystem.CommandQueue.Dequeue(OutCommand);
+    }
+};
+#endif
+
 #if WITH_EDITOR
 #include "Editor.h"
 #endif
@@ -115,7 +125,7 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
         return true;
     }
 
-    // Process commands up front
+    // Process commands up front so queue mutations happen before we start ticking tweens.
     ProcessCommands();
 
     if (DeltaTime < KINDA_SMALL_NUMBER)
@@ -123,19 +133,66 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
         return true;
     }
 
-    FWriteScopeLock WriteLock(PoolLock);
-    for (int32 Index = TweenPool.Num() - 1; Index >= 0; --Index)
+    struct FTickCandidate
     {
-        const TUniquePtr<FNsTween>& Instance = TweenPool[Index];
-        if (!Instance)
+        FNsTween* Instance = nullptr;
+        FNsTweenHandle Handle;
+    };
+
+    TArray<FTickCandidate, TInlineAllocator<32>> Candidates;
+    {
+        // Phase 1: Take a read lock and gather the tweens that are still active.
+        FReadScopeLock ReadLock(PoolLock);
+        Candidates.Reserve(TweenPool.Num());
+
+        for (const TUniquePtr<FNsTween>& Instance : TweenPool)
+        {
+            if (Instance && Instance->IsActive())
+            {
+                FTickCandidate& Candidate = Candidates.Emplace_GetRef();
+                Candidate.Instance = Instance.Get();
+                Candidate.Handle = Instance->GetHandle();
+            }
+        }
+    }
+
+    // Phase 2: Tick outside the lock so Update/OnComplete callbacks can execute without blocking
+    // other readers/writers attempting to enqueue commands.
+    TArray<FNsTweenHandle, TInlineAllocator<32>> CompletedHandles;
+    CompletedHandles.Reserve(Candidates.Num());
+
+    for (const FTickCandidate& Candidate : Candidates)
+    {
+        if (!Candidate.Instance)
         {
             continue;
         }
 
-        // If tick returns false, it’s finished or invalid — remove it.
-        if (!Instance->Tick(DeltaTime))
+        // If tick returns false, it’s finished or invalid — remember the handle for removal.
+        if (!Candidate.Instance->Tick(DeltaTime))
         {
-            TweenPool.RemoveAtSwap(Index);
+            CompletedHandles.Add(Candidate.Handle);
+        }
+    }
+
+    if (CompletedHandles.Num() > 0)
+    {
+        // Phase 3: Acquire a write lock only long enough to prune finished tweens. We validate
+        // each handle because the tween may have already been removed by a command processed
+        // earlier on this frame (e.g. cancel).
+        FWriteScopeLock WriteLock(PoolLock);
+
+        for (const FNsTweenHandle& Handle : CompletedHandles)
+        {
+            for (int32 Index = TweenPool.Num() - 1; Index >= 0; --Index)
+            {
+                const TUniquePtr<FNsTween>& Instance = TweenPool[Index];
+                if (Instance && Instance->GetHandle().Id.Value == Handle.Id.Value)
+                {
+                    TweenPool.RemoveAtSwap(Index);
+                    break;
+                }
+            }
         }
     }
 
