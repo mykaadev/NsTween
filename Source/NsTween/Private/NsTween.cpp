@@ -23,10 +23,20 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
     , Spec(MoveTemp(InSpec))
     , Strategy(MoveTemp(InStrategy))
     , Easing(MoveTemp(InEasing))
-    , DelayRemaining(FMath::Max(0.f, InSpec.DelaySeconds))
-    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_NUMBER))
-    , bPlayingForward(InSpec.Direction != ENsTweenDirection::Backward)
 {
+    Spec.DurationSeconds = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
+    Spec.DelaySeconds = FMath::Max(Spec.DelaySeconds, 0.f);
+    Spec.TimeScale = FMath::Max(Spec.TimeScale, 0.f);
+
+    DelayRemaining = Spec.DelaySeconds;
+    CycleTime = (Spec.Direction == ENsTweenDirection::Forward) ? 0.f : Spec.DurationSeconds;
+    bPlayingForward = (Spec.Direction != ENsTweenDirection::Backward);
+
+    InvDurationSeconds = 1.f / Spec.DurationSeconds;
+    bHasOnUpdate = Spec.OnUpdate.IsBound();
+    bHasOnComplete = Spec.OnComplete.IsBound();
+    bHasOnLoop = Spec.OnLoop.IsBound();
+    bHasOnPingPong = Spec.OnPingPong.IsBound();
 }
 
 bool FNsTween::Tick(float DeltaSeconds)
@@ -115,7 +125,7 @@ void FNsTween::Cancel(bool bApplyFinal)
         Strategy->ApplyFinal();
     }
 
-    if (Spec.OnComplete.IsBound())
+    if (bHasOnComplete)
     {
         Spec.OnComplete.Execute();
     }
@@ -136,12 +146,11 @@ void FNsTween::Apply(float InCycleTime)
         return;
     }
 
-    const float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
-    const float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
+    const float LinearAlpha = FMath::Clamp(InCycleTime * InvDurationSeconds, 0.f, 1.f);
     const float EasedAlpha = Easing->Evaluate(LinearAlpha);
 
     Strategy->Apply(EasedAlpha);
-    if (Spec.OnUpdate.IsBound())
+    if (bHasOnUpdate)
     {
         Spec.OnUpdate.Execute(EasedAlpha);
     }
@@ -155,7 +164,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
     {
     case ENsTweenWrapMode::Once:
         // Notify completion exactly once and ensure we end on the last value.
-        if (Spec.OnComplete.IsBound())
+        if (bHasOnComplete)
         {
             Spec.OnComplete.Execute();
         }
@@ -165,7 +174,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 
     case ENsTweenWrapMode::Loop:
         ++CompletedCycles;
-        if (Spec.OnLoop.IsBound())
+        if (bHasOnLoop)
         {
             Spec.OnLoop.Execute();
         }
@@ -173,7 +182,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         if (Spec.LoopCount > 0 && CompletedCycles >= Spec.LoopCount)
         {
             // Exhausted the requested loop count, so wrap like a completion.
-            if (Spec.OnComplete.IsBound())
+            if (bHasOnComplete)
             {
                 Spec.OnComplete.Execute();
             }
@@ -188,7 +197,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 
     case ENsTweenWrapMode::PingPong:
         bPlayingForward = !bPlayingForward;
-        if (Spec.OnPingPong.IsBound())
+        if (bHasOnPingPong)
         {
             Spec.OnPingPong.Execute();
         }
@@ -200,7 +209,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         else if (Spec.LoopCount > 0 && CompletedPingPongPairs >= Spec.LoopCount)
         {
             // A ping-pong pair counts as a single loop when evaluating completion.
-            if (Spec.OnComplete.IsBound())
+            if (bHasOnComplete)
             {
                 Spec.OnComplete.Execute();
             }

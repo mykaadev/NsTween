@@ -93,6 +93,9 @@ private:
     /** Accumulated time within the current tween cycle. */
     float CycleTime = 0.0f;
 
+    /** Cached inverse of the tween duration for normalized time calculations. */
+    float InvDurationSeconds = 1.0f;
+
     /** Number of completed cycles for looping tweens. */
     int32 CompletedCycles = 0;
 
@@ -110,5 +113,11 @@ private:
 
     /** Tracks whether the tween is currently playing forward. */
     bool bPlayingForward = true;
+
+    /** Cached binding state for optional callbacks. */
+    bool bHasOnUpdate = false;
+    bool bHasOnComplete = false;
+    bool bHasOnLoop = false;
+    bool bHasOnPingPong = false;
 };
 
