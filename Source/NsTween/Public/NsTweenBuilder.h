@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "NsTweenTypeLibrary.h"
 #include "Templates/Function.h"
-#include "Templates/UniquePtr.h"
+#include "Templates/SharedPointer.h"
 
 class ITweenValue;
 class IEasingCurve;
@@ -91,19 +91,48 @@ private:
     /** Updates the wrap mode based on ping-pong and loop settings. */
     void UpdateWrapMode() const;
 
-    /** Helper used to configure callbacks on the underlying spec. */
-    template <typename DelegateType>
-    void ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr<TFunction<void()>>& Storage, DelegateType& Delegate) const;
+    /** Returns true when configuration can still be modified. */
+    bool CanConfigure() const;
 
-    /** Executes an operation when the builder owns a valid handle. */
-    void WithHandle(TFunctionRef<void(UNsTweenSubsystem&, const FNsTweenHandle&)> Operation) const;
+    /** Configures the completion callback on the specification. */
+    void ConfigureComplete(TFunction<void()>&& Callback) const;
+
+    /** Configures the loop callback on the specification. */
+    void ConfigureLoop(TFunction<void()>&& Callback) const;
+
+    /** Configures the ping-pong callback on the specification. */
+    void ConfigurePingPong(TFunction<void()>&& Callback) const;
 
 private:
-    /** Container for the live builder state. */
-    struct FState;
+    /** Specification used when spawning the tween. */
+    mutable FNsTweenSpec Spec;
 
-    /** Optional state used while the builder owns a tween. */
-    mutable TUniquePtr<FState> State;
+    /** Deferred factory used to create the tween strategy. */
+    mutable TFunction<TSharedPtr<ITweenValue>()> StrategyFactory;
+
+    /** Callback storage to keep bound lambdas alive. */
+    mutable TSharedPtr<TFunction<void()>> CompleteCallback;
+
+    /** Callback storage to keep bound lambdas alive. */
+    mutable TSharedPtr<TFunction<void()>> LoopCallback;
+
+    /** Callback storage to keep bound lambdas alive. */
+    mutable TSharedPtr<TFunction<void()>> PingPongCallback;
+
+    /** Handle returned by the subsystem after activation. */
+    mutable FNsTweenHandle Handle;
+
+    /** True when the builder has been initialized with a specification. */
+    bool bHasSpec = false;
+
+    /** True when the tween loops continuously. */
+    mutable bool bLooping = false;
+
+    /** True when the tween ping-pongs instead of looping. */
+    mutable bool bPingPong = false;
+
+    /** True once the tween has been activated. */
+    mutable bool bActivated = false;
 
     friend struct FNsTween;
 };
