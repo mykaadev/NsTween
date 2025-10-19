@@ -95,6 +95,10 @@ private:
     /** Updates the wrap mode based on ping-pong and loop settings. */
     void UpdateWrapMode() const;
 
+    /** Helper used to configure callbacks on the underlying spec. */
+    template <typename DelegateType>
+    void ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr<TFunction<void()>>& Storage, DelegateType& Delegate) const;
+
 private:
     /** Shared state describing the tween being built. */
     TSharedPtr<FState> State;

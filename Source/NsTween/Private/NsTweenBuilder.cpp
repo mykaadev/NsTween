@@ -145,25 +145,9 @@ FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
 FNsTweenBuilder& FNsTweenBuilder::OnComplete(TFunction<void()> Callback)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnComplete");
-    if (CanConfigure())
+    if (State.IsValid())
     {
-        if (Callback)
-        {
-            State->CompleteCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
-            State->Spec.OnComplete.Unbind();
-            State->Spec.OnComplete.BindLambda([CallbackPtr = State->CompleteCallback]()
-            {
-                if (CallbackPtr && *CallbackPtr)
-                {
-                    (*CallbackPtr)();
-                }
-            });
-        }
-        else
-        {
-            State->CompleteCallback.Reset();
-            State->Spec.OnComplete.Unbind();
-        }
+        ConfigureCallback(MoveTemp(Callback), State->CompleteCallback, State->Spec.OnComplete);
     }
     return *this;
 }
@@ -171,25 +155,9 @@ FNsTweenBuilder& FNsTweenBuilder::OnComplete(TFunction<void()> Callback)
 FNsTweenBuilder& FNsTweenBuilder::OnLoop(TFunction<void()> Callback)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnLoop");
-    if (CanConfigure())
+    if (State.IsValid())
     {
-        if (Callback)
-        {
-            State->LoopCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
-            State->Spec.OnLoop.Unbind();
-            State->Spec.OnLoop.BindLambda([CallbackPtr = State->LoopCallback]()
-            {
-                if (CallbackPtr && *CallbackPtr)
-                {
-                    (*CallbackPtr)();
-                }
-            });
-        }
-        else
-        {
-            State->LoopCallback.Reset();
-            State->Spec.OnLoop.Unbind();
-        }
+        ConfigureCallback(MoveTemp(Callback), State->LoopCallback, State->Spec.OnLoop);
     }
     return *this;
 }
@@ -197,27 +165,38 @@ FNsTweenBuilder& FNsTweenBuilder::OnLoop(TFunction<void()> Callback)
 FNsTweenBuilder& FNsTweenBuilder::OnPingPong(TFunction<void()> Callback)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnPingPong");
-    if (CanConfigure())
+    if (State.IsValid())
     {
-        if (Callback)
-        {
-            State->PingPongCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
-            State->Spec.OnPingPong.Unbind();
-            State->Spec.OnPingPong.BindLambda([CallbackPtr = State->PingPongCallback]()
-            {
-                if (CallbackPtr && *CallbackPtr)
-                {
-                    (*CallbackPtr)();
-                }
-            });
-        }
-        else
-        {
-            State->PingPongCallback.Reset();
-            State->Spec.OnPingPong.Unbind();
-        }
+        ConfigureCallback(MoveTemp(Callback), State->PingPongCallback, State->Spec.OnPingPong);
     }
     return *this;
+}
+
+template <typename DelegateType>
+void FNsTweenBuilder::ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr<TFunction<void()>>& Storage, DelegateType& Delegate) const
+{
+    if (!CanConfigure())
+    {
+        return;
+    }
+
+    if (Callback)
+    {
+        Storage = MakeShared<TFunction<void()>>(MoveTemp(Callback));
+        Delegate.Unbind();
+        Delegate.BindLambda([CallbackPtr = Storage]()
+        {
+            if (CallbackPtr && *CallbackPtr)
+            {
+                (*CallbackPtr)();
+            }
+        });
+    }
+    else
+    {
+        Storage.Reset();
+        Delegate.Unbind();
+    }
 }
 
 void FNsTweenBuilder::Pause() const
