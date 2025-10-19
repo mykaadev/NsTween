@@ -7,17 +7,10 @@
 #include "Math/UnrealMathUtility.h"
 #include "Utils/NsTweenProfiling.h"
 
-/**
- * The non-templated Play overload wires an explicit specification and strategy factory into the builder.
- * Everything else funnels through this helper so we only have one place that knows how to seed the shared state.
- */
 FNsTweenBuilder FNsTween::Play(FNsTweenSpec Spec, TFunction<TSharedPtr<ITweenValue>()> StrategyFactory)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Play");
-    const TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
-    State->Spec = MoveTemp(Spec);
-    State->StrategyFactory = MoveTemp(StrategyFactory);
-    return FNsTweenBuilder(State);
+    return FNsTweenBuilder(MoveTemp(Spec), MoveTemp(StrategyFactory));
 }
 
 FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing)
