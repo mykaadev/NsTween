@@ -87,12 +87,6 @@ private:
     /** Easing curve used to transform normalized time. */
     TSharedPtr<IEasingCurve> Easing;
 
-    /** Cached raw pointer for strategy access without smart-pointer overhead. */
-    ITweenValue* StrategyRaw = nullptr;
-
-    /** Cached raw pointer for easing access without smart-pointer overhead. */
-    IEasingCurve* EasingRaw = nullptr;
-
     /** Remaining delay before the tween starts. */
     float DelayRemaining = 0.0f;
 
@@ -104,21 +98,6 @@ private:
 
     /** Number of completed ping-pong direction pairs. */
     int32 CompletedPingPongPairs = 0;
-
-    /** Loop limit cached for quick comparisons. */
-    int32 LoopLimit = 0;
-
-    /** Tracks whether the tween has a finite looping budget. */
-    bool bHasFiniteLoopLimit = false;
-
-    /** Tracks if delegates are bound so we can skip redundant checks. */
-    bool bHasOnUpdate = false;
-    bool bHasOnComplete = false;
-    bool bHasOnLoop = false;
-    bool bHasOnPingPong = false;
-
-    /** Precomputed reciprocal of the duration for Apply(). */
-    float InvDuration = 0.0f;
 
     /** Tracks whether the tween is still active. */
     bool bActive = true;

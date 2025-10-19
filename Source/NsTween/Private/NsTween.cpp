@@ -36,15 +36,6 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
     DelayRemaining = Spec.DelaySeconds;
     CycleTime = (Spec.Direction == ENsTweenDirection::Forward) ? 0.f : Spec.DurationSeconds;
     bPlayingForward = (Spec.Direction != ENsTweenDirection::Backward);
-    StrategyRaw = Strategy.Get();
-    EasingRaw = Easing.Get();
-    LoopLimit = Spec.LoopCount;
-    bHasFiniteLoopLimit = (LoopLimit > 0);
-    bHasOnUpdate = Spec.OnUpdate.IsBound();
-    bHasOnComplete = Spec.OnComplete.IsBound();
-    bHasOnLoop = Spec.OnLoop.IsBound();
-    bHasOnPingPong = Spec.OnPingPong.IsBound();
-    InvDuration = 1.0f / Spec.DurationSeconds;
     bStartBackward = (Spec.Direction == ENsTweenDirection::Backward);
 }
 
@@ -52,30 +43,19 @@ bool FNsTween::Tick(float DeltaSeconds)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Tick");
     // Bail out immediately if the tween is already completed, paused, or missing runtime pieces.
-    if (!bActive || bPaused)
+    if (!bActive || bPaused || !Strategy.IsValid() || !Easing.IsValid())
     {
+        bActive = bActive && Strategy.IsValid() && Easing.IsValid();
         return bActive;
-    }
-
-    if (!StrategyRaw || !EasingRaw)
-    {
-        StrategyRaw = Strategy.Get();
-        EasingRaw = Easing.Get();
-    }
-
-    if (StrategyRaw == nullptr || EasingRaw == nullptr)
-    {
-        bActive = false;
-        return false;
     }
 
     // Lazily initialize the strategy the first time we tick so creation happens on the game thread.
     if (!bInitialized)
     {
-        StrategyRaw->Initialize();
+        Strategy->Initialize();
         if (bStartBackward)
         {
-            StrategyRaw->ApplyFinal();
+            Strategy->ApplyFinal();
         }
         bInitialized = true;
     }
@@ -148,17 +128,13 @@ void FNsTween::Cancel(bool bApplyFinal)
 
     if (bApplyFinal)
     {
-        if (!StrategyRaw)
+        if (Strategy.IsValid())
         {
-            StrategyRaw = Strategy.Get();
-        }
-        if (StrategyRaw)
-        {
-            StrategyRaw->ApplyFinal();
+            Strategy->ApplyFinal();
         }
     }
 
-    if (bHasOnComplete)
+    if (Spec.OnComplete.IsBound())
     {
         Spec.OnComplete.Execute();
     }
@@ -176,30 +152,17 @@ void FNsTween::Apply(float InCycleTime)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Apply");
     // Guard against misconfigured tweens that somehow lost their runtime strategy.
-    if (!StrategyRaw || !EasingRaw)
-    {
-        StrategyRaw = Strategy.Get();
-        EasingRaw = Easing.Get();
-    }
-
-    if (!StrategyRaw || !EasingRaw)
+    if (!Strategy.IsValid() || !Easing.IsValid())
     {
         return;
     }
 
-    float LinearAlpha = InCycleTime * InvDuration;
-    if (LinearAlpha < 0.f)
-    {
-        LinearAlpha = 0.f;
-    }
-    else if (LinearAlpha > 1.f)
-    {
-        LinearAlpha = 1.f;
-    }
-    const float EasedAlpha = EasingRaw->Evaluate(LinearAlpha);
+    const float Duration = Spec.DurationSeconds;
+    const float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
+    const float EasedAlpha = Easing->Evaluate(LinearAlpha);
 
-    StrategyRaw->Apply(EasedAlpha);
-    if (bHasOnUpdate)
+    Strategy->Apply(EasedAlpha);
+    if (Spec.OnUpdate.IsBound())
     {
         Spec.OnUpdate.Execute(EasedAlpha);
     }
@@ -209,22 +172,17 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::HandleBoundary");
 
-    if (!StrategyRaw)
-    {
-        StrategyRaw = Strategy.Get();
-    }
-
     const ENsTweenWrapMode WrapMode = Spec.WrapMode;
 
     if (WrapMode == ENsTweenWrapMode::Once)
     {
-        if (bHasOnComplete)
+        if (Spec.OnComplete.IsBound())
         {
             Spec.OnComplete.Execute();
         }
-        if (StrategyRaw)
+        if (Strategy.IsValid())
         {
-            StrategyRaw->ApplyFinal();
+            Strategy->ApplyFinal();
         }
         bActive = false;
         return false;
@@ -233,20 +191,20 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
     if (WrapMode == ENsTweenWrapMode::Loop)
     {
         ++CompletedCycles;
-        if (bHasOnLoop)
+        if (Spec.OnLoop.IsBound())
         {
             Spec.OnLoop.Execute();
         }
 
-        if (bHasFiniteLoopLimit && CompletedCycles >= LoopLimit)
+        if (Spec.LoopCount > 0 && CompletedCycles >= Spec.LoopCount)
         {
-            if (bHasOnComplete)
+            if (Spec.OnComplete.IsBound())
             {
                 Spec.OnComplete.Execute();
             }
-            if (StrategyRaw)
+            if (Strategy.IsValid())
             {
-                StrategyRaw->ApplyFinal();
+                Strategy->ApplyFinal();
             }
             bActive = false;
             return false;
@@ -258,7 +216,7 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
     else if (WrapMode == ENsTweenWrapMode::PingPong)
     {
         bPlayingForward = !bPlayingForward;
-        if (bHasOnPingPong)
+        if (Spec.OnPingPong.IsBound())
         {
             Spec.OnPingPong.Execute();
         }
@@ -267,15 +225,15 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         {
             ++CompletedPingPongPairs;
         }
-        else if (bHasFiniteLoopLimit && CompletedPingPongPairs >= LoopLimit)
+        else if (Spec.LoopCount > 0 && CompletedPingPongPairs >= Spec.LoopCount)
         {
-            if (bHasOnComplete)
+            if (Spec.OnComplete.IsBound())
             {
                 Spec.OnComplete.Execute();
             }
-            if (StrategyRaw)
+            if (Strategy.IsValid())
             {
-                StrategyRaw->ApplyFinal();
+                Strategy->ApplyFinal();
             }
             bActive = false;
             return false;
