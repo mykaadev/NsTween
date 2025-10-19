@@ -207,16 +207,29 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
 void UNsTweenSubsystem::StopAllTweens(bool bApplyFinalOnCancel)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::StopAllTweens");
-    FWriteScopeLock WriteLock(PoolLock);
-
-    for (int32 Index = TweenPool.Num() - 1; Index >= 0; --Index)
+    TArray<TUniquePtr<FNsTween>> TweensToCancel;
     {
-        if (const TUniquePtr<FNsTween>& Instance = TweenPool[Index])
+        FWriteScopeLock WriteLock(PoolLock);
+        TweensToCancel.Reserve(TweenPool.Num());
+
+        for (int32 Index = TweenPool.Num() - 1; Index >= 0; --Index)
+        {
+            if (TUniquePtr<FNsTween>& Instance = TweenPool[Index])
+            {
+                TweensToCancel.Emplace(MoveTemp(Instance));
+            }
+        }
+
+        TweenPool.Reset();
+    }
+
+    for (TUniquePtr<FNsTween>& Instance : TweensToCancel)
+    {
+        if (Instance)
         {
             Instance->Cancel(bApplyFinalOnCancel);
         }
     }
-    TweenPool.Reset();
 }
 
 UNsTweenSubsystem* UNsTweenSubsystem::GetSubsystem()
@@ -389,16 +402,24 @@ void UNsTweenSubsystem::SpawnTween(FNsTweenCommand& Command)
 void UNsTweenSubsystem::CancelTween(const FNsTweenCommand& Command)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::CancelTween");
-    FWriteScopeLock WriteLock(PoolLock);
-    for (int32 Index = 0; Index < TweenPool.Num(); ++Index)
+    TUniquePtr<FNsTween> InstanceToCancel;
     {
-        TUniquePtr<FNsTween>& Instance = TweenPool[Index];
-        if (Instance && Instance->GetHandle().Id.Value == Command.Handle.Id.Value)
+        FWriteScopeLock WriteLock(PoolLock);
+        for (int32 Index = 0; Index < TweenPool.Num(); ++Index)
         {
-            Instance->Cancel(Command.bApplyFinalOnCancel);
-            TweenPool.RemoveAtSwap(Index);
-            break;
+            TUniquePtr<FNsTween>& Instance = TweenPool[Index];
+            if (Instance && Instance->GetHandle().Id.Value == Command.Handle.Id.Value)
+            {
+                InstanceToCancel = MoveTemp(Instance);
+                TweenPool.RemoveAtSwap(Index);
+                break;
+            }
         }
+    }
+
+    if (InstanceToCancel)
+    {
+        InstanceToCancel->Cancel(Command.bApplyFinalOnCancel);
     }
 }
 
