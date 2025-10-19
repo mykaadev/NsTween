@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "NsTweenTypeLibrary.h"
+#include "Templates/Function.h"
+#include "Templates/SharedPointer.h"
 
 class ITweenValue;
 class IEasingCurve;
@@ -16,17 +18,17 @@ public:
     /** Constructs an empty builder with no state. */
     FNsTweenBuilder();
 
-    /** Copies another builder instance. */
-    FNsTweenBuilder(const FNsTweenBuilder& Other) = default;
+    /** Builders are move-only to keep ownership tight and predictable. */
+    FNsTweenBuilder(const FNsTweenBuilder& Other) = delete;
 
     /** Moves another builder instance. */
-    FNsTweenBuilder(FNsTweenBuilder&& Other) = default;
+    FNsTweenBuilder(FNsTweenBuilder&& Other) noexcept;
 
     /** Assigns from another builder by copying. */
-    FNsTweenBuilder& operator=(const FNsTweenBuilder& Other) = default;
+    FNsTweenBuilder& operator=(const FNsTweenBuilder& Other) = delete;
 
     /** Assigns from another builder by moving. */
-    FNsTweenBuilder& operator=(FNsTweenBuilder&& Other) = default;
+    FNsTweenBuilder& operator=(FNsTweenBuilder&& Other) noexcept;
 
     /** Destroys the builder, ensuring any state is released. */
     ~FNsTweenBuilder();
@@ -80,14 +82,8 @@ public:
     }
 
 private:
-    /** Forward declaration for the shared state backing the builder. */
-    struct FState;
-
-    /** Constructs the builder from an explicit state pointer. */
-    explicit FNsTweenBuilder(const TSharedPtr<FState>& InState);
-
-    /** Returns true when the tween can still be configured. */
-    bool CanConfigure() const;
+    /** Constructs the builder from explicit specification data. */
+    FNsTweenBuilder(FNsTweenSpec&& InSpec, TFunction<TSharedPtr<ITweenValue>()>&& InStrategyFactory);
 
     /** Activates the tween within the subsystem. */
     void Activate() const;
@@ -95,44 +91,48 @@ private:
     /** Updates the wrap mode based on ping-pong and loop settings. */
     void UpdateWrapMode() const;
 
-    /** Helper used to configure callbacks on the underlying spec. */
-    template <typename DelegateType>
-    void ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr<TFunction<void()>>& Storage, DelegateType& Delegate) const;
+    /** Returns true when configuration can still be modified. */
+    bool CanConfigure() const;
+
+    /** Configures the completion callback on the specification. */
+    void ConfigureComplete(TFunction<void()>&& Callback) const;
+
+    /** Configures the loop callback on the specification. */
+    void ConfigureLoop(TFunction<void()>&& Callback) const;
+
+    /** Configures the ping-pong callback on the specification. */
+    void ConfigurePingPong(TFunction<void()>&& Callback) const;
 
 private:
-    /** Shared state describing the tween being built. */
-    TSharedPtr<FState> State;
+    /** Specification used when spawning the tween. */
+    mutable FNsTweenSpec Spec;
+
+    /** Deferred factory used to create the tween strategy. */
+    mutable TFunction<TSharedPtr<ITweenValue>()> StrategyFactory;
+
+    /** Callback storage to keep bound lambdas alive. */
+    mutable TSharedPtr<TFunction<void()>> CompleteCallback;
+
+    /** Callback storage to keep bound lambdas alive. */
+    mutable TSharedPtr<TFunction<void()>> LoopCallback;
+
+    /** Callback storage to keep bound lambdas alive. */
+    mutable TSharedPtr<TFunction<void()>> PingPongCallback;
+
+    /** Handle returned by the subsystem after activation. */
+    mutable FNsTweenHandle Handle;
+
+    /** True when the builder has been initialized with a specification. */
+    bool bHasSpec = false;
+
+    /** True when the tween loops continuously. */
+    mutable bool bLooping = false;
+
+    /** True when the tween ping-pongs instead of looping. */
+    mutable bool bPingPong = false;
+
+    /** True once the tween has been activated. */
+    mutable bool bActivated = false;
 
     friend struct FNsTween;
 };
-
-struct FNsTweenBuilder::FState : public TSharedFromThis<FState>
-{
-    /** Specification describing the tween configuration. */
-    FNsTweenSpec Spec;
-
-    /** Factory that produces the tween value strategy. */
-    TFunction<TSharedPtr<ITweenValue>()> StrategyFactory;
-
-    /** Callback executed on tween completion. */
-    TSharedPtr<TFunction<void()>> CompleteCallback;
-
-    /** Callback executed when the tween loops. */
-    TSharedPtr<TFunction<void()>> LoopCallback;
-
-    /** Callback executed when the tween ping-pongs. */
-    TSharedPtr<TFunction<void()>> PingPongCallback;
-
-    /** Handle used to identify the spawned tween. */
-    FNsTweenHandle Handle;
-
-    /** Tracks whether looping is currently enabled. */
-    bool bLooping = false;
-
-    /** Tracks whether ping-pong behaviour is enabled. */
-    bool bPingPong = false;
-
-    /** Tracks whether the tween has already been activated. */
-    bool bActivated = false;
-};
-

@@ -4,15 +4,21 @@
 #include "NsTweenSubsystem.h"
 #include "Utils/NsTweenProfiling.h"
 
-FNsTweenBuilder::FNsTweenBuilder()
-    : State(nullptr)
+FNsTweenBuilder::FNsTweenBuilder() = default;
+
+FNsTweenBuilder::FNsTweenBuilder(FNsTweenSpec&& InSpec, TFunction<TSharedPtr<ITweenValue>()>&& InStrategyFactory)
+    : Spec(MoveTemp(InSpec))
+    , StrategyFactory(MoveTemp(InStrategyFactory))
+    , bHasSpec(true)
 {
+    bLooping = (Spec.WrapMode == ENsTweenWrapMode::Loop) || (Spec.LoopCount != 0);
+    bPingPong = (Spec.WrapMode == ENsTweenWrapMode::PingPong);
+    UpdateWrapMode();
 }
 
-FNsTweenBuilder::FNsTweenBuilder(const TSharedPtr<FState>& InState)
-    : State(InState)
-{
-}
+FNsTweenBuilder::FNsTweenBuilder(FNsTweenBuilder&& Other) noexcept = default;
+
+FNsTweenBuilder& FNsTweenBuilder::operator=(FNsTweenBuilder&& Other) noexcept = default;
 
 FNsTweenBuilder::~FNsTweenBuilder()
 {
@@ -22,158 +28,159 @@ FNsTweenBuilder::~FNsTweenBuilder()
 
 bool FNsTweenBuilder::CanConfigure() const
 {
-    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::CanConfigure");
-    // Any configuration step must occur before the builder activates the tween.
-    return State.IsValid() && !State->bActivated;
+    return bHasSpec && !bActivated;
 }
 
 void FNsTweenBuilder::Activate() const
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::Activate");
-    if (!State.IsValid() || State->bActivated)
+
+    if (!bHasSpec || bActivated)
     {
         return;
     }
 
-    // Ensure wrap-mode flags are synchronized before we create the runtime strategy.
     UpdateWrapMode();
 
-    if (!State->StrategyFactory)
+    if (!StrategyFactory)
     {
-        State->bActivated = true;
+        bActivated = true;
         return;
     }
 
-    // The strategy factory runs lazily so callers can defer heavy allocations until activation.
-    TSharedPtr<ITweenValue> Strategy = State->StrategyFactory();
+    TSharedPtr<ITweenValue> Strategy = StrategyFactory();
+    StrategyFactory = {};
     if (!Strategy.IsValid())
     {
-        State->bActivated = true;
+        bActivated = true;
         return;
     }
 
-    // Pushing into the subsystem hands ownership to the runtime manager.
     if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
     {
-        State->Handle = Subsystem->EnqueueSpawn(State->Spec, Strategy);
+        Handle = Subsystem->EnqueueSpawn(Spec, Strategy);
     }
 
-    State->bActivated = true;
+    bActivated = true;
 }
 
 void FNsTweenBuilder::UpdateWrapMode() const
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::UpdateWrapMode");
-    if (!State.IsValid())
+
+    if (!bHasSpec)
     {
         return;
     }
 
-    // Mirror the fluent helper flags onto the underlying spec so the runtime can act on them.
-    if (State->bPingPong)
+    if (bPingPong)
     {
-        State->Spec.WrapMode = ENsTweenWrapMode::PingPong;
+        Spec.WrapMode = ENsTweenWrapMode::PingPong;
     }
-    else if (State->bLooping)
+    else if (bLooping)
     {
-        State->Spec.WrapMode = ENsTweenWrapMode::Loop;
+        Spec.WrapMode = ENsTweenWrapMode::Loop;
     }
     else
     {
-        State->Spec.WrapMode = ENsTweenWrapMode::Once;
-        State->Spec.LoopCount = 0;
+        Spec.WrapMode = ENsTweenWrapMode::Once;
+        Spec.LoopCount = 0;
     }
 }
 
 FNsTweenBuilder& FNsTweenBuilder::SetPingPong(bool bEnable)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetPingPong");
+
     if (CanConfigure())
     {
-        State->bPingPong = bEnable;
+        bPingPong = bEnable;
         UpdateWrapMode();
     }
+
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::SetLoops(int32 LoopCount)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetLoops");
+
     if (CanConfigure())
     {
-        State->bLooping = (LoopCount != 0);
-        State->Spec.LoopCount = LoopCount < 0 ? 0 : FMath::Max(LoopCount, 0);
+        const int32 ClampedLoops = FMath::Max(LoopCount, 0);
+        Spec.LoopCount = ClampedLoops;
+        bLooping = (ClampedLoops != 0);
         UpdateWrapMode();
     }
+
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::SetDelay(float DelaySeconds)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetDelay");
+
     if (CanConfigure())
     {
-        State->Spec.DelaySeconds = FMath::Max(0.f, DelaySeconds);
+        Spec.DelaySeconds = FMath::Max(0.f, DelaySeconds);
     }
+
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::SetTimeScale(float TimeScale)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetTimeScale");
+
     if (CanConfigure())
     {
-        State->Spec.TimeScale = FMath::Max(TimeScale, KINDA_SMALL_NUMBER);
+        Spec.TimeScale = FMath::Max(TimeScale, KINDA_SMALL_NUMBER);
     }
+
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetCurveAsset");
+
     if (CanConfigure())
     {
-        State->Spec.CurveAsset = Curve;
+        Spec.CurveAsset = Curve;
         if (Curve)
         {
-            State->Spec.EasingPreset = ENsTweenEase::CurveAsset;
+            Spec.EasingPreset = ENsTweenEase::CurveAsset;
         }
     }
+
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::OnComplete(TFunction<void()> Callback)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnComplete");
-    if (State.IsValid())
-    {
-        ConfigureCallback(MoveTemp(Callback), State->CompleteCallback, State->Spec.OnComplete);
-    }
+
+    ConfigureComplete(MoveTemp(Callback));
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::OnLoop(TFunction<void()> Callback)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnLoop");
-    if (State.IsValid())
-    {
-        ConfigureCallback(MoveTemp(Callback), State->LoopCallback, State->Spec.OnLoop);
-    }
+
+    ConfigureLoop(MoveTemp(Callback));
     return *this;
 }
 
 FNsTweenBuilder& FNsTweenBuilder::OnPingPong(TFunction<void()> Callback)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnPingPong");
-    if (State.IsValid())
-    {
-        ConfigureCallback(MoveTemp(Callback), State->PingPongCallback, State->Spec.OnPingPong);
-    }
+
+    ConfigurePingPong(MoveTemp(Callback));
     return *this;
 }
 
-template <typename DelegateType>
-void FNsTweenBuilder::ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr<TFunction<void()>>& Storage, DelegateType& Delegate) const
+void FNsTweenBuilder::ConfigureComplete(TFunction<void()>&& Callback) const
 {
     if (!CanConfigure())
     {
@@ -182,9 +189,9 @@ void FNsTweenBuilder::ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr
 
     if (Callback)
     {
-        Storage = MakeShared<TFunction<void()>>(MoveTemp(Callback));
-        Delegate.Unbind();
-        Delegate.BindLambda([CallbackPtr = Storage]()
+        CompleteCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
+        Spec.OnComplete.Unbind();
+        Spec.OnComplete.BindLambda([CallbackPtr = CompleteCallback]()
         {
             if (CallbackPtr && *CallbackPtr)
             {
@@ -194,58 +201,120 @@ void FNsTweenBuilder::ConfigureCallback(TFunction<void()>&& Callback, TSharedPtr
     }
     else
     {
-        Storage.Reset();
-        Delegate.Unbind();
+        CompleteCallback.Reset();
+        Spec.OnComplete.Unbind();
+    }
+}
+
+void FNsTweenBuilder::ConfigureLoop(TFunction<void()>&& Callback) const
+{
+    if (!CanConfigure())
+    {
+        return;
+    }
+
+    if (Callback)
+    {
+        LoopCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
+        Spec.OnLoop.Unbind();
+        Spec.OnLoop.BindLambda([CallbackPtr = LoopCallback]()
+        {
+            if (CallbackPtr && *CallbackPtr)
+            {
+                (*CallbackPtr)();
+            }
+        });
+    }
+    else
+    {
+        LoopCallback.Reset();
+        Spec.OnLoop.Unbind();
+    }
+}
+
+void FNsTweenBuilder::ConfigurePingPong(TFunction<void()>&& Callback) const
+{
+    if (!CanConfigure())
+    {
+        return;
+    }
+
+    if (Callback)
+    {
+        PingPongCallback = MakeShared<TFunction<void()>>(MoveTemp(Callback));
+        Spec.OnPingPong.Unbind();
+        Spec.OnPingPong.BindLambda([CallbackPtr = PingPongCallback]()
+        {
+            if (CallbackPtr && *CallbackPtr)
+            {
+                (*CallbackPtr)();
+            }
+        });
+    }
+    else
+    {
+        PingPongCallback.Reset();
+        Spec.OnPingPong.Unbind();
     }
 }
 
 void FNsTweenBuilder::Pause() const
 {
     Activate();
-    if (State.IsValid() && State->Handle.IsValid())
+
+    if (!Handle.IsValid())
     {
-        if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
-        {
-            Subsystem->EnqueuePause(State->Handle);
-        }
+        return;
+    }
+
+    if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
+    {
+        Subsystem->EnqueuePause(Handle);
     }
 }
 
 void FNsTweenBuilder::Resume() const
 {
     Activate();
-    if (State.IsValid() && State->Handle.IsValid())
+
+    if (!Handle.IsValid())
     {
-        if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
-        {
-            Subsystem->EnqueueResume(State->Handle);
-        }
+        return;
+    }
+
+    if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
+    {
+        Subsystem->EnqueueResume(Handle);
     }
 }
 
 void FNsTweenBuilder::Cancel(bool bApplyFinal) const
 {
     Activate();
-    if (State.IsValid() && State->Handle.IsValid())
+
+    if (!Handle.IsValid())
     {
-        if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
-        {
-            Subsystem->EnqueueCancel(State->Handle, bApplyFinal);
-        }
+        return;
+    }
+
+    if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
+    {
+        Subsystem->EnqueueCancel(Handle, bApplyFinal);
     }
 }
 
 bool FNsTweenBuilder::IsActive() const
 {
-    if (!State.IsValid())
+    Activate();
+
+    if (!Handle.IsValid())
     {
         return false;
     }
 
-    Activate();
     if (UNsTweenSubsystem* Subsystem = UNsTweenSubsystem::GetSubsystem())
     {
-        return Subsystem->IsActive(State->Handle);
+        return Subsystem->IsActive(Handle);
     }
 
     return false;
@@ -254,15 +323,11 @@ bool FNsTweenBuilder::IsActive() const
 FNsTweenHandle FNsTweenBuilder::GetHandle() const
 {
     Activate();
-    if (!State.IsValid())
-    {
-        return FNsTweenHandle();
-    }
-    return State->Handle;
+    return Handle;
 }
 
 bool FNsTweenBuilder::IsValid() const
 {
     Activate();
-    return State.IsValid() && State->Handle.IsValid();
+    return Handle.IsValid();
 }
