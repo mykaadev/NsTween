@@ -89,6 +89,10 @@ private:
     /** Pool lock */
     mutable FRWLock PoolLock;
 
+#if WITH_AUTOMATION_TESTS
+    friend struct FNsTweenSubsystemTestAccessor;
+#endif
+
     /** Main ticker handle */
     FTSTicker::FDelegateHandle TickerHandle;
 
