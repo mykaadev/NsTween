@@ -6,6 +6,7 @@
 #include "Interfaces/ITweenValue.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Curves/CurveFloat.h"
+#include "UObject/WeakObjectPtr.h"
 #include "NsTweenTypeLibrary.generated.h"
 
 /** Delegate fired every tick of a tween with the normalized alpha. */
@@ -140,8 +141,15 @@ public:
     /** Callback executed when the tween ping-pongs. */
     FNsTweenOnPingPong OnPingPong;
 
+    /** Weak reference to an owning object whose lifetime gates the tween. */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tween")
+    TWeakObjectPtr<UObject> Owner = nullptr;
+
     /** Pointer for user-defined context data. */
     void* UserData = nullptr;
+
+    /** Internal flag set when the owner lifetime should be enforced. */
+    bool bEnforceOwnerLifetime = false;
 };
 
 /** A single entry within a tween sequence asset. */

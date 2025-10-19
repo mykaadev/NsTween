@@ -138,14 +138,8 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
         return true;
     }
 
-    struct FTickCandidate
-    {
-        FNsTween* Instance = nullptr;
-        FNsTweenHandle Handle;
-        int32 SourceIndex = INDEX_NONE;
-    };
-
-    TArray<FTickCandidate, TInlineAllocator<32>> Candidates;
+    TArray<FNsTween*, TInlineAllocator<32>> Candidates;
+    bool bRequiresCompaction = false;
     {
         // Phase 1: Take a read lock and gather the tweens that are still active.
         FReadScopeLock ReadLock(PoolLock);
@@ -154,72 +148,53 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
         for (int32 Index = 0; Index < TweenPool.Num(); ++Index)
         {
             const TUniquePtr<FNsTween>& Instance = TweenPool[Index];
-            if (Instance && Instance->IsActive())
+            if (!Instance)
             {
-                FTickCandidate& Candidate = Candidates.Emplace_GetRef();
-                Candidate.Instance = Instance.Get();
-                Candidate.Handle = Instance->GetHandle();
-                Candidate.SourceIndex = Index;
+                bRequiresCompaction = true;
+                continue;
             }
+
+            if (!Instance->IsActive())
+            {
+                bRequiresCompaction = true;
+                continue;
+            }
+
+            Candidates.Add(Instance.Get());
         }
     }
 
     // Phase 2: Tick outside the lock so Update/OnComplete callbacks can execute without blocking
     // other readers/writers attempting to enqueue commands.
-    struct FCompletedTween
+    for (FNsTween* Candidate : Candidates)
     {
-        int32 SourceIndex = INDEX_NONE;
-        FNsTweenHandle Handle;
-    };
-
-    TArray<FCompletedTween, TInlineAllocator<32>> CompletedTweens;
-    CompletedTweens.Reserve(Candidates.Num());
-
-    for (const FTickCandidate& Candidate : Candidates)
-    {
-        if (!Candidate.Instance)
+        if (!Candidate)
         {
             continue;
         }
 
-        // If tick returns false, it’s finished or invalid — remember the handle for removal.
-        if (!Candidate.Instance->Tick(DeltaTime))
+        // If tick returns false, it’s finished or invalid — mark the pool for compaction.
+        if (!Candidate->Tick(DeltaTime))
         {
-            FCompletedTween& Completed = CompletedTweens.Emplace_GetRef();
-            Completed.SourceIndex = Candidate.SourceIndex;
-            Completed.Handle = Candidate.Handle;
+            bRequiresCompaction = true;
         }
     }
 
-    if (CompletedTweens.Num() > 0)
+    // Phase 3: Acquire a write lock only long enough to prune tweens that finished or became invalid.
+    if (bRequiresCompaction)
     {
-        // Phase 3: Acquire a write lock only long enough to prune finished tweens. We validate
-        // each handle because the tween may have already been removed by a command processed
-        // earlier on this frame (e.g. cancel).
         FWriteScopeLock WriteLock(PoolLock);
-
-        CompletedTweens.Sort([](const FCompletedTween& A, const FCompletedTween& B)
+        for (int32 Index = TweenPool.Num() - 1; Index >= 0; --Index)
         {
-            return A.SourceIndex > B.SourceIndex;
-        });
-
-        for (const FCompletedTween& Completed : CompletedTweens)
-        {
-            if (!TweenPool.IsValidIndex(Completed.SourceIndex))
+            const TUniquePtr<FNsTween>& Instance = TweenPool[Index];
+            if (!Instance || !Instance->IsActive())
             {
-                continue;
-            }
-
-            const TUniquePtr<FNsTween>& Instance = TweenPool[Completed.SourceIndex];
-            if (Instance && Instance->GetHandle().Id.Value == Completed.Handle.Id.Value)
-            {
-                TweenPool.RemoveAtSwap(Completed.SourceIndex);
+                TweenPool.RemoveAtSwap(Index);
             }
         }
     }
 
     Candidates.Reset();
-    CompletedTweens.Reset();
 
     return true;
 }

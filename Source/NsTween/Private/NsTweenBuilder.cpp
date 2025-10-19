@@ -13,6 +13,10 @@ FNsTweenBuilder::FNsTweenBuilder(FNsTweenSpec&& InSpec, TFunction<TSharedPtr<ITw
 {
     bLooping = (Spec.WrapMode == ENsTweenWrapMode::Loop) || (Spec.LoopCount != 0);
     bPingPong = (Spec.WrapMode == ENsTweenWrapMode::PingPong);
+    if (Spec.Owner.IsValid())
+    {
+        Spec.bEnforceOwnerLifetime = true;
+    }
     UpdateWrapMode();
 }
 
@@ -151,6 +155,19 @@ FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
         {
             Spec.EasingPreset = ENsTweenEase::CurveAsset;
         }
+    }
+
+    return *this;
+}
+
+FNsTweenBuilder& FNsTweenBuilder::SetOwner(UObject* InOwner)
+{
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetOwner");
+
+    if (CanConfigure())
+    {
+        Spec.Owner = InOwner;
+        Spec.bEnforceOwnerLifetime = (InOwner != nullptr);
     }
 
     return *this;
