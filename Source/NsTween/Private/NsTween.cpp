@@ -42,6 +42,14 @@ bool FNsTween::Tick(float DeltaSeconds)
         return bActive;
     }
 
+    if (Spec.bEnforceOwnerLifetime && !Spec.Owner.IsValid())
+    {
+        bActive = false;
+        Strategy.Reset();
+        Easing.Reset();
+        return false;
+    }
+
     // Lazily initialize the strategy the first time we tick so creation happens on the game thread.
     if (!bInitialized)
     {

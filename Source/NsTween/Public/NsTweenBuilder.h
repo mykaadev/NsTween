@@ -48,6 +48,9 @@ public:
     /** Specifies the curve asset used for easing evaluation. */
     FNsTweenBuilder& SetCurveAsset(UCurveFloat* Curve);
 
+    /** Associates the tween with an owning UObject to gate its lifetime. */
+    FNsTweenBuilder& SetOwner(UObject* InOwner);
+
     /** Registers a callback executed when the tween completes. */
     FNsTweenBuilder& OnComplete(TFunction<void()> Callback);
 
