@@ -110,5 +110,8 @@ private:
 
     /** Tracks whether the tween is currently playing forward. */
     bool bPlayingForward = true;
+
+    /** Remembers if the tween started by playing backward. */
+    bool bStartBackward = false;
 };
 

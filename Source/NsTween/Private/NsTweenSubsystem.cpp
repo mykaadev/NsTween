@@ -13,6 +13,7 @@
 #include "Misc/CoreDelegates.h"
 #include "NsTween.h"
 #include "Utils/NsTweenLogging.h"
+#include "Utils/NsTweenProfiling.h"
 
 #if WITH_EDITOR
 #include "Editor.h"
@@ -25,6 +26,7 @@ UNsTweenSubsystem::UNsTweenSubsystem()
 
 void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::Initialize");
     Super::Initialize(Collection);
     NextTweenId.Set(0);
 
@@ -45,6 +47,7 @@ void UNsTweenSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 void UNsTweenSubsystem::Deinitialize()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::Deinitialize");
     // Kill ticker first so no more ticks arrive
     if (TickerHandle.IsValid())
     {
@@ -73,6 +76,7 @@ void UNsTweenSubsystem::Deinitialize()
 
 bool UNsTweenSubsystem::ShouldTick() const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::ShouldTick");
     if (IsEngineExitRequested())
     {
         return false;
@@ -109,6 +113,7 @@ bool UNsTweenSubsystem::ShouldTick() const
 
 bool UNsTweenSubsystem::Tick(float DeltaTime)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::Tick");
     // Don’t process anything during teardown/after PIE
     if (!ShouldTick())
     {
@@ -144,6 +149,7 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
 
 void UNsTweenSubsystem::StopAllTweens(bool bApplyFinalOnCancel)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::StopAllTweens");
     FWriteScopeLock WriteLock(PoolLock);
 
     for (int32 Index = TweenPool.Num() - 1; Index >= 0; --Index)
@@ -158,6 +164,7 @@ void UNsTweenSubsystem::StopAllTweens(bool bApplyFinalOnCancel)
 
 UNsTweenSubsystem* UNsTweenSubsystem::GetSubsystem()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::GetSubsystem");
     UNsTweenSubsystem* ToReturn = nullptr;
 
     if (GEngine != nullptr)
@@ -184,24 +191,28 @@ UNsTweenSubsystem* UNsTweenSubsystem::GetSubsystem()
 
 void UNsTweenSubsystem::DrainCommandQueue()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::DrainCommandQueue");
     FNsTweenCommand Dummy;
     while (CommandQueue.Dequeue(Dummy)) {}
 }
 
 void UNsTweenSubsystem::HandleWorldBeginTearDown(UWorld* /*World*/)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::HandleWorldBeginTearDown");
     StopAllTweens(/*bApplyFinalOnCancel*/ false);
     DrainCommandQueue();
 }
 
 void UNsTweenSubsystem::HandleWorldCleanup(UWorld* /*World*/, bool /*bSessionEnded*/, bool /*bCleanupResources*/)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::HandleWorldCleanup");
     StopAllTweens(/*bApplyFinalOnCancel*/ false);
     DrainCommandQueue();
 }
 
 void UNsTweenSubsystem::HandlePreExit()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::HandlePreExit");
     StopAllTweens(/*bApplyFinalOnCancel*/ false);
     DrainCommandQueue();
 }
@@ -209,6 +220,7 @@ void UNsTweenSubsystem::HandlePreExit()
 #if WITH_EDITOR
 void UNsTweenSubsystem::HandlePrePIEEnded(const bool /*bIsSimulating*/)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::HandlePrePIEEnded");
     StopAllTweens(/*bApplyFinalOnCancel*/ false);
     DrainCommandQueue();
 }
@@ -216,6 +228,7 @@ void UNsTweenSubsystem::HandlePrePIEEnded(const bool /*bIsSimulating*/)
 
 FNsTweenHandle UNsTweenSubsystem::EnqueueSpawn(const FNsTweenSpec& Spec, const TSharedPtr<ITweenValue>& Strategy)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::EnqueueSpawn");
     FNsTweenCommand Command;
     Command.Type = ENsTweenCommandType::Spawn;
     Command.Spec = Spec;
@@ -231,6 +244,7 @@ FNsTweenHandle UNsTweenSubsystem::EnqueueSpawn(const FNsTweenSpec& Spec, const T
 
 void UNsTweenSubsystem::EnqueueCancel(const FNsTweenHandle& Handle, bool bApplyFinal)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::EnqueueCancel");
     if (!Handle.IsValid()) return;
 
     FNsTweenCommand Command;
@@ -242,6 +256,7 @@ void UNsTweenSubsystem::EnqueueCancel(const FNsTweenHandle& Handle, bool bApplyF
 
 void UNsTweenSubsystem::EnqueuePause(const FNsTweenHandle& Handle)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::EnqueuePause");
     if (!Handle.IsValid()) return;
 
     FNsTweenCommand Command;
@@ -252,6 +267,7 @@ void UNsTweenSubsystem::EnqueuePause(const FNsTweenHandle& Handle)
 
 void UNsTweenSubsystem::EnqueueResume(const FNsTweenHandle& Handle)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::EnqueueResume");
     if (!Handle.IsValid()) return;
 
     FNsTweenCommand Command;
@@ -262,6 +278,7 @@ void UNsTweenSubsystem::EnqueueResume(const FNsTweenHandle& Handle)
 
 bool UNsTweenSubsystem::IsActive(const FNsTweenHandle& Handle) const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::IsActive");
     FReadScopeLock ReadLock(PoolLock);
     for (const TUniquePtr<FNsTween>& Instance : TweenPool)
     {
@@ -275,6 +292,7 @@ bool UNsTweenSubsystem::IsActive(const FNsTweenHandle& Handle) const
 
 void UNsTweenSubsystem::ProcessCommands()
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::ProcessCommands");
     FNsTweenCommand Command;
     while (CommandQueue.Dequeue(Command))
     {
@@ -291,14 +309,10 @@ void UNsTweenSubsystem::ProcessCommands()
 
 void UNsTweenSubsystem::SpawnTween(FNsTweenCommand& Command)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::SpawnTween");
     if (!Command.Strategy.IsValid())
     {
         UE_LOG(LogNsTween, Warning, TEXT("Cannot spawn tween without strategy."));
-        return;
-    }
-
-    if (!ShouldTick())
-    {
         return;
     }
 
@@ -317,6 +331,7 @@ void UNsTweenSubsystem::SpawnTween(FNsTweenCommand& Command)
 
 void UNsTweenSubsystem::CancelTween(const FNsTweenCommand& Command)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::CancelTween");
     FWriteScopeLock WriteLock(PoolLock);
     for (int32 Index = 0; Index < TweenPool.Num(); ++Index)
     {
@@ -332,6 +347,7 @@ void UNsTweenSubsystem::CancelTween(const FNsTweenCommand& Command)
 
 void UNsTweenSubsystem::PauseTween(const FNsTweenCommand& Command)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::PauseTween");
     FWriteScopeLock WriteLock(PoolLock);
     for (const TUniquePtr<FNsTween>& Instance : TweenPool)
     {
@@ -345,6 +361,7 @@ void UNsTweenSubsystem::PauseTween(const FNsTweenCommand& Command)
 
 void UNsTweenSubsystem::ResumeTween(const FNsTweenCommand& Command)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::ResumeTween");
     FWriteScopeLock WriteLock(PoolLock);
     for (const TUniquePtr<FNsTween>& Instance : TweenPool)
     {
@@ -358,6 +375,7 @@ void UNsTweenSubsystem::ResumeTween(const FNsTweenCommand& Command)
 
 TSharedPtr<IEasingCurve> UNsTweenSubsystem::CreateEasing(const FNsTweenSpec& Spec) const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenSubsystem::CreateEasing");
     switch (Spec.EasingPreset)
     {
         case ENsTweenEase::CustomBezier: return MakeShared<FNsTweenBezierEasing>(Spec.BezierControlPoints);

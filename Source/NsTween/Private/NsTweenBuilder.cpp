@@ -2,6 +2,7 @@
 
 #include "NsTweenBuilder.h"
 #include "NsTweenSubsystem.h"
+#include "Utils/NsTweenProfiling.h"
 
 FNsTweenBuilder::FNsTweenBuilder()
     : State(nullptr)
@@ -21,12 +22,14 @@ FNsTweenBuilder::~FNsTweenBuilder()
 
 bool FNsTweenBuilder::CanConfigure() const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::CanConfigure");
     // Any configuration step must occur before the builder activates the tween.
     return State.IsValid() && !State->bActivated;
 }
 
 void FNsTweenBuilder::Activate() const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::Activate");
     if (!State.IsValid() || State->bActivated)
     {
         return;
@@ -60,6 +63,7 @@ void FNsTweenBuilder::Activate() const
 
 void FNsTweenBuilder::UpdateWrapMode() const
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::UpdateWrapMode");
     if (!State.IsValid())
     {
         return;
@@ -83,6 +87,7 @@ void FNsTweenBuilder::UpdateWrapMode() const
 
 FNsTweenBuilder& FNsTweenBuilder::SetPingPong(bool bEnable)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetPingPong");
     if (CanConfigure())
     {
         State->bPingPong = bEnable;
@@ -93,6 +98,7 @@ FNsTweenBuilder& FNsTweenBuilder::SetPingPong(bool bEnable)
 
 FNsTweenBuilder& FNsTweenBuilder::SetLoops(int32 LoopCount)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetLoops");
     if (CanConfigure())
     {
         State->bLooping = (LoopCount != 0);
@@ -104,6 +110,7 @@ FNsTweenBuilder& FNsTweenBuilder::SetLoops(int32 LoopCount)
 
 FNsTweenBuilder& FNsTweenBuilder::SetDelay(float DelaySeconds)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetDelay");
     if (CanConfigure())
     {
         State->Spec.DelaySeconds = FMath::Max(0.f, DelaySeconds);
@@ -113,6 +120,7 @@ FNsTweenBuilder& FNsTweenBuilder::SetDelay(float DelaySeconds)
 
 FNsTweenBuilder& FNsTweenBuilder::SetTimeScale(float TimeScale)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetTimeScale");
     if (CanConfigure())
     {
         State->Spec.TimeScale = FMath::Max(TimeScale, KINDA_SMALL_NUMBER);
@@ -122,6 +130,7 @@ FNsTweenBuilder& FNsTweenBuilder::SetTimeScale(float TimeScale)
 
 FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetCurveAsset");
     if (CanConfigure())
     {
         State->Spec.CurveAsset = Curve;
@@ -135,6 +144,7 @@ FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
 
 FNsTweenBuilder& FNsTweenBuilder::OnComplete(TFunction<void()> Callback)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnComplete");
     if (CanConfigure())
     {
         if (Callback)
@@ -160,6 +170,7 @@ FNsTweenBuilder& FNsTweenBuilder::OnComplete(TFunction<void()> Callback)
 
 FNsTweenBuilder& FNsTweenBuilder::OnLoop(TFunction<void()> Callback)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnLoop");
     if (CanConfigure())
     {
         if (Callback)
@@ -185,6 +196,7 @@ FNsTweenBuilder& FNsTweenBuilder::OnLoop(TFunction<void()> Callback)
 
 FNsTweenBuilder& FNsTweenBuilder::OnPingPong(TFunction<void()> Callback)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::OnPingPong");
     if (CanConfigure())
     {
         if (Callback)

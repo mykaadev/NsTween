@@ -5,6 +5,7 @@
 #include "Interfaces/IEasingCurve.h"
 #include "Interfaces/ITweenValue.h"
 #include "Math/UnrealMathUtility.h"
+#include "Utils/NsTweenProfiling.h"
 
 /**
  * The non-templated Play overload wires an explicit specification and strategy factory into the builder.
@@ -12,6 +13,7 @@
  */
 FNsTweenBuilder FNsTween::Play(FNsTweenSpec Spec, TFunction<TSharedPtr<ITweenValue>()> StrategyFactory)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Play");
     const TSharedPtr<FNsTweenBuilder::FState> State = MakeShared<FNsTweenBuilder::FState>();
     State->Spec = MoveTemp(Spec);
     State->StrategyFactory = MoveTemp(StrategyFactory);
@@ -23,17 +25,27 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
     , Spec(MoveTemp(InSpec))
     , Strategy(MoveTemp(InStrategy))
     , Easing(MoveTemp(InEasing))
-    , DelayRemaining(FMath::Max(0.f, InSpec.DelaySeconds))
-    , CycleTime(InSpec.Direction == ENsTweenDirection::Forward ? 0.f : FMath::Max(InSpec.DurationSeconds, SMALL_NUMBER))
-    , bPlayingForward(InSpec.Direction != ENsTweenDirection::Backward)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Ctor");
+
+    Spec.DelaySeconds = FMath::Max(0.f, Spec.DelaySeconds);
+    Spec.DurationSeconds = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
+    Spec.TimeScale = FMath::Max(Spec.TimeScale, 0.f);
+    Spec.LoopCount = FMath::Max(Spec.LoopCount, 0);
+
+    DelayRemaining = Spec.DelaySeconds;
+    CycleTime = (Spec.Direction == ENsTweenDirection::Forward) ? 0.f : Spec.DurationSeconds;
+    bPlayingForward = (Spec.Direction != ENsTweenDirection::Backward);
+    bStartBackward = (Spec.Direction == ENsTweenDirection::Backward);
 }
 
 bool FNsTween::Tick(float DeltaSeconds)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Tick");
     // Bail out immediately if the tween is already completed, paused, or missing runtime pieces.
     if (!bActive || bPaused || !Strategy.IsValid() || !Easing.IsValid())
     {
+        bActive = bActive && Strategy.IsValid() && Easing.IsValid();
         return bActive;
     }
 
@@ -41,7 +53,7 @@ bool FNsTween::Tick(float DeltaSeconds)
     if (!bInitialized)
     {
         Strategy->Initialize();
-        if (Spec.Direction == ENsTweenDirection::Backward)
+        if (bStartBackward)
         {
             Strategy->ApplyFinal();
         }
@@ -49,7 +61,7 @@ bool FNsTween::Tick(float DeltaSeconds)
     }
 
     // Respect the time scale so tweens can speed up or slow down deterministically.
-    float ScaledDelta = DeltaSeconds * FMath::Max(Spec.TimeScale, 0.f);
+    float ScaledDelta = DeltaSeconds * Spec.TimeScale;
     if (ScaledDelta <= SMALL_NUMBER)
     {
         return true;
@@ -69,29 +81,32 @@ bool FNsTween::Tick(float DeltaSeconds)
     }
 
     float RemainingTime = ScaledDelta;
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
+    const float LocalDuration = Spec.DurationSeconds;
 
     while (RemainingTime > SMALL_NUMBER && bActive)
     {
-        // Figure out how far we will advance during this tick, respecting direction and wrap mode.
-        const float DirectionFactor = bPlayingForward ? 1.f : -1.f;
-        float NextCycleTime = CycleTime + RemainingTime * DirectionFactor;
+        const float TargetBoundary = bPlayingForward ? LocalDuration : 0.f;
+        const float TimeToBoundary = bPlayingForward ? (TargetBoundary - CycleTime) : (CycleTime - TargetBoundary);
+        const float SafeTimeToBoundary = (TimeToBoundary > 0.f) ? TimeToBoundary : 0.f;
 
-        const float TargetBoundary = bPlayingForward ? Duration : 0.f;
-        const bool bCrossingBoundary = bPlayingForward ? (NextCycleTime >= TargetBoundary) : (NextCycleTime <= TargetBoundary);
-
-        if (!bCrossingBoundary)
+        if (RemainingTime <= SafeTimeToBoundary + KINDA_SMALL_NUMBER)
         {
-            CycleTime = FMath::Clamp(NextCycleTime, 0.f, Duration);
+            CycleTime += bPlayingForward ? RemainingTime : -RemainingTime;
+            if (CycleTime < 0.f)
+            {
+                CycleTime = 0.f;
+            }
+            else if (CycleTime > LocalDuration)
+            {
+                CycleTime = LocalDuration;
+            }
             Apply(CycleTime);
             break;
         }
 
-        // We will cross a boundary this frame, so finish the current segment first.
-        const float TimeToBoundary = FMath::Abs(TargetBoundary - CycleTime);
+        RemainingTime -= SafeTimeToBoundary;
         CycleTime = TargetBoundary;
         Apply(CycleTime);
-        RemainingTime -= TimeToBoundary;
 
         if (!HandleBoundary(RemainingTime))
         {
@@ -104,15 +119,19 @@ bool FNsTween::Tick(float DeltaSeconds)
 
 void FNsTween::Cancel(bool bApplyFinal)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Cancel");
     // Cancellation is idempotent; the first call decides whether to apply the final value.
     if (!bActive)
     {
         return;
     }
 
-    if (bApplyFinal && Strategy.IsValid())
+    if (bApplyFinal)
     {
-        Strategy->ApplyFinal();
+        if (Strategy.IsValid())
+        {
+            Strategy->ApplyFinal();
+        }
     }
 
     if (Spec.OnComplete.IsBound())
@@ -125,18 +144,20 @@ void FNsTween::Cancel(bool bApplyFinal)
 
 void FNsTween::SetPaused(bool bInPaused)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::SetPaused");
     bPaused = bInPaused;
 }
 
 void FNsTween::Apply(float InCycleTime)
 {
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Apply");
     // Guard against misconfigured tweens that somehow lost their runtime strategy.
     if (!Strategy.IsValid() || !Easing.IsValid())
     {
         return;
     }
 
-    const float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
+    const float Duration = Spec.DurationSeconds;
     const float LinearAlpha = FMath::Clamp(InCycleTime / Duration, 0.f, 1.f);
     const float EasedAlpha = Easing->Evaluate(LinearAlpha);
 
@@ -149,21 +170,26 @@ void FNsTween::Apply(float InCycleTime)
 
 bool FNsTween::HandleBoundary(float& RemainingTime)
 {
-    float Duration = FMath::Max(Spec.DurationSeconds, SMALL_NUMBER);
+    NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::HandleBoundary");
 
-    switch (Spec.WrapMode)
+    const ENsTweenWrapMode WrapMode = Spec.WrapMode;
+
+    if (WrapMode == ENsTweenWrapMode::Once)
     {
-    case ENsTweenWrapMode::Once:
-        // Notify completion exactly once and ensure we end on the last value.
         if (Spec.OnComplete.IsBound())
         {
             Spec.OnComplete.Execute();
         }
-        Strategy->ApplyFinal();
+        if (Strategy.IsValid())
+        {
+            Strategy->ApplyFinal();
+        }
         bActive = false;
         return false;
+    }
 
-    case ENsTweenWrapMode::Loop:
+    if (WrapMode == ENsTweenWrapMode::Loop)
+    {
         ++CompletedCycles;
         if (Spec.OnLoop.IsBound())
         {
@@ -172,21 +198,23 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 
         if (Spec.LoopCount > 0 && CompletedCycles >= Spec.LoopCount)
         {
-            // Exhausted the requested loop count, so wrap like a completion.
             if (Spec.OnComplete.IsBound())
             {
                 Spec.OnComplete.Execute();
             }
-            Strategy->ApplyFinal();
+            if (Strategy.IsValid())
+            {
+                Strategy->ApplyFinal();
+            }
             bActive = false;
             return false;
         }
 
         CycleTime = 0.f;
         bPlayingForward = (Spec.Direction != ENsTweenDirection::Backward);
-        break;
-
-    case ENsTweenWrapMode::PingPong:
+    }
+    else if (WrapMode == ENsTweenWrapMode::PingPong)
+    {
         bPlayingForward = !bPlayingForward;
         if (Spec.OnPingPong.IsBound())
         {
@@ -199,22 +227,25 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         }
         else if (Spec.LoopCount > 0 && CompletedPingPongPairs >= Spec.LoopCount)
         {
-            // A ping-pong pair counts as a single loop when evaluating completion.
             if (Spec.OnComplete.IsBound())
             {
                 Spec.OnComplete.Execute();
             }
-            Strategy->ApplyFinal();
+            if (Strategy.IsValid())
+            {
+                Strategy->ApplyFinal();
+            }
             bActive = false;
             return false;
         }
 
-        CycleTime = bPlayingForward ? 0.f : Duration;
-        break;
+        CycleTime = bPlayingForward ? 0.f : Spec.DurationSeconds;
     }
 
-    // Consume whatever time is left using the new direction or wrap mode.
-    RemainingTime = FMath::Max(RemainingTime, 0.f);
+    if (RemainingTime < 0.f)
+    {
+        RemainingTime = 0.f;
+    }
     return true;
 }
 
