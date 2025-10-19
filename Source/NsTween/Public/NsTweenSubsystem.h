@@ -6,6 +6,7 @@
 #include "Containers/Queue.h"
 #include "Containers/Ticker.h"
 #include "HAL/ThreadSafeCounter.h"
+#include "Misc/AutomationTest.h"
 #include "NsTweenTypeLibrary.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "NsTweenSubsystem.generated.h"
@@ -104,4 +105,15 @@ private:
     FDelegateHandle PrePIEEndedHandle;
 #endif
 };
+
+
+#if WITH_AUTOMATION_TESTS
+struct FNsTweenSubsystemTestAccessor
+{
+    static bool DequeueCommand(UNsTweenSubsystem& Subsystem, FNsTweenCommand& OutCommand)
+    {
+        return Subsystem.CommandQueue.Dequeue(OutCommand);
+    }
+};
+#endif
 

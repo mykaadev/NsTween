@@ -1,20 +1,20 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
-#if WITH_AUTOMATION_TESTS
-
+#include "Interfaces/ITweenValue.h"
 #include "Misc/AutomationTest.h"
 #include "NsTweenSubsystem.h"
 #include "NsTweenTypeLibrary.h"
-#include "Interfaces/ITweenValue.h"
+
+#if WITH_AUTOMATION_TESTS
 
 namespace
 {
     /** Minimal tween strategy used to satisfy spawn requirements during tests. */
     class FAutomationTestTweenValue final : public ITweenValue
     {
-    public:
-        virtual void Initialize() override {}
-        virtual void Apply(float) override {}
+        public:
+            virtual void Initialize() override {}
+            virtual void Apply(float) override {}
     };
 }
 

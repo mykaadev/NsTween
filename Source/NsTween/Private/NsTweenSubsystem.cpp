@@ -5,25 +5,15 @@
 #include "Easing/NsTweenBezierEasing.h"
 #include "Easing/NsTweenCurveAssetEasingAdapter.h"
 #include "Easing/NsTweenPolynomialEasing.h"
-#include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Engine/World.h"
 #include "Interfaces/IEasingCurve.h"
 #include "Interfaces/ITweenValue.h"
 #include "Misc/CoreDelegates.h"
 #include "NsTween.h"
 #include "Utils/NsTweenLogging.h"
 #include "Utils/NsTweenProfiling.h"
-
-#if WITH_AUTOMATION_TESTS
-struct FNsTweenSubsystemTestAccessor
-{
-    static bool DequeueCommand(UNsTweenSubsystem& Subsystem, FNsTweenCommand& OutCommand)
-    {
-        return Subsystem.CommandQueue.Dequeue(OutCommand);
-    }
-};
-#endif
 
 #if WITH_EDITOR
 #include "Editor.h"
