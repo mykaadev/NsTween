@@ -151,14 +151,14 @@ void AFloatingItem::BeginPlay()
 - `FNsTweenBezierEasing` – Cubic Bezier easing solver inverting time with Newton steps before sampling output.
 - `FNsTweenCurveAssetEasingAdapter` – Adapter wrapping UCurveFloat assets to drive easing while falling back gracefully.
 
-## 🧭 Tech Documentation Layout
+## 🧭 Framework Layout
 Use the following map when you need to dive deeper than the high-level feature overview. Each entry mirrors the folder layout inside the plugin so you can jump straight from prose into the exact file that owns the logic.
 
 ### Public Surface
 - [`Source/NsTween/Public/NsTween.h`](Source/NsTween/Public/NsTween.h) &mdash; contains `FNsTween::Play` and the templated `BuildT<T>` helpers that every example in the docs references.
-- [`Source/NsTween/Public/NsTweenTypeLibrary.h`](Source/NsTween/Public/NsTweenTypeLibrary.h) &mdash; enums, delegates, and light-weight structs used across the tutorials.
+- [`Source/NsTween/Public/NsTweenTypeLibrary.h`](Source/NsTween/Public/NsTweenTypeLibrary.h) &mdash; enums, delegates, and light-weight structs.
 - [`Source/NsTween/Public/Interfaces/ITweenValue.h`](Source/NsTween/Public/Interfaces/ITweenValue.h) &mdash; the strategy contract implemented by each type-specific value driver.
-- [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; header-only interpolators and callback strategies.
+- [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; interpolators and callback strategies.
 
 ### Runtime Flow
 - [`Source/NsTween/Private/NsTween.cpp`](Source/NsTween/Private/NsTween.cpp) &mdash; documents the lifetime of an active tween, including pause/cancel semantics and wrap modes.
