@@ -177,14 +177,16 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 
     if (WrapMode == ENsTweenWrapMode::Once)
     {
-        if (Spec.OnComplete.IsBound())
-        {
-            Spec.OnComplete.Execute();
-        }
         if (Strategy.IsValid())
         {
             Strategy->ApplyFinal();
         }
+
+        if (Spec.OnComplete.IsBound())
+        {
+            Spec.OnComplete.Execute();
+        }
+
         bActive = false;
         return false;
     }
@@ -199,14 +201,16 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
 
         if (Spec.LoopCount > 0 && CompletedCycles >= Spec.LoopCount)
         {
-            if (Spec.OnComplete.IsBound())
-            {
-                Spec.OnComplete.Execute();
-            }
             if (Strategy.IsValid())
             {
                 Strategy->ApplyFinal();
             }
+
+            if (Spec.OnComplete.IsBound())
+            {
+                Spec.OnComplete.Execute();
+            }
+
             bActive = false;
             return false;
         }
