@@ -232,14 +232,16 @@ bool FNsTween::HandleBoundary(float& RemainingTime)
         }
         else if (Spec.LoopCount > 0 && CompletedPingPongPairs >= Spec.LoopCount)
         {
-            if (Spec.OnComplete.IsBound())
-            {
-                Spec.OnComplete.Execute();
-            }
             if (Strategy.IsValid())
             {
                 Strategy->ApplyFinal();
             }
+
+            if (Spec.OnComplete.IsBound())
+            {
+                Spec.OnComplete.Execute();
+            }
+
             bActive = false;
             return false;
         }
