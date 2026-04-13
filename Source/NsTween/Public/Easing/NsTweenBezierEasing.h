@@ -22,6 +22,9 @@ public:
     virtual float Evaluate(float T) const override;
 
 private:
+    static constexpr float Epsilon = 1e-6f;
+    static constexpr int32 NewtonIterations = 8;
+
     float SampleCurveX(float T) const;
     float SampleCurveY(float T) const;
     float SampleDerivativeX(float T) const;

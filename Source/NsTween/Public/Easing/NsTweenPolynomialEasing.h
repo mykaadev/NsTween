@@ -16,6 +16,8 @@ public:
     virtual float Evaluate(float T) const override;
 
 private:
+    static float EaseOutBounce(float T);
+
     /** Preset determining the formula used for evaluation. */
     ENsTweenEase Preset;
 };

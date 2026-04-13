@@ -11,6 +11,33 @@
 #include "Utils/NsTweenLogging.h"
 #include "Utils/NsTweenProfiling.h"
 
+UObject* UNsTweenAsyncAction::ResolveWorldContext(UObject* WorldContextObject)
+{
+    if (WorldContextObject)
+    {
+        return WorldContextObject;
+    }
+
+    if (!GEngine)
+    {
+        return nullptr;
+    }
+
+    for (const FWorldContext& Context : GEngine->GetWorldContexts())
+    {
+        if (const UWorld* World = Context.World())
+        {
+            if (UGameInstance* GameInstance = World->GetGameInstance())
+            {
+                return GameInstance;
+            }
+
+            return const_cast<UWorld*>(World);
+        }
+    }
+
+    return nullptr;
+}
 
 void UNsTweenAsyncAction::InitialiseCommon(UObject* WorldContextObject, float InDuration, ENsTweenEase InEase, float InDelay, int32 InLoops, float InLoopDelay, bool bInPingPong, float InPingPongDelay, bool bInCanTickDuringPause, bool bInUseGlobalTimeDilation, UCurveFloat* InCurve, bool bInUseCustomCurve)
 {

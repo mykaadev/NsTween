@@ -3,33 +3,29 @@
 #include "Easing/NsTweenPolynomialEasing.h"
 #include "Math/UnrealMathUtility.h"
 
-namespace NsTweenEaseHelpers
+float FNsTweenPolynomialEasing::EaseOutBounce(float T)
 {
-    /** Returns the bounce-out eased value used by several presets. */
-    float EaseOutBounce(float T)
+    const float N1 = 7.5625f;
+    const float D1 = 2.75f;
+
+    if (T < 1.f / D1)
     {
-        const float N1 = 7.5625f;
-        const float D1 = 2.75f;
-
-        if (T < 1.f / D1)
-        {
-            return N1 * T * T;
-        }
-        if (T < 2.f / D1)
-        {
-            T -= 1.5f / D1;
-            return N1 * T * T + 0.75f;
-        }
-        if (T < 2.5f / D1)
-        {
-            T -= 2.25f / D1;
-            return N1 * T * T + 0.9375f;
-        }
-
-        T -= 2.625f / D1;
-        return N1 * T * T + 0.984375f;
+        return N1 * T * T;
     }
-} // namespace
+    if (T < 2.f / D1)
+    {
+        T -= 1.5f / D1;
+        return N1 * T * T + 0.75f;
+    }
+    if (T < 2.5f / D1)
+    {
+        T -= 2.25f / D1;
+        return N1 * T * T + 0.9375f;
+    }
+
+    T -= 2.625f / D1;
+    return N1 * T * T + 0.984375f;
+}
 
 FNsTweenPolynomialEasing::FNsTweenPolynomialEasing(ENsTweenEase InPreset)
     : Preset(InPreset)
@@ -145,13 +141,13 @@ float FNsTweenPolynomialEasing::Evaluate(float T) const
         return FMath::Pow(2.f, -20.f * X + 10.f) * FMath::Sin((20.f * X - 11.125f) * C) * 0.5f + 1.f;
     }
     case ENsTweenEase::InBounce:
-        return 1.f - NsTweenEaseHelpers::EaseOutBounce(1.f - X);
+        return 1.f - EaseOutBounce(1.f - X);
     case ENsTweenEase::OutBounce:
-        return NsTweenEaseHelpers::EaseOutBounce(X);
+        return EaseOutBounce(X);
     case ENsTweenEase::InOutBounce:
         return X < 0.5f
-            ? (1.f - NsTweenEaseHelpers::EaseOutBounce(1.f - 2.f * X)) * 0.5f
-            : (1.f + NsTweenEaseHelpers::EaseOutBounce(2.f * X - 1.f)) * 0.5f;
+            ? (1.f - EaseOutBounce(1.f - 2.f * X)) * 0.5f
+            : (1.f + EaseOutBounce(2.f * X - 1.f)) * 0.5f;
     case ENsTweenEase::InBack:
     {
         constexpr float C1 = 1.70158f;

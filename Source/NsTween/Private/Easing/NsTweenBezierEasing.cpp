@@ -1,12 +1,6 @@
 #include "Easing/NsTweenBezierEasing.h"
 #include "Math/UnrealMathUtility.h"
 
-namespace
-{
-    constexpr float EPSILON = 1e-6f;
-    constexpr int32 NEWTON_ITERATIONS = 8;
-}
-
 FNsTweenBezierEasing::FNsTweenBezierEasing(const FVector4& InControlPoints)
     : ControlPoints(InControlPoints)
 {
@@ -40,16 +34,16 @@ float FNsTweenBezierEasing::SampleDerivativeX(float T) const
 float FNsTweenBezierEasing::Solve(float X) const
 {
     float T = X;
-    for (int32 Iteration = 0; Iteration < NEWTON_ITERATIONS; ++Iteration)
+    for (int32 Iteration = 0; Iteration < NewtonIterations; ++Iteration)
     {
         const float CurrentX = SampleCurveX(T) - X;
-        if (FMath::Abs(CurrentX) < EPSILON)
+        if (FMath::Abs(CurrentX) < Epsilon)
         {
             return T;
         }
 
         const float Derivative = SampleDerivativeX(T);
-        if (FMath::Abs(Derivative) < EPSILON)
+        if (FMath::Abs(Derivative) < Epsilon)
         {
             break;
         }
@@ -62,10 +56,10 @@ float FNsTweenBezierEasing::Solve(float X) const
     float Upper = 1.f;
     T = X;
 
-    while (Upper - Lower > EPSILON)
+    while (Upper - Lower > Epsilon)
     {
         const float CurrentX = SampleCurveX(T);
-        if (FMath::Abs(CurrentX - X) < EPSILON)
+        if (FMath::Abs(CurrentX - X) < Epsilon)
         {
             break;
         }

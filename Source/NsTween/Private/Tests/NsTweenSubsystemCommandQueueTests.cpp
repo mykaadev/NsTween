@@ -7,16 +7,13 @@
 
 #if WITH_AUTOMATION_TESTS
 
-namespace
+/** Minimal tween strategy used to satisfy spawn requirements during tests. */
+class FAutomationTestTweenValue final : public ITweenValue
 {
-    /** Minimal tween strategy used to satisfy spawn requirements during tests. */
-    class FAutomationTestTweenValue final : public ITweenValue
-    {
-        public:
-            virtual void Initialize() override {}
-            virtual void Apply(float) override {}
-    };
-}
+public:
+    virtual void Initialize() override {}
+    virtual void Apply(float) override {}
+};
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FNsTweenSubsystemCommandQueueTest, "NsTween.Subsystem.CommandEnqueue", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter);
 
