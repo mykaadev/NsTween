@@ -1,12 +1,10 @@
 <!-- GH_ONLY_START -->
 <h1 align="center">
   <br>
-  <a href="https://github.com/mykaadev/NsTween">
-    <img src="https://github.com/mykaadev/NsTween/blob/main/Resources/Banner.png" alt="NsTween" width="400">
-  </a>
+  <a href="https://github.com/mykaadev/NsTween"><img src="https://raw.githubusercontent.com/mykaadev/NsTween/refs/heads/main/Resources/Banner.png" alt="NsTween" width="400"></a>
 </h1>
 
-<h4 align="center">A lightweight tweening library for Unreal Engine.</h4>
+<h4 align="center">A small tween library for Unreal Engine, for C++ and Blueprint.</h4>
 
 <div align="center">
     <a href="https://github.com/mykaadev/NsTween/commits/main"><img src="https://img.shields.io/github/last-commit/mykaadev/NsTween?style=plastic&logo=github&logoColor=white" alt="GitHub Last Commit"></a>
@@ -20,7 +18,11 @@
   <a href="#-features">📦 Features</a> •
   <a href="#-requirements">⚙️ Requirements</a> •
   <a href="#-installation">🛠️ Installation</a> •
+  <a href="#-getting-started">🚀 Getting Started</a> •
+  <a href="#-blueprint-nodes">🧩 Blueprint Nodes</a> •
   <a href="#-api">🔧 API</a> •
+  <a href="#-limits">🚧 Limits</a> •
+  <a href="#-acknowledgement">🧾 Acknowledgement</a> •
   <a href="#-documentation">📚 Documentation</a> •
   <a href="#-credits">❤️ Credits</a> •
   <a href="#-support">📞 Support</a> •
@@ -32,31 +34,36 @@
 <!-- GH_ONLY_END -->
 
 ## 👀 Summary
-NsTween is a small yet powerful tweening framework for Unreal Engine. It allows smooth interpolation of floats, vectors and quaternions using a rich set of easing functions. Tweens can be controlled entirely through C++ or Blueprint nodes.
+NsTween moves a value from a start to an end over time, with an easing curve. Use it from C++ with `FNsTween::Play`, or from Blueprint with async nodes. It suits UI motion and small game motion, such as a floating pickup, a door, or a color pulse.
+
+NsTween does not replace UMG animations or Sequencer, and it does not replicate. Tweens run on real time, so a game pause or a time dilation does not slow them.
 
 <div align="center">
- <img src="https://github.com/mykaadev/NsTween/blob/main/Resources/SupportedCurvesRow.png" alt="NsTween" width="750">
+ <img src="https://github.com/mykaadev/NsTween/blob/main/Resources/SupportedCurvesRow.png" alt="NsTween easing presets" width="750">
 </div>
 
 ## 📦 Features
-- **Multiple data types**: `Float`, `Vector`, `Vector2D`, `Rotator`, `Quaternion`, `Transform` and `Color` values.
-- **Custom easing**: Choose from many easing curves or drive interpolation via a user supplied curve.
-- **Warp mode**: Built-in `Looping`, `Delays` and `Ping-Pong` behaviours.
-- **Direction**: Chose between `Forward` or `Backward`
-- **Blueprint actions**: Async Blueprint nodes for quick setup without code.
-- **Subsystem based**: A Subsystem to handle all the active tweens.
-- **Tween-To-Tween Injection**: Inject any different tween behaviour at any time into your current tween.
+- **Value types**: Float, Vector, Vector 2D, Rotator, Quat, Transform, and Linear Color.
+- **Easing**: Linear, 30 In, Out, and InOut presets from Sine to Back, a cubic Bezier ease, and a Float Curve asset.
+- **Repeats**: Loops, ping-pong, a start delay, and a time scale.
+- **Callbacks**: `OnComplete`, `OnLoop`, and `OnPingPong` in C++, and the same events on the async nodes.
+- **Control**: Pause, resume, cancel, and test a tween by its handle.
+- **Owner**: A tween with an owner stops when the owner is destroyed.
+- **Blueprint nodes**: Async tween nodes for each value type, and `Play ... Tween` nodes that take a full spec.
+- **One subsystem**: A game instance subsystem ticks all tweens from one core ticker.
 
 ## ⚙️ Requirements
-Unreal Engine 5.2+
+- Unreal Engine 5.7+
+- Windows (Win64). The module builds only for Win64.
 
 ## 🛠️ Installation
 1. **Clone** or download this repository.
-2. Copy the `NsTween` folder into your project's `Plugins` directory.
-3. Generate project files and enable the plugin when prompted.
+2. Copy the `NsTween` folder into the `Plugins` folder of your project.
+3. For C++, add `"NsTween"` to the dependencies of your game module.
+4. Generate the project files and enable the plugin.
 
 ## 🚀 Getting Started
-Below is a minimal C++ example showing how to move an actor along the X axis using the fluent tween helpers built into `FNsTween`:
+In C++, `FNsTween::Play` returns a builder. Chain the options in the same statement. The tween starts when the builder goes out of scope.
 
 ```cpp
 #include "NsTween.h"
@@ -65,106 +72,50 @@ void AMyActor::BeginPlay()
 {
     Super::BeginPlay();
 
-    FNsTween::Play(
-        /**Start*/   0.f,
-        /**End*/     100.f,
-        /**Time*/    2.f,
-        /**Ease*/    ENsTweenEase::InOutQuad,
-        /**Update*/  [this](float Value)
-        {
-            SetActorLocation(FVector(Value, 0.f, 0.f));
-        });
+    const FVector Start = GetActorLocation();
+    FNsTween::Play(0.f, 100.f, 2.f, ENsTweenEase::InOutQuad, [this, Start](float Value)
+    {
+        SetActorLocation(Start + FVector(Value, 0.f, 0.f));
+    })
+    .SetOwner(this);
 }
 ```
 
-The library also exposes Blueprint nodes for the same functionality if you prefer a visual approach.
-Below is a slightly more advanced snippet showing how to make an item float up and down while spinning for 10 complete loops
+In Blueprint:
 
-```cpp
-#include "NsTween.h"
+1. Add the `Tween Float` node.
+2. Set **Start**, **End**, **Duration Secs**, and **Ease Type**.
+3. Connect **Apply Easing** to the code that uses **Value**.
+4. Connect **On Complete** to the code that runs at the end.
 
-void AFloatingItem::BeginPlay()
-{
-    Super::BeginPlay();
-
-    // Float continuously
-    FNsTween::Play(
-         /**Start*/   GetActorLocation().Z,
-         /**End*/     GetActorLocation().Z + 40.f,
-         /**Time*/    1.f,
-         /**Ease*/    ENsTweenEase::InOutSine,
-         /**Update*/  [this](float Z)
-        {
-            FVector CurrentLocation = GetActorLocation();
-            CurrentLocation.Z = Z;
-            SetActorLocation(CurrentLocation);
-        })
-        .SetPingPong(true)
-        .SetLoops(-1); // infinite loops
-
-
-    // Rotate and print 10 times the Loop
-    FNsTween::Play(
-        /** Start  */  0.f,
-        /** End    */  360.f,
-        /** Time   */  2.f,
-        /** Ease   */  ENsTweenEase::Linear,
-        /** Update */  [this](float Yaw)
-        {
-            SetActorRotation(FRotator(0.f, Yaw, 0.f));
-        })
-        .SetLoops(10) // 10 full spins
-        .OnLoop([this]()
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Spin finished"));
-        });
-}
-```
-
-
-## 🚩 Road Map
-<div align="center">
- <img src="https://github.com/mykaadev/NsTween/blob/main/Resources/RoadMap.png" alt="NsTween" width="750">
-</div>
-
+## 🧩 Blueprint Nodes
+| Node | Output |
+|---|---|
+| `Tween Float`, `Tween Vector`, `Tween Vector 2D` | The value on **Apply Easing** |
+| `Tween Rotator`, `Tween Quat`, `Tween Quat From Rotator` | A Rotator or a Quat on **Apply Easing** |
+| `Tween Transform`, `Tween Linear Color` | The value on **Apply Easing** |
+| `... Custom Curve` versions | The same, with a Float Curve as the ease |
+| `Play Float Tween`, `Play Vector Tween`, `Play Rotator Tween`, `Play Transform Tween`, `Play Color Tween` | A handle. The tween writes to the **Target** variable |
+| `Pause Tween`, `Resume Tween`, `Cancel Tween`, `Is Tween Active` | Control by handle |
 
 ## 🔧 API
-### Runtime Core
-- `FNsTween` – Runtime tween state tracking easing, wrap modes, delegates, and pause behavior.
-- `FNsTweenBuilder` – Fluent setup handle chaining specs, callbacks, activation, and control forwarding.
-- `UNsTweenSubsystem` – Game-instance subsystem ticking live tweens, processing commands, and allocating easing curves.
+- `FNsTween::Play` – Make a tween from a start, an end, a duration, an ease, and an update function. A second overload takes an `FNsTweenSpec` and a value strategy factory.
+- `FNsTweenBuilder` – Set the options: `SetLoops`, `SetPingPong`, `SetDelay`, `SetTimeScale`, `SetCurveAsset`, `SetOwner`, `OnComplete`, `OnLoop`, `OnPingPong`.
+- `FNsTweenBuilder` control – `Pause`, `Resume`, `Cancel`, `IsActive`, `GetHandle`.
+- `FNsTweenSpec` – The Blueprint struct with all the options of one tween.
+- `FNsTweenHandle` – The id of one tween.
+- `ENsTweenEase` – The easing presets, plus `CustomBezier` and `CurveAsset`.
+- `UNsTweenBlueprintLibrary` – The `Play ... Tween` and control nodes.
+- `UNsTweenAsyncAction` – The base class of the async tween nodes.
 
-### Data & Specs
-- `FNsTweenSpec` / `FNsTweenCommand` / `FNsTweenHandle` – Blueprint-ready structs describing playback options, delegate hooks, queued commands, and handles.
-- `UNsTweenSequence` – UObject sequence asset storing ordered tween specs for content-driven playback.
+## 🚧 Limits
+- Tweens use real time. The async inputs **Can Tick During Pause**, **Use Global Time Dilation**, **Loop Delay**, and **Ping Pong Delay** have no effect.
+- Tweens tick only while a game world exists (Play In Editor, a game, or a game preview).
+- A Rotator tween takes the shortest path, so a tween from 0 to 360 degrees does not turn.
+- `UNsTweenSequence` holds a list of specs, but no code plays it.
 
-### Blueprint & Async Surface
-- `UNsTweenBlueprintLibrary` – Central Blueprint library spawning tweens, exposing ease presets, and forwarding subsystem controls.
-- `UNsTweenAsyncAction` (base) – Shared async action base normalizing inputs, binding events, and managing lifecycle cleanup.
-- Typed async nodes – Float, vector, rotator, transform, and color broadcasts with curve overrides.
-
-### Strategies & Helpers
-- Callback strategy / interpolators – Lambda-friendly callback strategies and templated interpolators supplying type-appropriate lerp math.
-- Native value strategies – Native ITweenValue implementations initializing targets, applying eased updates, and ensuring completion.
-
-### Easing Implementations
-- `FNsTweenPolynomialEasing` – Polynomial easing evaluator covering sine, expo, elastic, bounce, and back presets.
-- `FNsTweenBezierEasing` – Cubic Bezier easing solver inverting time with Newton steps before sampling output.
-- `FNsTweenCurveAssetEasingAdapter` – Adapter wrapping UCurveFloat assets to drive easing while falling back gracefully.
-
-## 🧭 Framework Layout
-Use the following map when you need to dive deeper than the high-level feature overview. Each entry mirrors the folder layout inside the plugin so you can jump straight from prose into the exact file that owns the logic.
-
-### Public Surface
-- [`Source/NsTween/Public/NsTween.h`](Source/NsTween/Public/NsTween.h) &mdash; contains `FNsTween::Play` and the templated `BuildT<T>` helpers that every example in the docs references.
-- [`Source/NsTween/Public/NsTweenTypeLibrary.h`](Source/NsTween/Public/NsTweenTypeLibrary.h) &mdash; enums, delegates, and light-weight structs.
-- [`Source/NsTween/Public/Interfaces/ITweenValue.h`](Source/NsTween/Public/Interfaces/ITweenValue.h) &mdash; the strategy contract implemented by each type-specific value driver.
-- [`Source/NsTween/Public/Templates/`](Source/NsTween/Public/Templates) &mdash; interpolators and callback strategies.
-
-### Runtime Flow
-- [`Source/NsTween/Private/NsTween.cpp`](Source/NsTween/Private/NsTween.cpp) &mdash; documents the lifetime of an active tween, including pause/cancel semantics and wrap modes.
-- [`Source/NsTween/Private/NsTweenBuilder.cpp`](Source/NsTween/Private/NsTweenBuilder.cpp) &mdash; shows how specs become runtime objects before entering the subsystem.
-- [`Source/NsTween/Private/NsTweenSubsystem.cpp`](Source/NsTween/Private/NsTweenSubsystem.cpp) &mdash; central tick loop and allocation strategy for live tweens
+## 🧾 Acknowledgement
+NsTween takes its inspiration from **Fresh Cooked Tweens** by **Jared Cook**.
 
 ## 📚 Documentation
 - [User Guide](https://mykaadev.github.io/plugins/nstween/user-guide/) – Setup, common tasks, settings, and debug tools.
@@ -179,7 +130,4 @@ Reach out via the **[profile page](https://github.com/mykaadev)**.
 
 ## 📃 License
 [![License](https://img.shields.io/badge/license-MIT-green)](https://www.tldrlegal.com/license/mit-license)
-
-## 🧾 Acknowledgement
-Special thanks to **Jared Cook** and **Fresh Cooked Tweens** for inspiring this project. From this point forward, our roadmap and priorities differ, and the projects will evolve independently.
 <!-- GH_ONLY_END -->
