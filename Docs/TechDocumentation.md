@@ -20,7 +20,6 @@
 - `Source/NsTween/Private/Easing`: the easing `.cpp` files.
 - `Source/NsTween/Private/ValueStrategies`: `TweenValue_Float`, `TweenValue_Vector`, `TweenValue_Rotator`, `TweenValue_Transform`, `TweenValue_Color`.
 - `Source/NsTween/Private/Utils`: `NsTweenLogging` (`LogNsTween`) and `NsTweenProfiling.h` (`NSTWEEN_SCOPE_CYCLE_COUNTER`).
-- `Source/NsTween/Private/Tests`: `NsTweenSubsystemCommandQueueTests.cpp`.
 
 ### Main Classes
 
@@ -127,26 +126,3 @@ The `.uplugin` lists no plugin dependencies.
 ## Networking
 
 The plugin does not replicate.
-
-## Testing
-
-| Test | Path | Checks |
-|---|---|---|
-| `FNsTweenSubsystemCommandQueueTest` | `NsTween.Subsystem.CommandEnqueue` | `EnqueueSpawn` returns a valid handle. Spawn, cancel, pause, and resume each put the right command in the queue. Cancel keeps `bApplyFinalOnCancel` |
-
-The test makes a subsystem with `NewObject` and does not initialize it. It reads the queue through `FNsTweenSubsystemTestAccessor`. It runs in the editor context (`EditorContext | EngineFilter`), under `WITH_AUTOMATION_TESTS`.
-
-To run it:
-
-1. Open **Tools > Session Frontend > Automation**.
-2. Search for `NsTween`.
-3. Run `NsTween.Subsystem.CommandEnqueue`.
-
-From the command line, use `-ExecCmds="Automation RunTests NsTween"`.
-
-## Change Rules
-
-- Do not rename the `UPROPERTY` fields of `FNsTweenSpec`, or the values of `ENsTweenEase`, `ENsTweenWrapMode`, and `ENsTweenDirection`. Blueprints save them by name.
-- Do not rename the parameters of the async factories or of `UNsTweenBlueprintLibrary`. Blueprint pins link by parameter name.
-- `Config/DefaultNsTween.ini` redirects the class `/Script/NsTween.NsTweenBlueprintLibrary` to `/Script/NsTween.NsTweenFunctionLibrary`. No class has the name `NsTweenFunctionLibrary`: the class in `NsTweenFunctionLibrary.h` is `UNsTweenBlueprintLibrary`. Make sure that the redirect and the class name agree before you rename either one.
-- `FNsTweenBezierDefinition` in `NsTweenBezierEasing.h` is not used. `FNsTweenBezierEasing` reads an `FVector4`.
