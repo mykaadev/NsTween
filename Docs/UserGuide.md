@@ -6,6 +6,8 @@ NsTween moves a value from a start to an end over time, with an easing curve. Us
 
 NsTween is not a replacement for UMG animations or for Sequencer. It does not replicate, and it does not follow the game pause or the time dilation. Tweens run on real time.
 
+[![The easing playground with the OutBounce preset](Showcase/img/easing.png)](Showcase/EasingPlayground.html)
+
 ## Setup
 
 1. Copy the `NsTween` folder into the `Plugins` folder of your project.
