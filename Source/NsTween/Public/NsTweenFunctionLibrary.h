@@ -13,7 +13,7 @@ class UNsTweenSubsystem;
 
 /**
  * Helper that routes every Blueprint spawn call through the same builder logic.
- * This guarantees parity with the C++ helpers and keeps the redundant boilerplate in one place.
+ * This guarantees parity with the C++ helpers and keeps the redundant boilerplate in one place
  */
 template <typename TValue, typename TStrategy>
 FNsTweenHandle PlayTypedTween(TValue& Target, const TValue& StartValue, const TValue& EndValue, const FNsTweenSpec& Spec)
@@ -23,11 +23,11 @@ FNsTweenHandle PlayTypedTween(TValue& Target, const TValue& StartValue, const TV
         return MakeShared<TStrategy>(&Target, StartValue, EndValue);
     });
 
-    // Activating via GetHandle ensures the tween is registered with the subsystem before returning.
+    // Activating via GetHandle ensures the tween is registered with the subsystem before returning
     return Builder.GetHandle();
 }
 
-/** Invokes a subsystem command if the singleton is currently available. */
+/** Invokes a subsystem command if the singleton is currently available */
 template <typename TCallback>
 void DispatchToSubsystem(FNsTweenHandle Handle, TCallback&& Callback)
 {
@@ -37,46 +37,46 @@ void DispatchToSubsystem(FNsTweenHandle Handle, TCallback&& Callback)
     }
 }
 
-/** Blueprint convenience entry points for spawning and controlling tweens. */
+/** Blueprint convenience entry points for spawning and controlling tweens */
 UCLASS()
 class NSTWEEN_API UNsTweenBlueprintLibrary : public UBlueprintFunctionLibrary
 {
     GENERATED_BODY()
 
 public:
-    /** Plays a float tween that writes the interpolated value back to the provided reference. */
+    /** Plays a float tween that writes the interpolated value back to the provided reference */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static FNsTweenHandle PlayFloatTween(float StartValue, float EndValue, UPARAM(ref) float& Target, const FNsTweenSpec& Spec);
 
-    /** Plays a vector tween that writes the interpolated value back to the provided reference. */
+    /** Plays a vector tween that writes the interpolated value back to the provided reference */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static FNsTweenHandle PlayVectorTween(const FVector& StartValue, const FVector& EndValue, UPARAM(ref) FVector& Target, const FNsTweenSpec& Spec);
 
-    /** Plays a rotator tween that writes the interpolated value back to the provided reference. */
+    /** Plays a rotator tween that writes the interpolated value back to the provided reference */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static FNsTweenHandle PlayRotatorTween(const FRotator& StartValue, const FRotator& EndValue, UPARAM(ref) FRotator& Target, const FNsTweenSpec& Spec);
 
-    /** Plays a transform tween that writes the interpolated value back to the provided reference. */
+    /** Plays a transform tween that writes the interpolated value back to the provided reference */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static FNsTweenHandle PlayTransformTween(const FTransform& StartValue, const FTransform& EndValue, UPARAM(ref) FTransform& Target, const FNsTweenSpec& Spec);
 
-    /** Plays a color tween that writes the interpolated value back to the provided reference. */
+    /** Plays a color tween that writes the interpolated value back to the provided reference */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static FNsTweenHandle PlayColorTween(const FLinearColor& StartValue, const FLinearColor& EndValue, UPARAM(ref) FLinearColor& Target, const FNsTweenSpec& Spec);
 
-    /** Pauses the tween represented by the supplied handle. */
+    /** Pauses the tween represented by the supplied handle */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static void PauseTween(FNsTweenHandle Handle);
 
-    /** Resumes the tween represented by the supplied handle. */
+    /** Resumes the tween represented by the supplied handle */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static void ResumeTween(FNsTweenHandle Handle);
 
-    /** Cancels the tween represented by the supplied handle. */
+    /** Cancels the tween represented by the supplied handle */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static void CancelTween(FNsTweenHandle Handle, bool bApplyFinal = true);
 
-    /** Returns true when the tween represented by the supplied handle is currently active. */
+    /** Returns true when the tween represented by the supplied handle is currently active */
     UFUNCTION(BlueprintCallable, Category = "NsTween", meta = (WorldContext = "WorldContextObject"))
     static bool IsTweenActive(FNsTweenHandle Handle);
 };

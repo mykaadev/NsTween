@@ -5,20 +5,20 @@
 #include "Interfaces/IEasingCurve.h"
 #include "NsTweenTypeLibrary.h"
 
-/** Easing curve implementation that evaluates engine-friendly presets. */
+/** Easing curve implementation that evaluates engine-friendly presets */
 class NSTWEEN_API FNsTweenPolynomialEasing : public IEasingCurve
 {
 public:
-    /** Builds an easing evaluator bound to the provided preset. */
+    /** Builds an easing evaluator bound to the provided preset */
     explicit FNsTweenPolynomialEasing(ENsTweenEase InPreset);
 
-    /** Returns the eased alpha for the supplied normalized time. */
+    /** Returns the eased alpha for the supplied normalized time */
     virtual float Evaluate(float T) const override;
 
 private:
     static float EaseOutBounce(float T);
 
-    /** Preset determining the formula used for evaluation. */
+    /** Preset determining the formula used for evaluation */
     ENsTweenEase Preset;
 };
 

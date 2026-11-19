@@ -12,7 +12,7 @@ class NSTWEEN_API FNsTweenCurveAssetEasingAdapter : public IEasingCurve
 public:
     explicit FNsTweenCurveAssetEasingAdapter(TWeakObjectPtr<UCurveFloat> InCurve);
 
-    /** Returns the eased alpha for the supplied normalized time. */
+    /** Returns the eased alpha for the supplied normalized time */
     virtual float Evaluate(float T) const override;
 
 private:

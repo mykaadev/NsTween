@@ -35,7 +35,7 @@ FNsTween::FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedP
 bool FNsTween::Tick(float DeltaSeconds)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Tick");
-    // Bail out immediately if the tween is already completed, paused, or missing runtime pieces.
+    // Bail out immediately if the tween is already completed, paused, or missing runtime pieces
     if (!bActive || bPaused || !Strategy.IsValid() || !Easing.IsValid())
     {
         bActive = bActive && Strategy.IsValid() && Easing.IsValid();
@@ -50,7 +50,7 @@ bool FNsTween::Tick(float DeltaSeconds)
         return false;
     }
 
-    // Lazily initialize the strategy the first time we tick so creation happens on the game thread.
+    // Lazily initialize the strategy the first time we tick so creation happens on the game thread
     if (!bInitialized)
     {
         Strategy->Initialize();
@@ -61,14 +61,14 @@ bool FNsTween::Tick(float DeltaSeconds)
         bInitialized = true;
     }
 
-    // Respect the time scale so tweens can speed up or slow down deterministically.
+    // Respect the time scale so tweens can speed up or slow down deterministically
     float ScaledDelta = DeltaSeconds * Spec.TimeScale;
     if (ScaledDelta <= SMALL_NUMBER)
     {
         return true;
     }
 
-    // Consume any remaining delay before the tween starts ticking.
+    // Consume any remaining delay before the tween starts ticking
     if (DelayRemaining > SMALL_NUMBER)
     {
         if (ScaledDelta < DelayRemaining)
@@ -121,7 +121,7 @@ bool FNsTween::Tick(float DeltaSeconds)
 void FNsTween::Cancel(bool bApplyFinal)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Cancel");
-    // Cancellation is idempotent; the first call decides whether to apply the final value.
+    // Cancellation is idempotent; the first call decides whether to apply the final value
     if (!bActive)
     {
         return;
@@ -152,7 +152,7 @@ void FNsTween::SetPaused(bool bInPaused)
 void FNsTween::Apply(float InCycleTime)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTween::Apply");
-    // Guard against misconfigured tweens that somehow lost their runtime strategy.
+    // Guard against misconfigured tweens that somehow lost their runtime strategy
     if (!Strategy.IsValid() || !Easing.IsValid())
     {
         return;

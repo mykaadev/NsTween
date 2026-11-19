@@ -18,7 +18,7 @@ class NSTWEEN_API FNsTweenBezierEasing : public IEasingCurve
 public:
     explicit FNsTweenBezierEasing(const FVector4& InControlPoints);
 
-    /** Returns the eased alpha for the supplied normalized time. */
+    /** Returns the eased alpha for the supplied normalized time */
     virtual float Evaluate(float T) const override;
 
 private:

@@ -26,7 +26,7 @@ FNsTweenBuilder& FNsTweenBuilder::operator=(FNsTweenBuilder&& Other) noexcept = 
 
 FNsTweenBuilder::~FNsTweenBuilder()
 {
-    // Builders are designed to auto-activate on destruction so temporary helpers still spawn tweens.
+    // Builders are designed to auto-activate on destruction so temporary helpers still spawn tweens
     Activate();
 }
 

@@ -6,16 +6,16 @@
 #include "Templates/NsTweenInterpolator.h"
 #include "Interfaces/ITweenValue.h"
 
-/** Tween value strategy that invokes a callback for each interpolation update. */
+/** Tween value strategy that invokes a callback for each interpolation update */
 template <typename TValue>
 class FNsTweenCallbackValue : public ITweenValue
 {
 public:
-    /** Type alias describing the function executed when the tween updates. */
+    /** Type alias describing the function executed when the tween updates */
     using FUpdateFunction = TFunction<void(const TValue&)>;
 
 public:
-    /** Constructs the strategy with the provided start, end, and update callback. */
+    /** Constructs the strategy with the provided start, end, and update callback */
     FNsTweenCallbackValue(const TValue& InStart, const TValue& InEnd, FUpdateFunction InUpdate)
         : StartValue(InStart)
         , EndValue(InEnd)
@@ -23,7 +23,7 @@ public:
     {
     }
 
-    /** Initializes the tween, applying the start value immediately. */
+    /** Initializes the tween, applying the start value immediately */
     virtual void Initialize() override
     {
         if (UpdateFunction)
@@ -32,7 +32,7 @@ public:
         }
     }
 
-    /** Applies an interpolated value for the supplied eased alpha. */
+    /** Applies an interpolated value for the supplied eased alpha */
     virtual void Apply(float EasedAlpha) override
     {
         if (UpdateFunction)
@@ -42,7 +42,7 @@ public:
         }
     }
 
-    /** Applies the final value when the tween completes. */
+    /** Applies the final value when the tween completes */
     virtual void ApplyFinal() override
     {
         if (UpdateFunction)
@@ -52,17 +52,17 @@ public:
     }
 
 private:
-    /** Starting value sampled at the beginning of the tween. */
+    /** Starting value sampled at the beginning of the tween */
     TValue StartValue;
 
-    /** Target value sampled at the end of the tween. */
+    /** Target value sampled at the end of the tween */
     TValue EndValue;
 
-    /** Callback executed whenever the tween produces a new value. */
+    /** Callback executed whenever the tween produces a new value */
     FUpdateFunction UpdateFunction;
 };
 
-/** Creates a callback strategy instance for the provided tween value type. */
+/** Creates a callback strategy instance for the provided tween value type */
 template <typename TValue>
 TSharedPtr<ITweenValue> MakeNsTweenCallbackStrategy(const TValue& StartValue, const TValue& EndValue, TFunction<void(const TValue&)> Update)
 {

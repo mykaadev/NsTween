@@ -7,7 +7,7 @@
 
 #if WITH_AUTOMATION_TESTS
 
-/** Minimal tween strategy used to satisfy spawn requirements during tests. */
+/** Minimal tween strategy used to satisfy spawn requirements during tests */
 class FAutomationTestTweenValue final : public ITweenValue
 {
 public:

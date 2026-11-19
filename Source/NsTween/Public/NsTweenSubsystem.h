@@ -28,6 +28,7 @@ class UNsTweenSubsystem : public UGameInstanceSubsystem
     GENERATED_BODY()
 
 public:
+    /** Constructor */
     UNsTweenSubsystem();
 
     //~ Begin UEngineSubsystem Interface

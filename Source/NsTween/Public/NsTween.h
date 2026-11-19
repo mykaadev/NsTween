@@ -16,25 +16,25 @@ class UCurveFloat;
 struct NSTWEEN_API FNsTween
 {
 public:
-    /** Constructs a tween using the provided runtime data. */
+    /** Constructs a tween using the provided runtime data */
     FNsTween(const FNsTweenHandle& InHandle, FNsTweenSpec InSpec, TSharedPtr<ITweenValue> InStrategy, TSharedPtr<IEasingCurve> InEasing);
 
-    /** Advances the tween state by the provided delta time. */
+    /** Advances the tween state by the provided delta time */
     bool Tick(float DeltaSeconds);
 
-    /** Cancels the tween and optionally applies the final value. */
+    /** Cancels the tween and optionally applies the final value */
     void Cancel(bool bApplyFinal);
 
-    /** Sets whether the tween is currently paused. */
+    /** Sets whether the tween is currently paused */
     void SetPaused(bool bInPaused);
 
-    /** Returns true when the tween is still actively running. */
+    /** Returns true when the tween is still actively running */
     bool IsActive() const { return bActive; }
 
-    /** Returns the handle that uniquely identifies this tween. */
+    /** Returns the handle that uniquely identifies this tween */
     const FNsTweenHandle& GetHandle() const { return Handle; }
 
-    /** Generic convenience wrapper that forwards to the correct typed overload. */
+    /** Generic convenience wrapper that forwards to the correct typed overload */
     template <typename TCallable, typename TType>
     static FNsTweenBuilder Play(const TType& StartValue, const TType& EndValue, float DurationSeconds, ENsTweenEase Ease, TCallable&& Update)
     {
@@ -42,17 +42,17 @@ public:
         return BuildT<TType>(StartValue, EndValue, DurationSeconds, Ease, MoveTemp(Fn));
     }
 
-    /** Constructs a builder using explicit tween specification data. */
+    /** Constructs a builder using explicit tween specification data */
     static FNsTweenBuilder Play(FNsTweenSpec Spec, TFunction<TSharedPtr<ITweenValue>()> StrategyFactory);
 
 private:
-    /** Applies the tween update for the given cycle time. */
+    /** Applies the tween update for the given cycle time */
     void Apply(float CycleTime);
 
-    /** Handles wrap-mode transitions, returning false when the tween completes. */
+    /** Handles wrap-mode transitions, returning false when the tween completes */
     bool HandleBoundary(float& RemainingTime);
 
-    /** Default typed builder that wires up the callback strategy for the tween. */
+    /** Default typed builder that wires up the callback strategy for the tween */
     template <typename TType>
     static FNsTweenBuilder BuildT(const TType& StartValue, const TType& EndValue, float DurationSeconds, ENsTweenEase Ease, TFunction<void(const TType&)> Update)
     {
@@ -75,43 +75,43 @@ private:
     }
 
 private:
-    /** The handle assigned to this tween. */
+    /** The handle assigned to this tween */
     FNsTweenHandle Handle;
 
-    /** Specification describing how the tween behaves. */
+    /** Specification describing how the tween behaves */
     FNsTweenSpec Spec;
 
-    /** Strategy responsible for applying value updates. */
+    /** Strategy responsible for applying value updates */
     TSharedPtr<ITweenValue> Strategy;
 
-    /** Easing curve used to transform normalized time. */
+    /** Easing curve used to transform normalized time */
     TSharedPtr<IEasingCurve> Easing;
 
-    /** Remaining delay before the tween starts. */
+    /** Remaining delay before the tween starts */
     float DelayRemaining = 0.0f;
 
-    /** Accumulated time within the current tween cycle. */
+    /** Accumulated time within the current tween cycle */
     float CycleTime = 0.0f;
 
-    /** Number of completed cycles for looping tweens. */
+    /** Number of completed cycles for looping tweens */
     int32 CompletedCycles = 0;
 
-    /** Number of completed ping-pong direction pairs. */
+    /** Number of completed ping-pong direction pairs */
     int32 CompletedPingPongPairs = 0;
 
-    /** Tracks whether the tween is still active. */
+    /** Tracks whether the tween is still active */
     bool bActive = true;
 
-    /** Tracks whether the tween is currently paused. */
+    /** Tracks whether the tween is currently paused */
     bool bPaused = false;
 
-    /** Tracks whether the tween strategy has been initialized. */
+    /** Tracks whether the tween strategy has been initialized */
     bool bInitialized = false;
 
-    /** Tracks whether the tween is currently playing forward. */
+    /** Tracks whether the tween is currently playing forward */
     bool bPlayingForward = true;
 
-    /** Remembers if the tween started by playing backward. */
+    /** Remembers if the tween started by playing backward */
     bool bStartBackward = false;
 };
 

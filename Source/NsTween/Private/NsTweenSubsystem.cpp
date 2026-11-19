@@ -120,7 +120,7 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
         return true;
     }
 
-    // Process commands up front so queue mutations happen before we start ticking tweens.
+    // Process commands up front so queue mutations happen before we start ticking tweens
     ProcessCommands();
 
     if (DeltaTime < KINDA_SMALL_NUMBER)
@@ -131,7 +131,7 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
     TArray<FNsTween*, TInlineAllocator<32>> Candidates;
     bool bRequiresCompaction = false;
     {
-        // Phase 1: Take a read lock and gather the tweens that are still active.
+        // Phase 1: Take a read lock and gather the tweens that are still active
         FReadScopeLock ReadLock(PoolLock);
         Candidates.Reserve(TweenPool.Num());
 
@@ -155,7 +155,7 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
     }
 
     // Phase 2: Tick outside the lock so Update/OnComplete callbacks can execute without blocking
-    // other readers/writers attempting to enqueue commands.
+    // other readers/writers attempting to enqueue commands
     for (FNsTween* Candidate : Candidates)
     {
         if (!Candidate)
@@ -163,14 +163,14 @@ bool UNsTweenSubsystem::Tick(float DeltaTime)
             continue;
         }
 
-        // If tick returns false, it’s finished or invalid — mark the pool for compaction.
+        // If tick returns false, it’s finished or invalid — mark the pool for compaction
         if (!Candidate->Tick(DeltaTime))
         {
             bRequiresCompaction = true;
         }
     }
 
-    // Phase 3: Acquire a write lock only long enough to prune tweens that finished or became invalid.
+    // Phase 3: Acquire a write lock only long enough to prune tweens that finished or became invalid
     if (bRequiresCompaction)
     {
         FWriteScopeLock WriteLock(PoolLock);
