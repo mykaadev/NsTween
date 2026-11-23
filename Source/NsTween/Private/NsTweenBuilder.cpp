@@ -160,6 +160,16 @@ FNsTweenBuilder& FNsTweenBuilder::SetCurveAsset(UCurveFloat* Curve)
     return *this;
 }
 
+FNsTweenBuilder& FNsTweenBuilder::SetPauseWithGame(const bool bEnable)
+{
+    if (CanConfigure())
+    {
+        Spec.bPauseWithGame = bEnable;
+    }
+
+    return *this;
+}
+
 FNsTweenBuilder& FNsTweenBuilder::SetOwner(UObject* InOwner)
 {
     NSTWEEN_SCOPE_CYCLE_COUNTER("NsTweenBuilder::SetOwner");

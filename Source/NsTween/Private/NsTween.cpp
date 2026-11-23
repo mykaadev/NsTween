@@ -1,6 +1,7 @@
 // Copyright (C) 2025 nulled.softworks. All rights reserved.
 
 #include "NsTween.h"
+#include "Engine/World.h"
 #include "Engine/Engine.h"
 #include "Interfaces/IEasingCurve.h"
 #include "Interfaces/ITweenValue.h"
@@ -48,6 +49,16 @@ bool FNsTween::Tick(float DeltaSeconds)
         Strategy.Reset();
         Easing.Reset();
         return false;
+    }
+
+    if (Spec.bPauseWithGame)
+    {
+        const UObject* const Owner = Spec.Owner.Get();
+        const UWorld* const World = Owner != nullptr ? Owner->GetWorld() : nullptr;
+        if (World != nullptr && World->IsPaused())
+        {
+            return true;
+        }
     }
 
     // Lazily initialize the strategy the first time we tick so creation happens on the game thread

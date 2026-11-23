@@ -51,6 +51,9 @@ public:
     /** Associates the tween with an owning UObject to gate its lifetime */
     FNsTweenBuilder& SetOwner(UObject* InOwner);
 
+    /** Stops the tween while the world of the owner is paused. Set the owner too */
+    FNsTweenBuilder& SetPauseWithGame(bool bEnable = true);
+
     /** Registers a callback executed when the tween completes */
     FNsTweenBuilder& OnComplete(TFunction<void()> Callback);
 

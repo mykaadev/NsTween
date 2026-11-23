@@ -259,3 +259,7 @@ The builder calls work only before the tween starts. After that, they do nothing
 - After `Restart`, the async node fires `On Complete` for the old tween and then ends. The new tween runs, but the node sends no more events after it is garbage collected.
 - `UNsTweenSequence` holds a list of specs, but no code plays it.
 - The module builds only for Win64.
+
+### Stop a game animation during the pause
+
+NsTween does not follow the game pause. For a game animation, call `SetOwner(this)` and `SetPauseWithGame()` on the builder. The tween waits while the world of the owner is paused.

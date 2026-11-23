@@ -150,6 +150,10 @@ public:
 
     /** Internal flag set when the owner lifetime should be enforced */
     bool bEnforceOwnerLifetime = false;
+
+    /** Stops the tween while the world of the owner is paused. It needs an owner */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "NsTween")
+    bool bPauseWithGame = false;
 };
 
 /** A single entry within a tween sequence asset */
